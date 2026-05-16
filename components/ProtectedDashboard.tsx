@@ -12,10 +12,16 @@ type Profile = {
 };
 
 type RoleRow = {
-  roles: {
-    name: string;
-    description: string | null;
-  } | null;
+  roles:
+    | {
+        name: string;
+        description: string | null;
+      }
+    | {
+        name: string;
+        description: string | null;
+      }[]
+    | null;
 };
 
 type ProtectedDashboardProps = {
@@ -68,8 +74,14 @@ export function ProtectedDashboard({ children }: ProtectedDashboardProps) {
       }
 
       const roleNames =
-        (roleData as RoleRow[] | null)
-          ?.map((item) => item.roles?.name)
+        ((roleData as unknown as RoleRow[] | null) ?? [])
+          .map((item) => {
+            if (Array.isArray(item.roles)) {
+              return item.roles[0]?.name;
+            }
+
+            return item.roles?.name;
+          })
           .filter((name): name is string => Boolean(name)) ?? [];
 
       setRoles(roleNames);
