@@ -1,0 +1,506 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { ProtectedArea } from "@/components/ProtectedArea";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import {
+  formatCPF,
+  formatPhone,
+  isValidCPF,
+  normalizeEmail,
+  normalizeName,
+  normalizeUF,
+} from "@/lib/utils/formatters";
+
+type Profile = {
+  id: string;
+  full_name: string;
+  email: string;
+  status: string;
+};
+
+type MembershipRequest = {
+  id: string;
+  status: string;
+  review_notes: string | null;
+  full_name: string;
+  cpf: string | null;
+  rg: string | null;
+  birth_date: string | null;
+  phone: string | null;
+  email: string;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  zip_code: string | null;
+  semester: string | null;
+  message: string | null;
+};
+
+function formatStatus(value: string) {
+  const labels: Record<string, string> = {
+    pendente: "Pendente",
+    com_pendencia: "Com pendência",
+    aprovada: "Aprovada",
+    rejeitada: "Rejeitada",
+  };
+
+  return labels[value] || value.replaceAll("_", " ");
+}
+
+export default function AreaSolicitacaoPage() {
+  const router = useRouter();
+
+  const [loadingPage, setLoadingPage] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [existingRequest, setExistingRequest] = useState<MembershipRequest | null>(null);
+
+  const [form, setForm] = useState({
+    full_name: "",
+    cpf: "",
+    rg: "",
+    birth_date: "",
+    phone: "",
+    email: "",
+    address: "",
+    city: "Araputanga",
+    state: "MT",
+    zip_code: "",
+    semester: "",
+    message: "",
+    accepted_statute: false,
+    accepted_financial_rules: false,
+  });
+
+  function updateField(field: string, value: string | boolean) {
+    setForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  }
+
+  useEffect(() => {
+    async function loadData() {
+      const supabase = createClient();
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        window.location.href = "/login";
+        return;
+      }
+
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, full_name, email, status")
+        .eq("user_id", user.id)
+        .single();
+
+      if (profileError || !profileData) {
+        setStatusMessage("Não foi possível carregar seu perfil.");
+        setLoadingPage(false);
+        return;
+      }
+
+      setProfile(profileData);
+
+      const { data: requestData } = await supabase
+        .from("membership_requests")
+        .select(
+          "id, status, review_notes, full_name, cpf, rg, birth_date, phone, email, address, city, state, zip_code, semester, message"
+        )
+        .or(`profile_id.eq.${profileData.id},email.eq.${profileData.email}`)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (requestData) {
+        setExistingRequest(requestData);
+
+        setForm({
+          full_name: requestData.full_name || profileData.full_name || "",
+          cpf: requestData.cpf || "",
+          rg: requestData.rg || "",
+          birth_date: requestData.birth_date || "",
+          phone: requestData.phone || "",
+          email: requestData.email || profileData.email || "",
+          address: requestData.address || "",
+          city: requestData.city || "Araputanga",
+          state: requestData.state || "MT",
+          zip_code: requestData.zip_code || "",
+          semester: requestData.semester || "",
+          message: requestData.message || "",
+          accepted_statute: true,
+          accepted_financial_rules: true,
+        });
+      } else {
+        const metadata = user.user_metadata || {};
+
+        setForm((current) => ({
+          ...current,
+          full_name: profileData.full_name || "",
+          email: profileData.email || user.email || "",
+          cpf: typeof metadata.cpf === "string" ? metadata.cpf : "",
+          phone: typeof metadata.phone === "string" ? metadata.phone : "",
+        }));
+      }
+
+      setLoadingPage(false);
+    }
+
+    loadData();
+  }, []);
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!profile) {
+      setStatusMessage("Perfil não carregado. Atualize a página e tente novamente.");
+      return;
+    }
+
+    if (existingRequest?.status === "aprovada") {
+      setStatusMessage("Sua solicitação já foi aprovada.");
+      return;
+    }
+
+    if (existingRequest?.status === "rejeitada") {
+      setStatusMessage("Sua solicitação foi rejeitada. Procure a Diretoria/Secretaria para orientações.");
+      return;
+    }
+
+    const fullName = normalizeName(form.full_name);
+    const email = normalizeEmail(form.email);
+    const cpf = formatCPF(form.cpf);
+    const phone = formatPhone(form.phone);
+    const state = normalizeUF(form.state);
+
+    if (!fullName || fullName.split(" ").length < 2) {
+      setStatusMessage("Informe o nome completo.");
+      return;
+    }
+
+    if (!isValidCPF(cpf)) {
+      setStatusMessage("Informe um CPF válido.");
+      return;
+    }
+
+    if (!email) {
+      setStatusMessage("Informe um e-mail válido.");
+      return;
+    }
+
+    if (!form.accepted_statute || !form.accepted_financial_rules) {
+      setStatusMessage("Para enviar a solicitação, é necessário aceitar o Estatuto e as regras financeiras.");
+      return;
+    }
+
+    setSaving(true);
+    setStatusMessage("Salvando solicitação...");
+
+    const supabase = createClient();
+
+    const payload = {
+      profile_id: profile.id,
+      full_name: fullName,
+      cpf,
+      rg: form.rg.trim() || null,
+      birth_date: form.birth_date || null,
+      phone: phone || null,
+      email,
+      address: form.address.trim() || null,
+      city: normalizeName(form.city) || null,
+      state: state || "MT",
+      zip_code: form.zip_code.trim() || null,
+      semester: form.semester.trim() || null,
+      message: form.message.trim() || null,
+      accepted_statute: form.accepted_statute,
+      accepted_financial_rules: form.accepted_financial_rules,
+      status: "pendente",
+      review_notes: null,
+      reviewed_at: null,
+    };
+
+    if (existingRequest) {
+      const { error } = await supabase
+        .from("membership_requests")
+        .update(payload)
+        .eq("id", existingRequest.id);
+
+      if (error) {
+        console.error(error);
+        setStatusMessage("Não foi possível atualizar a solicitação.");
+        setSaving(false);
+        return;
+      }
+    } else {
+      const { error } = await supabase.from("membership_requests").insert(payload);
+
+      if (error) {
+        console.error(error);
+        setStatusMessage("Não foi possível enviar a solicitação.");
+        setSaving(false);
+        return;
+      }
+    }
+
+    setStatusMessage("Solicitação enviada com sucesso.");
+    router.push("/area");
+    router.refresh();
+  }
+
+  if (loadingPage) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#f7f8fa] px-6 text-[#13233a]">
+        <div className="rounded-3xl border border-[#e8dccb] bg-white p-8 shadow-sm">
+          <p className="font-bold">Carregando solicitação...</p>
+        </div>
+      </main>
+    );
+  }
+
+  const blocked =
+    existingRequest?.status === "aprovada" || existingRequest?.status === "rejeitada";
+
+  return (
+    <ProtectedArea>
+        <div className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10 md:p-8">
+          <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
+            Minha área
+          </p>
+
+          <h1 className="mt-4 text-3xl font-black tracking-[-0.05em] md:text-5xl">
+            Solicitação de associação
+          </h1>
+
+          <p className="mt-4 max-w-3xl leading-7 text-white/75">
+            Preencha ou atualize sua ficha para análise da Diretoria/Secretaria
+            da AAD Direito 2028.
+          </p>
+        </div>
+
+        {existingRequest && (
+          <div className="mt-6 rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+            <p className="text-sm font-bold text-[#596579]">Situação atual</p>
+            <p className="mt-2 text-2xl font-black tracking-[-0.04em]">
+              {formatStatus(existingRequest.status)}
+            </p>
+
+            {existingRequest.review_notes && (
+              <div className="mt-4 rounded-2xl bg-[#fffaf1] p-4 text-sm leading-6 text-[#596579]">
+                <strong className="text-[#13233a]">Análise da Associação:</strong>{" "}
+                {existingRequest.review_notes}
+              </div>
+            )}
+          </div>
+        )}
+
+        {blocked ? (
+          <div className="mt-8 rounded-3xl border border-[#e8dccb] bg-white p-6 shadow-sm">
+            <h2 className="text-2xl font-black tracking-[-0.04em]">
+              Solicitação encerrada
+            </h2>
+
+            <p className="mt-3 leading-7 text-[#596579]">
+              Esta solicitação já foi analisada. Para nova orientação ou ajuste,
+              procure a Diretoria/Secretaria da Associação.
+            </p>
+
+
+          </div>
+        ) : (
+          <form
+            onSubmit={handleSubmit}
+            className="mt-8 rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm md:p-6"
+          >
+            <div className="grid gap-5 md:grid-cols-2">
+              <label className="grid gap-2 md:col-span-2">
+                <span className="text-sm font-bold text-[#596579]">Nome completo *</span>
+                <input
+                  type="text"
+                  value={form.full_name}
+                  onChange={(event) => updateField("full_name", event.target.value)}
+                  required
+                  className="rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  placeholder="Digite seu nome completo"
+                />
+              </label>
+
+              <label className="grid gap-2">
+                <span className="text-sm font-bold text-[#596579]">CPF *</span>
+                <input
+                  type="text"
+                  value={form.cpf}
+                  onChange={(event) => updateField("cpf", formatCPF(event.target.value))}
+                  required
+                  inputMode="numeric"
+                  className="rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  placeholder="000.000.000-00"
+                />
+              </label>
+
+              <label className="grid gap-2">
+                <span className="text-sm font-bold text-[#596579]">RG</span>
+                <input
+                  type="text"
+                  value={form.rg}
+                  onChange={(event) => updateField("rg", event.target.value)}
+                  className="rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  placeholder="RG"
+                />
+              </label>
+
+              <label className="grid gap-2">
+                <span className="text-sm font-bold text-[#596579]">Data de nascimento</span>
+                <input
+                  type="date"
+                  value={form.birth_date}
+                  onChange={(event) => updateField("birth_date", event.target.value)}
+                  className="rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                />
+              </label>
+
+              <label className="grid gap-2">
+                <span className="text-sm font-bold text-[#596579]">Semestre atual</span>
+                <input
+                  type="text"
+                  value={form.semester}
+                  onChange={(event) => updateField("semester", event.target.value)}
+                  className="rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  placeholder="Ex.: 5º semestre"
+                />
+              </label>
+
+              <label className="grid gap-2">
+                <span className="text-sm font-bold text-[#596579]">Telefone/WhatsApp</span>
+                <input
+                  type="text"
+                  value={form.phone}
+                  onChange={(event) => updateField("phone", formatPhone(event.target.value))}
+                  inputMode="numeric"
+                  className="rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  placeholder="(00) 00000-0000"
+                />
+              </label>
+
+              <label className="grid gap-2">
+                <span className="text-sm font-bold text-[#596579]">E-mail *</span>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(event) => updateField("email", event.target.value)}
+                  required
+                  className="rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  placeholder="email@exemplo.com"
+                />
+              </label>
+
+              <label className="grid gap-2 md:col-span-2">
+                <span className="text-sm font-bold text-[#596579]">Endereço</span>
+                <input
+                  type="text"
+                  value={form.address}
+                  onChange={(event) => updateField("address", event.target.value)}
+                  className="rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  placeholder="Rua, número, bairro"
+                />
+              </label>
+
+              <label className="grid gap-2">
+                <span className="text-sm font-bold text-[#596579]">Cidade</span>
+                <input
+                  type="text"
+                  value={form.city}
+                  onChange={(event) => updateField("city", event.target.value)}
+                  className="rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  placeholder="Cidade"
+                />
+              </label>
+
+              <label className="grid gap-2">
+                <span className="text-sm font-bold text-[#596579]">Estado</span>
+                <input
+                  type="text"
+                  value={form.state}
+                  onChange={(event) => updateField("state", normalizeUF(event.target.value))}
+                  className="rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  placeholder="MT"
+                />
+              </label>
+
+              <label className="grid gap-2 md:col-span-2">
+                <span className="text-sm font-bold text-[#596579]">Mensagem ou observação</span>
+                <textarea
+                  value={form.message}
+                  onChange={(event) => updateField("message", event.target.value)}
+                  rows={4}
+                  className="rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  placeholder="Escreva alguma informação complementar, se necessário"
+                />
+              </label>
+            </div>
+
+            <div className="mt-6 grid gap-3 rounded-2xl bg-[#f7f8fa] p-5">
+              <label className="flex gap-3 text-sm font-bold leading-6 text-[#596579]">
+                <input
+                  type="checkbox"
+                  checked={form.accepted_statute}
+                  onChange={(event) => updateField("accepted_statute", event.target.checked)}
+                  className="mt-1 h-4 w-4"
+                />
+                <span>
+                  Declaro ciência de que o ingresso na Associação depende de
+                  análise e concordo em observar o Estatuto Social.
+                </span>
+              </label>
+
+              <label className="flex gap-3 text-sm font-bold leading-6 text-[#596579]">
+                <input
+                  type="checkbox"
+                  checked={form.accepted_financial_rules}
+                  onChange={(event) =>
+                    updateField("accepted_financial_rules", event.target.checked)
+                  }
+                  className="mt-1 h-4 w-4"
+                />
+                <span>
+                  Declaro ciência de que poderão existir contribuições mensais,
+                  taxas, regras financeiras e obrigações aprovadas pela Associação.
+                </span>
+              </label>
+            </div>
+
+            {statusMessage && (
+              <div className="mt-6 rounded-2xl bg-[#f7f8fa] p-4 text-sm font-bold text-[#596579]">
+                {statusMessage}
+              </div>
+            )}
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
+              <Link
+                href="/area"
+                className="rounded-full border border-[#e8dccb] bg-white px-6 py-3 text-center text-sm font-black uppercase tracking-[0.1em] text-[#13233a]"
+              >
+                Voltar
+              </Link>
+
+              <button
+                type="submit"
+                disabled={saving}
+                className="rounded-full bg-[#13233a] px-6 py-3 text-sm font-black uppercase tracking-[0.1em] text-white shadow-lg shadow-slate-900/10 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {saving ? "Salvando..." : "Enviar solicitação"}
+              </button>
+            </div>
+          </form>
+        )}
+    </ProtectedArea>
+  );
+}
