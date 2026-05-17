@@ -89,12 +89,19 @@ export default function CadastroPage() {
     }
 
     if (data.user) {
-      await supabase.from("profiles").upsert({
+      const { error: profileError } = await supabase.from("profiles").upsert({
         user_id: data.user.id,
         full_name: fullName,
         email,
         status: "ativo",
       });
+
+      if (profileError) {
+        console.error("Erro ao salvar perfil:", profileError);
+        setStatusMessage(profileError.message || "A conta foi criada, mas não foi possível salvar o perfil.");
+        setLoading(false);
+        return;
+      }
     }
 
     setStatusMessage("Conta criada com sucesso. Redirecionando...");

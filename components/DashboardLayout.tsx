@@ -15,6 +15,7 @@ const menuItems = [
   { label: "Início", href: "/dashboard", icon: "🏠" },
   { label: "Associados", href: "/dashboard/associados", icon: "👥" },
   { label: "Solicitações", href: "/dashboard/solicitacoes", icon: "📝" },
+  { label: "Avisos", href: "/dashboard/avisos", icon: "📢" },
   { label: "Financeiro", href: "/dashboard/financeiro", icon: "💰" },
   { label: "Mensalidades", href: "/dashboard/mensalidades", icon: "📅" },
   { label: "Inadimplência", href: "/dashboard/inadimplencia", icon: "⚠️" },

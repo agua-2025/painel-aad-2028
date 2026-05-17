@@ -28,6 +28,15 @@ type ProtectedDashboardProps = {
   children: React.ReactNode;
 };
 
+const allowedDashboardRoles = [
+  "administrador",
+  "presidente",
+  "vice_presidente",
+  "secretaria",
+  "tesoureira",
+  "comissao_fiscal",
+];
+
 export function ProtectedDashboard({ children }: ProtectedDashboardProps) {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -60,8 +69,6 @@ export function ProtectedDashboard({ children }: ProtectedDashboardProps) {
         return;
       }
 
-      setProfile(profileData);
-
       const { data: roleData, error: roleError } = await supabase
         .from("user_roles")
         .select("roles(name, description)")
@@ -84,6 +91,16 @@ export function ProtectedDashboard({ children }: ProtectedDashboardProps) {
           })
           .filter((name): name is string => Boolean(name)) ?? [];
 
+      const canAccessDashboard = roleNames.some((role) =>
+        allowedDashboardRoles.includes(role)
+      );
+
+      if (!canAccessDashboard) {
+        window.location.href = "/area";
+        return;
+      }
+
+      setProfile(profileData);
       setRoles(roleNames);
       setLoading(false);
     }
@@ -101,18 +118,22 @@ export function ProtectedDashboard({ children }: ProtectedDashboardProps) {
     );
   }
 
+  if (errorMessage) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#f7f8fa] px-6 text-[#13233a]">
+        <div className="max-w-xl rounded-3xl border border-red-200 bg-red-50 p-8 shadow-sm">
+          <p className="font-bold text-red-700">{errorMessage}</p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <DashboardLayout
       userName={profile?.full_name}
       userEmail={profile?.email}
       roles={roles}
     >
-      {errorMessage && (
-        <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-5 font-bold text-red-700">
-          {errorMessage}
-        </div>
-      )}
-
       {children}
     </DashboardLayout>
   );
