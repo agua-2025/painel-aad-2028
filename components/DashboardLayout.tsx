@@ -18,6 +18,7 @@ const menuItems = [
   { label: "Avisos", href: "/dashboard/avisos", icon: "📢" },
   { label: "Regras Financeiras", href: "/dashboard/financeiro", icon: "⚖️" },
   { label: "Mensalidades", href: "/dashboard/mensalidades", icon: "📅" },
+  { label: "Contribuições Extras", href: "/dashboard/contribuicoes-extras", icon: "➕" },
   { label: "Informes de Pagamento", href: "/dashboard/pagamentos", icon: "💳" },
   { label: "Inadimplência", href: "/dashboard/inadimplencia", icon: "⚠️" },
   { label: "Relatórios", href: "/dashboard/relatorios", icon: "📊" },

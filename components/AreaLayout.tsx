@@ -24,6 +24,7 @@ const baseMenuItems = [
 const associateMenuItems = [
   { label: "Pagamentos", href: "/area/pagamentos", icon: "💳" },
   { label: "Financeiro", href: "/area/financeiro", icon: "💰" },
+  { label: "Contribuições Extras", href: "/area/contribuicoes-extras", icon: "➕" },
 ];
 
 function formatStatus(value?: string | null) {
