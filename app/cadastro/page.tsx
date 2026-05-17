@@ -82,8 +82,8 @@ export default function CadastroPage() {
     });
 
     if (error) {
-      console.error(error);
-      setStatusMessage("Não foi possível criar a conta. Verifique os dados e tente novamente.");
+      console.error("Erro ao criar conta:", error);
+      setStatusMessage(error.message || "Não foi possível criar a conta. Verifique os dados e tente novamente.");
       setLoading(false);
       return;
     }
