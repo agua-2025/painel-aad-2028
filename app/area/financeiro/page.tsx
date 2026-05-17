@@ -340,27 +340,15 @@ export default function AreaFinanceiroPage() {
             </section>
 
             {summary.openFees.length > 1 && (
-              <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
-                <h2 className="text-xl font-black text-amber-900">
-                  Orientação sobre pagamento
-                </h2>
-
-                <p className="mt-3 leading-7 text-amber-900/80">
-                  Havendo mais de uma mensalidade em aberto, recomenda-se quitar primeiro a mensalidade mais antiga, salvo orientação diferente da Tesouraria. Ao realizar o pagamento, informe corretamente a referência da mensalidade para facilitar a baixa.
-                </p>
-              </section>
+              <p className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
+                Orientação: havendo mais de uma mensalidade em aberto, recomenda-se quitar primeiro a mais antiga e informar corretamente a referência do pagamento.
+              </p>
             )}
 
             {summary.overdueFees.length > 0 && (
-              <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
-                <h2 className="text-xl font-black text-amber-900">
-                  Atenção: existe mensalidade com encargos
-                </h2>
-
-                <p className="mt-3 leading-7 text-amber-900/80">
-                  Há mensalidade vencida com incidência de multa/juros conforme a regra financeira vigente. O valor exibido considera a data de hoje. Para pagamento em outra data, o valor poderá sofrer alteração.
-                </p>
-              </section>
+              <p className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
+                Atenção: há mensalidade vencida com encargos. O valor exibido considera a data de hoje e pode mudar em outra data.
+              </p>
             )}
 
             <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">

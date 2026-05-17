@@ -291,15 +291,9 @@ export default function DashboardInadimplenciaPage() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
-          <h2 className="text-xl font-black text-amber-900">
-            Orientação para baixa
-          </h2>
-
-          <p className="mt-3 leading-7 text-amber-900/80">
-            Recomenda-se lançar pagamentos na mensalidade vencida mais antiga, salvo indicação expressa do associado e conferência da Tesouraria. Antes da baixa, confirme sempre o mês de referência, o vencimento e a data efetiva do pagamento.
-          </p>
-        </section>
+        <p className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
+          Orientação: confira sempre o associado, o mês de referência, o vencimento e a data efetiva do pagamento antes da baixa.
+        </p>
 
         <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">

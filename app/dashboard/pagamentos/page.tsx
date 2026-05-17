@@ -400,7 +400,7 @@ export default function DashboardPagamentosPage() {
         status: "aprovado",
         review_notes:
           forms[report.id]?.review_notes?.trim() ||
-          "Pagamento conferido e aprovado pela Tesouraria.",
+          "Pagamento conferido e aprovado pela Pagamentos informados.",
         reviewed_by: profileId,
         reviewed_at: new Date().toISOString(),
       })
@@ -463,15 +463,15 @@ export default function DashboardPagamentosPage() {
       <div className="space-y-6">
         <section className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10">
           <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
-            Tesouraria
+            Pagamentos informados
           </p>
 
           <h1 className="mt-3 text-3xl font-black tracking-[-0.04em] md:text-4xl">
-            Informes de pagamento
+            Informes de Pagamento
           </h1>
 
           <p className="mt-3 max-w-3xl leading-7 text-white/75">
-            Analise os pagamentos informados pelos associados antes de realizar a baixa definitiva.
+            Analise os informes enviados pelos associados e aprove somente após conferência da Pagamentos informados.
           </p>
         </section>
 
@@ -505,15 +505,9 @@ export default function DashboardPagamentosPage() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
-          <h2 className="text-xl font-black text-amber-900">
-            Conferência obrigatória
-          </h2>
-
-          <p className="mt-3 leading-7 text-amber-900/80">
-            O informe enviado pelo associado não quita automaticamente a mensalidade. Antes de aprovar, confira o extrato, comprovante, valor, data efetiva do pagamento e mês de referência.
-          </p>
-        </section>
+        <p className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
+          Conferência: antes de aprovar, verifique extrato, comprovante, valor, data efetiva e mês de referência.
+        </p>
 
         <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -523,7 +517,7 @@ export default function DashboardPagamentosPage() {
               </h2>
 
               <p className="mt-2 text-sm font-medium text-[#596579]">
-                Os informes pendentes podem ser aprovados ou rejeitados pela Tesouraria.
+                Os informes pendentes podem ser aprovados ou rejeitados pela Pagamentos informados.
               </p>
             </div>
 
@@ -653,7 +647,7 @@ export default function DashboardPagamentosPage() {
                     <div className="mt-4 grid gap-3">
                       <label className="grid gap-2">
                         <span className="text-sm font-bold text-[#13233a]">
-                          Observação da Tesouraria
+                          Observação da Pagamentos informados
                         </span>
 
                         <textarea

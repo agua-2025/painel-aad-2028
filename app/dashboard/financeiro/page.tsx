@@ -183,7 +183,7 @@ export default function DashboardFinanceiroPage() {
       <div className="space-y-6">
         <section className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10">
           <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
-            Gestão financeira
+            Regras de cobrança
           </p>
 
           <h1 className="mt-3 text-3xl font-black tracking-[-0.04em] md:text-4xl">
