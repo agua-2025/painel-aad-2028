@@ -71,6 +71,15 @@ const statusLabels: Record<string, string> = {
   isenta: "Isenta",
 };
 
+const paymentMethodLabels: Record<string, string> = {
+  pix: "Pix",
+  dinheiro: "Dinheiro",
+  transferencia: "Transferência",
+  deposito: "Depósito",
+  cartao: "Cartão",
+  outros: "Outros",
+};
+
 function formatCurrency(value: number | null | undefined) {
   return Number(value ?? 0).toLocaleString("pt-BR", {
     style: "currency",
@@ -110,14 +119,59 @@ export default function DashboardMensalidadesPage() {
   const [associates, setAssociates] = useState<Associate[]>([]);
   const [fees, setFees] = useState<MonthlyFee[]>([]);
 
+  const [selectedFee, setSelectedFee] = useState<MonthlyFee | null>(null);
+  const [paymentForm, setPaymentForm] = useState({
+    amount: "",
+    paid_at: new Date().toISOString().slice(0, 10),
+    payment_method: "pix",
+    reference: "",
+    notes: "",
+  });
+
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [savingPayment, setSavingPayment] = useState(false);
   const [message, setMessage] = useState("");
 
   const selectedLabel = useMemo(() => {
     const monthIndex = Number(selectedMonth) - 1;
     return `${monthNames[monthIndex]} de ${selectedYear}`;
   }, [selectedMonth, selectedYear]);
+
+  function updatePaymentField(field: string, value: string) {
+    setPaymentForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  }
+
+  function openPaymentForm(fee: MonthlyFee) {
+    const remainingAmount = Math.max(
+      Number(fee.total_amount ?? 0) - Number(fee.paid_amount ?? 0),
+      0
+    );
+
+    setSelectedFee(fee);
+    setPaymentForm({
+      amount: String(remainingAmount.toFixed(2)),
+      paid_at: new Date().toISOString().slice(0, 10),
+      payment_method: "pix",
+      reference: "",
+      notes: "",
+    });
+    setMessage("");
+  }
+
+  function closePaymentForm() {
+    setSelectedFee(null);
+    setPaymentForm({
+      amount: "",
+      paid_at: new Date().toISOString().slice(0, 10),
+      payment_method: "pix",
+      reference: "",
+      notes: "",
+    });
+  }
 
   async function loadData() {
     setLoading(true);
@@ -269,6 +323,104 @@ export default function DashboardMensalidadesPage() {
     await loadFees();
   }
 
+  async function registerPayment(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!selectedFee) {
+      setMessage("Selecione uma mensalidade para registrar o pagamento.");
+      return;
+    }
+
+    const amount = Number(paymentForm.amount.replace(",", "."));
+
+    if (Number.isNaN(amount) || amount <= 0) {
+      setMessage("Informe um valor de pagamento válido.");
+      return;
+    }
+
+    if (!paymentForm.paid_at) {
+      setMessage("Informe a data do pagamento.");
+      return;
+    }
+
+    const currentPaidAmount = Number(selectedFee.paid_amount ?? 0);
+    const totalAmount = Number(selectedFee.total_amount ?? 0);
+    const newPaidAmount = Number((currentPaidAmount + amount).toFixed(2));
+
+    if (newPaidAmount > totalAmount) {
+      setMessage(
+        `O valor informado ultrapassa o saldo da mensalidade. Saldo atual: ${formatCurrency(
+          totalAmount - currentPaidAmount
+        )}.`
+      );
+      return;
+    }
+
+    setSavingPayment(true);
+    setMessage("Registrando pagamento...");
+
+    const supabase = createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    let profileId: string | null = null;
+
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      profileId = profile?.id ?? null;
+    }
+
+    const { error: paymentError } = await supabase.from("payments").insert({
+      associate_id: selectedFee.associate_id,
+      monthly_fee_id: selectedFee.id,
+      amount,
+      paid_at: paymentForm.paid_at,
+      payment_method: paymentForm.payment_method,
+      reference: paymentForm.reference.trim() || null,
+      created_by: profileId,
+      notes: paymentForm.notes.trim() || null,
+    });
+
+    if (paymentError) {
+      console.error("Erro ao registrar pagamento:", paymentError);
+      setMessage(paymentError.message || "Não foi possível registrar o pagamento.");
+      setSavingPayment(false);
+      return;
+    }
+
+    const newStatus = newPaidAmount >= totalAmount ? "paga" : "parcialmente_paga";
+
+    const { error: feeError } = await supabase
+      .from("monthly_fees")
+      .update({
+        paid_amount: newPaidAmount,
+        paid_at: paymentForm.paid_at,
+        status: newStatus,
+      })
+      .eq("id", selectedFee.id);
+
+    if (feeError) {
+      console.error("Erro ao atualizar mensalidade:", feeError);
+      setMessage(
+        "O pagamento foi registrado, mas não foi possível atualizar a mensalidade."
+      );
+      setSavingPayment(false);
+      return;
+    }
+
+    setMessage("Pagamento registrado com sucesso.");
+    setSavingPayment(false);
+    closePaymentForm();
+    await loadFees();
+  }
+
   return (
     <ProtectedDashboard>
       <div className="space-y-6">
@@ -282,7 +434,7 @@ export default function DashboardMensalidadesPage() {
           </h1>
 
           <p className="mt-3 max-w-3xl leading-7 text-white/75">
-            Gere e acompanhe mensalidades dos associados ativos com base na regra financeira vigente.
+            Gere, acompanhe e registre pagamentos das mensalidades dos associados ativos.
           </p>
         </section>
 
@@ -371,6 +523,114 @@ export default function DashboardMensalidadesPage() {
           )}
         </section>
 
+        {selectedFee && (
+          <section className="rounded-3xl border border-[#c7a56b] bg-white p-5 shadow-sm">
+            <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-[#c7a56b]">
+                  Baixa de pagamento
+                </p>
+
+                <h2 className="mt-2 text-2xl font-black tracking-[-0.04em]">
+                  Registrar pagamento
+                </h2>
+
+                <p className="mt-2 text-sm font-bold text-[#596579]">
+                  {getAssociateName(selectedFee)} · saldo{" "}
+                  {formatCurrency(
+                    Number(selectedFee.total_amount ?? 0) -
+                      Number(selectedFee.paid_amount ?? 0)
+                  )}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={closePaymentForm}
+                className="rounded-full border border-[#e8dccb] bg-white px-5 py-2 text-xs font-black uppercase tracking-[0.08em] text-[#13233a]"
+              >
+                Fechar
+              </button>
+            </div>
+
+            <form
+              onSubmit={registerPayment}
+              className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5"
+            >
+              <label className="grid gap-2">
+                <span className="text-sm font-bold text-[#596579]">Valor pago</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={paymentForm.amount}
+                  onChange={(event) => updatePaymentField("amount", event.target.value)}
+                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                />
+              </label>
+
+              <label className="grid gap-2">
+                <span className="text-sm font-bold text-[#596579]">Data</span>
+                <input
+                  type="date"
+                  value={paymentForm.paid_at}
+                  onChange={(event) => updatePaymentField("paid_at", event.target.value)}
+                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                />
+              </label>
+
+              <label className="grid gap-2">
+                <span className="text-sm font-bold text-[#596579]">Forma</span>
+                <select
+                  value={paymentForm.payment_method}
+                  onChange={(event) =>
+                    updatePaymentField("payment_method", event.target.value)
+                  }
+                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                >
+                  {Object.entries(paymentMethodLabels).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="grid gap-2">
+                <span className="text-sm font-bold text-[#596579]">Referência</span>
+                <input
+                  type="text"
+                  value={paymentForm.reference}
+                  onChange={(event) =>
+                    updatePaymentField("reference", event.target.value)
+                  }
+                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  placeholder="Ex.: Pix, recibo, comprovante"
+                />
+              </label>
+
+              <button
+                type="submit"
+                disabled={savingPayment}
+                className="rounded-full bg-[#13233a] px-6 py-3 text-sm font-black uppercase tracking-[0.1em] text-white shadow-lg shadow-slate-900/10 disabled:cursor-not-allowed disabled:opacity-70 md:self-end"
+              >
+                {savingPayment ? "Salvando..." : "Confirmar"}
+              </button>
+
+              <label className="grid gap-2 md:col-span-2 xl:col-span-5">
+                <span className="text-sm font-bold text-[#596579]">Observação</span>
+                <textarea
+                  value={paymentForm.notes}
+                  onChange={(event) => updatePaymentField("notes", event.target.value)}
+                  rows={3}
+                  className="w-full resize-none rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  placeholder="Observação interna sobre o pagamento, se necessário."
+                />
+              </label>
+            </form>
+          </section>
+        )}
+
         <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
             <div>
@@ -399,19 +659,20 @@ export default function DashboardMensalidadesPage() {
             </div>
           ) : (
             <div className="mt-5 overflow-hidden rounded-2xl border border-[#e8dccb]">
-              <div className="hidden bg-[#f7f8fa] px-5 py-3 text-xs font-black uppercase tracking-[0.12em] text-[#596579] md:grid md:grid-cols-[1.2fr_0.7fr_0.7fr_0.7fr_0.7fr]">
+              <div className="hidden bg-[#f7f8fa] px-5 py-3 text-xs font-black uppercase tracking-[0.12em] text-[#596579] md:grid md:grid-cols-[1.2fr_0.7fr_0.7fr_0.7fr_0.7fr_0.8fr]">
                 <span>Associado</span>
                 <span>Vencimento</span>
                 <span>Valor</span>
                 <span>Pago</span>
                 <span>Status</span>
+                <span>Ação</span>
               </div>
 
               <div className="divide-y divide-[#e8dccb]">
                 {fees.map((fee) => (
                   <div
                     key={fee.id}
-                    className="grid gap-4 px-5 py-5 md:grid-cols-[1.2fr_0.7fr_0.7fr_0.7fr_0.7fr] md:items-center"
+                    className="grid gap-4 px-5 py-5 md:grid-cols-[1.2fr_0.7fr_0.7fr_0.7fr_0.7fr_0.8fr] md:items-center"
                   >
                     <div>
                       <p className="font-black text-[#13233a]">
@@ -438,6 +699,22 @@ export default function DashboardMensalidadesPage() {
                       <span className="inline-flex rounded-full bg-[#f7f8fa] px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-[#13233a]">
                         {statusLabels[fee.status] ?? fee.status}
                       </span>
+                    </div>
+
+                    <div>
+                      {fee.status === "paga" ? (
+                        <span className="text-xs font-black uppercase tracking-[0.08em] text-[#596579]">
+                          Quitada
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => openPaymentForm(fee)}
+                          className="rounded-full bg-[#13233a] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white"
+                        >
+                          Registrar
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
