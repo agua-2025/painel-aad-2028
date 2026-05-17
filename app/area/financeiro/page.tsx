@@ -148,7 +148,16 @@ export default function AreaFinanceiroPage() {
   const today = new Date().toISOString().slice(0, 10);
 
   const summary = useMemo(() => {
-    const openFees = fees.filter(isOpenFee);
+    const openFees = fees
+      .filter(isOpenFee)
+      .sort((a, b) => {
+        if (a.year !== b.year) {
+          return a.year - b.year;
+        }
+
+        return a.month - b.month;
+      });
+
     const paidFees = fees.filter((fee) => fee.status === "paga");
 
     const totalOpen = openFees.reduce((sum, fee) => {
@@ -330,6 +339,18 @@ export default function AreaFinanceiroPage() {
               </div>
             </section>
 
+            {summary.openFees.length > 1 && (
+              <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
+                <h2 className="text-xl font-black text-amber-900">
+                  Orientação sobre pagamento
+                </h2>
+
+                <p className="mt-3 leading-7 text-amber-900/80">
+                  Havendo mais de uma mensalidade em aberto, recomenda-se quitar primeiro a mensalidade mais antiga, salvo orientação diferente da Tesouraria. Ao realizar o pagamento, informe corretamente a referência da mensalidade para facilitar a baixa.
+                </p>
+              </section>
+            )}
+
             {summary.overdueFees.length > 0 && (
               <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
                 <h2 className="text-xl font-black text-amber-900">
@@ -363,7 +384,7 @@ export default function AreaFinanceiroPage() {
                 </div>
               ) : (
                 <div className="mt-5 grid gap-4">
-                  {summary.openFees.map((fee) => {
+                  {summary.openFees.map((fee, index) => {
                     const calculated = calculateAmountDueAtDate(fee, today);
                     const remaining = Math.max(
                       calculated.totalDue - Number(fee.paid_amount ?? 0),
@@ -377,9 +398,17 @@ export default function AreaFinanceiroPage() {
                       >
                         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                           <div>
-                            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#c7a56b]">
-                              {getMonthLabel(fee)}
-                            </p>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#c7a56b]">
+                                {getMonthLabel(fee)}
+                              </p>
+
+                              {index === 0 && summary.openFees.length > 1 && (
+                                <span className="rounded-full bg-amber-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-amber-900">
+                                  Prioridade de pagamento
+                                </span>
+                              )}
+                            </div>
 
                             <h3 className="mt-2 text-xl font-black text-[#13233a]">
                               {formatCurrency(remaining)}
@@ -420,6 +449,13 @@ export default function AreaFinanceiroPage() {
                             <strong>Total devido hoje:</strong>{" "}
                             {formatCurrency(calculated.totalDue)}
                           </p>
+
+                          <a
+                            href={`/area/informar-pagamento/${fee.id}`}
+                            className="mt-3 inline-flex w-fit rounded-full bg-[#13233a] px-5 py-2 text-xs font-black uppercase tracking-[0.08em] text-white"
+                          >
+                            Informar pagamento
+                          </a>
                         </div>
                       </article>
                     );

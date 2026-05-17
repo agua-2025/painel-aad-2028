@@ -18,6 +18,7 @@ const menuItems = [
   { label: "Avisos", href: "/dashboard/avisos", icon: "📢" },
   { label: "Financeiro", href: "/dashboard/financeiro", icon: "💰" },
   { label: "Mensalidades", href: "/dashboard/mensalidades", icon: "📅" },
+  { label: "Pagamentos", href: "/dashboard/pagamentos", icon: "💳" },
   { label: "Inadimplência", href: "/dashboard/inadimplencia", icon: "⚠️" },
   { label: "Relatórios", href: "/dashboard/relatorios", icon: "📊" },
   { label: "Configurações", href: "/dashboard/configuracoes", icon: "⚙️" },

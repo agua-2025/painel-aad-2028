@@ -226,8 +226,8 @@ export default function DashboardInadimplenciaPage() {
         "id, associate_id, year, month, base_amount, due_date, late_fee_percent, daily_interest_percent, late_fee_amount, interest_amount, total_amount, paid_amount, paid_at, status, notes, associates(full_name, email, phone, status), financial_settings(late_fee_grace_days)"
       )
       .in("status", ["pendente", "parcialmente_paga", "atrasada"])
-      .order("year", { ascending: false })
-      .order("month", { ascending: false });
+      .order("year", { ascending: true })
+      .order("month", { ascending: true });
 
     if (error) {
       console.error("Erro ao carregar inadimplência:", error);
@@ -289,6 +289,16 @@ export default function DashboardInadimplenciaPage() {
               {formatCurrency(summary.totalOpen)}
             </p>
           </div>
+        </section>
+
+        <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
+          <h2 className="text-xl font-black text-amber-900">
+            Orientação para baixa
+          </h2>
+
+          <p className="mt-3 leading-7 text-amber-900/80">
+            Recomenda-se lançar pagamentos na mensalidade vencida mais antiga, salvo indicação expressa do associado e conferência da Tesouraria. Antes da baixa, confirme sempre o mês de referência, o vencimento e a data efetiva do pagamento.
+          </p>
         </section>
 
         <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">

@@ -611,15 +611,33 @@ export default function DashboardMensalidadesPage() {
                   Registrar pagamento
                 </h2>
 
-                <p className="mt-2 text-sm font-bold text-[#596579]">
-                  {getAssociateName(selectedFee)} · saldo{" "}
-                  {formatCurrency(
-                    calculateAmountDueAtDate(
-                      selectedFee,
-                      paymentForm.paid_at
-                    ).totalDue - Number(selectedFee.paid_amount ?? 0)
-                  )}
-                </p>
+                <div className="mt-3 rounded-2xl bg-[#f7f8fa] p-4 text-sm font-bold leading-7 text-[#596579]">
+                  <p>
+                    <strong>Associado:</strong> {getAssociateName(selectedFee)}
+                  </p>
+
+                  <p>
+                    <strong>Referência:</strong> {monthNames[Number(selectedFee.month) - 1]} de {selectedFee.year}
+                  </p>
+
+                  <p>
+                    <strong>Vencimento:</strong> {formatDate(selectedFee.due_date)}
+                  </p>
+
+                  <p>
+                    <strong>Saldo na data efetiva do pagamento:</strong>{" "}
+                    {formatCurrency(
+                      calculateAmountDueAtDate(
+                        selectedFee,
+                        paymentForm.paid_at
+                      ).totalDue - Number(selectedFee.paid_amount ?? 0)
+                    )}
+                  </p>
+                </div>
+
+                <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-bold leading-6 text-amber-900">
+                  Antes de confirmar, confira se o pagamento pertence a esta mensalidade. Havendo meses anteriores em aberto, recomenda-se baixar primeiro a mensalidade mais antiga, salvo orientação expressa do associado.
+                </div>
               </div>
 
               <button
