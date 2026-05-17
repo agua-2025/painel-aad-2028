@@ -315,6 +315,13 @@ export default function AreaContribuicoesExtrasPage() {
                             <strong>Motivo:</strong> {contribution.reason}
                           </p>
                         )}
+
+                        <a
+                          href={`/area/informar-contribuicao-extra/${item.id}`}
+                          className="mt-4 inline-flex w-fit rounded-full bg-[#13233a] px-5 py-2 text-xs font-black uppercase tracking-[0.08em] text-white"
+                        >
+                          Informar pagamento
+                        </a>
                       </article>
                     );
                   })}

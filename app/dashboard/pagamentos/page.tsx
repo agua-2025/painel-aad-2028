@@ -4,10 +4,51 @@ import { useEffect, useMemo, useState } from "react";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
 
+type AssociateData = {
+  full_name: string;
+  email: string | null;
+  phone: string | null;
+};
+
+type FinancialSettingsData = {
+  late_fee_grace_days: number;
+};
+
+type MonthlyFeeData = {
+  id: string;
+  year: number;
+  month: number;
+  base_amount: number;
+  due_date: string;
+  late_fee_percent: number;
+  daily_interest_percent: number;
+  paid_amount: number;
+  status: string;
+  financial_settings: FinancialSettingsData | FinancialSettingsData[] | null;
+};
+
+type ExtraContributionData = {
+  id: string;
+  title: string;
+  description: string | null;
+  reason: string | null;
+  status: string;
+};
+
+type ExtraContributionItemData = {
+  id: string;
+  amount: number;
+  paid_amount: number;
+  due_date: string;
+  status: string;
+  extra_contributions: ExtraContributionData | ExtraContributionData[] | null;
+};
+
 type PaymentReport = {
   id: string;
   associate_id: string;
-  monthly_fee_id: string;
+  monthly_fee_id: string | null;
+  extra_contribution_item_id: string | null;
   amount: number;
   paid_at: string;
   payment_method: string;
@@ -16,57 +57,11 @@ type PaymentReport = {
   status: string;
   review_notes: string | null;
   created_at: string;
-  associates:
-    | {
-        full_name: string;
-        email: string | null;
-        phone: string | null;
-      }
-    | {
-        full_name: string;
-        email: string | null;
-        phone: string | null;
-      }[]
-    | null;
-  monthly_fees:
-    | {
-        id: string;
-        year: number;
-        month: number;
-        base_amount: number;
-        due_date: string;
-        late_fee_percent: number;
-        daily_interest_percent: number;
-        paid_amount: number;
-        status: string;
-        financial_settings:
-          | {
-              late_fee_grace_days: number;
-            }
-          | {
-              late_fee_grace_days: number;
-            }[]
-          | null;
-      }
-    | {
-        id: string;
-        year: number;
-        month: number;
-        base_amount: number;
-        due_date: string;
-        late_fee_percent: number;
-        daily_interest_percent: number;
-        paid_amount: number;
-        status: string;
-        financial_settings:
-          | {
-              late_fee_grace_days: number;
-            }
-          | {
-              late_fee_grace_days: number;
-            }[]
-          | null;
-      }[]
+  associates: AssociateData | AssociateData[] | null;
+  monthly_fees: MonthlyFeeData | MonthlyFeeData[] | null;
+  extra_contribution_items:
+    | ExtraContributionItemData
+    | ExtraContributionItemData[]
     | null;
 };
 
@@ -102,6 +97,15 @@ const statusLabels: Record<string, string> = {
   pendente: "Pendente",
   aprovado: "Aprovado",
   rejeitado: "Rejeitado",
+};
+
+const feeStatusLabels: Record<string, string> = {
+  pendente: "Pendente",
+  paga: "Paga",
+  parcialmente_paga: "Parcialmente paga",
+  atrasada: "Atrasada",
+  cancelada: "Cancelada",
+  isenta: "Isenta",
 };
 
 function formatCurrency(value: number | null | undefined) {
@@ -140,12 +144,68 @@ function getMonthlyFee(report: PaymentReport) {
   return report.monthly_fees ?? null;
 }
 
-function getMonthLabel(report: PaymentReport) {
+function getExtraItem(report: PaymentReport) {
+  if (Array.isArray(report.extra_contribution_items)) {
+    return report.extra_contribution_items[0] ?? null;
+  }
+
+  return report.extra_contribution_items ?? null;
+}
+
+function getExtraContribution(item: ExtraContributionItemData | null) {
+  if (!item) return null;
+
+  if (Array.isArray(item.extra_contributions)) {
+    return item.extra_contributions[0] ?? null;
+  }
+
+  return item.extra_contributions ?? null;
+}
+
+function getOriginType(report: PaymentReport) {
+  if (report.extra_contribution_item_id) return "extra";
+  return "monthly";
+}
+
+function getOriginLabel(report: PaymentReport) {
+  const originType = getOriginType(report);
+
+  if (originType === "extra") {
+    const item = getExtraItem(report);
+    const contribution = getExtraContribution(item);
+
+    return contribution?.title ?? "Contribuição extra";
+  }
+
   const fee = getMonthlyFee(report);
 
   if (!fee) return "Mensalidade não localizada";
 
   return `${monthNames[Number(fee.month) - 1]} de ${fee.year}`;
+}
+
+function getOriginBadge(report: PaymentReport) {
+  if (getOriginType(report) === "extra") {
+    return "Contribuição extra";
+  }
+
+  return "Mensalidade";
+}
+
+function getDueDate(report: PaymentReport) {
+  if (getOriginType(report) === "extra") {
+    return getExtraItem(report)?.due_date ?? null;
+  }
+
+  return getMonthlyFee(report)?.due_date ?? null;
+}
+
+function getCurrentStatus(report: PaymentReport) {
+  if (getOriginType(report) === "extra") {
+    return getExtraItem(report)?.status ?? "Não informado";
+  }
+
+  return getMonthlyFee(report)?.status ?? "Não informado";
 }
 
 function getGraceDays(report: PaymentReport) {
@@ -160,7 +220,7 @@ function getGraceDays(report: PaymentReport) {
   return Number(fee.financial_settings?.late_fee_grace_days ?? 0);
 }
 
-function calculateAmountDueAtDate(report: PaymentReport) {
+function calculateMonthlyAmountDueAtDate(report: PaymentReport) {
   const fee = getMonthlyFee(report);
 
   if (!fee) {
@@ -223,6 +283,25 @@ function calculateAmountDueAtDate(report: PaymentReport) {
   };
 }
 
+function calculateExtraAmountDue(report: PaymentReport) {
+  const item = getExtraItem(report);
+
+  if (!item) {
+    return {
+      totalDue: 0,
+      remaining: 0,
+    };
+  }
+
+  const totalDue = Number(item.amount ?? 0);
+  const remaining = Math.max(totalDue - Number(item.paid_amount ?? 0), 0);
+
+  return {
+    totalDue,
+    remaining,
+  };
+}
+
 function getReportBadgeClass(status: string) {
   if (status === "aprovado") {
     return "bg-green-100 text-green-800";
@@ -244,8 +323,6 @@ export default function DashboardPagamentosPage() {
 
   const summary = useMemo(() => {
     const pending = reports.filter((report) => report.status === "pendente");
-    const approved = reports.filter((report) => report.status === "aprovado");
-    const rejected = reports.filter((report) => report.status === "rejeitado");
 
     const pendingAmount = pending.reduce(
       (sum, report) => sum + Number(report.amount ?? 0),
@@ -254,8 +331,6 @@ export default function DashboardPagamentosPage() {
 
     return {
       pending,
-      approved,
-      rejected,
       pendingAmount,
     };
   }, [reports]);
@@ -269,7 +344,7 @@ export default function DashboardPagamentosPage() {
     const { data, error } = await supabase
       .from("payment_reports")
       .select(
-        "id, associate_id, monthly_fee_id, amount, paid_at, payment_method, reference, notes, status, review_notes, created_at, associates(full_name, email, phone), monthly_fees(id, year, month, base_amount, due_date, late_fee_percent, daily_interest_percent, paid_amount, status, financial_settings(late_fee_grace_days))"
+        "id, associate_id, monthly_fee_id, extra_contribution_item_id, amount, paid_at, payment_method, reference, notes, status, review_notes, created_at, associates(full_name, email, phone), monthly_fees(id, year, month, base_amount, due_date, late_fee_percent, daily_interest_percent, paid_amount, status, financial_settings(late_fee_grace_days)), extra_contribution_items(id, amount, paid_amount, due_date, status, extra_contributions(id, title, description, reason, status))"
       )
       .eq("status", "pendente")
       .order("created_at", { ascending: false });
@@ -327,7 +402,23 @@ export default function DashboardPagamentosPage() {
     return profile?.id ?? null;
   }
 
-  async function approveReport(report: PaymentReport) {
+  async function markReportAsApproved(report: PaymentReport, profileId: string | null) {
+    const supabase = createClient();
+
+    return supabase
+      .from("payment_reports")
+      .update({
+        status: "aprovado",
+        review_notes:
+          forms[report.id]?.review_notes?.trim() ||
+          "Pagamento conferido e aprovado pela Tesouraria.",
+        reviewed_by: profileId,
+        reviewed_at: new Date().toISOString(),
+      })
+      .eq("id", report.id);
+  }
+
+  async function approveMonthlyReport(report: PaymentReport) {
     const fee = getMonthlyFee(report);
 
     if (!fee) {
@@ -335,18 +426,10 @@ export default function DashboardPagamentosPage() {
       return;
     }
 
-    if (report.status !== "pendente") {
-      setMessage("Este informe já foi analisado.");
-      return;
-    }
-
-    setProcessingId(report.id);
-    setMessage("");
-
     const supabase = createClient();
     const profileId = await getCurrentProfileId();
 
-    const calculated = calculateAmountDueAtDate(report);
+    const calculated = calculateMonthlyAmountDueAtDate(report);
     const paidAmountBefore = Number(fee.paid_amount ?? 0);
     const reportAmount = Number(report.amount ?? 0);
     const paidAmountAfter = Number((paidAmountBefore + reportAmount).toFixed(2));
@@ -357,6 +440,7 @@ export default function DashboardPagamentosPage() {
     const { error: paymentError } = await supabase.from("payments").insert({
       associate_id: report.associate_id,
       monthly_fee_id: report.monthly_fee_id,
+      extra_contribution_item_id: null,
       amount: reportAmount,
       paid_at: report.paid_at,
       payment_method: report.payment_method,
@@ -369,7 +453,6 @@ export default function DashboardPagamentosPage() {
 
     if (paymentError) {
       setMessage(paymentError.message || "Não foi possível registrar o pagamento.");
-      setProcessingId(null);
       return;
     }
 
@@ -390,29 +473,96 @@ export default function DashboardPagamentosPage() {
         "O pagamento foi criado, mas houve erro ao atualizar a mensalidade: " +
           feeError.message
       );
-      setProcessingId(null);
       return;
     }
 
-    const { error: reportError } = await supabase
-      .from("payment_reports")
-      .update({
-        status: "aprovado",
-        review_notes:
-          forms[report.id]?.review_notes?.trim() ||
-          "Pagamento conferido e aprovado pela Pagamentos informados.",
-        reviewed_by: profileId,
-        reviewed_at: new Date().toISOString(),
-      })
-      .eq("id", report.id);
+    const { error: reportError } = await markReportAsApproved(report, profileId);
 
     if (reportError) {
       setMessage(
         "A baixa foi realizada, mas houve erro ao atualizar o informe: " +
           reportError.message
       );
-      setProcessingId(null);
+    }
+  }
+
+  async function approveExtraReport(report: PaymentReport) {
+    const item = getExtraItem(report);
+
+    if (!item) {
+      setMessage("Contribuição extra vinculada ao informe não foi localizada.");
       return;
+    }
+
+    const supabase = createClient();
+    const profileId = await getCurrentProfileId();
+
+    const reportAmount = Number(report.amount ?? 0);
+    const paidAmountBefore = Number(item.paid_amount ?? 0);
+    const paidAmountAfter = Number((paidAmountBefore + reportAmount).toFixed(2));
+    const totalDue = Number(item.amount ?? 0);
+
+    const nextStatus =
+      paidAmountAfter >= totalDue ? "paga" : "parcialmente_paga";
+
+    const { error: paymentError } = await supabase.from("payments").insert({
+      associate_id: report.associate_id,
+      monthly_fee_id: null,
+      extra_contribution_item_id: report.extra_contribution_item_id,
+      amount: reportAmount,
+      paid_at: report.paid_at,
+      payment_method: report.payment_method,
+      reference: report.reference,
+      notes:
+        forms[report.id]?.review_notes?.trim() ||
+        report.notes ||
+        "Baixa realizada a partir de informe de pagamento de contribuição extra.",
+    });
+
+    if (paymentError) {
+      setMessage(paymentError.message || "Não foi possível registrar o pagamento.");
+      return;
+    }
+
+    const { error: itemError } = await supabase
+      .from("extra_contribution_items")
+      .update({
+        paid_amount: paidAmountAfter,
+        status: nextStatus,
+      })
+      .eq("id", report.extra_contribution_item_id);
+
+    if (itemError) {
+      setMessage(
+        "O pagamento foi criado, mas houve erro ao atualizar a contribuição extra: " +
+          itemError.message
+      );
+      return;
+    }
+
+    const { error: reportError } = await markReportAsApproved(report, profileId);
+
+    if (reportError) {
+      setMessage(
+        "A baixa foi realizada, mas houve erro ao atualizar o informe: " +
+          reportError.message
+      );
+    }
+  }
+
+  async function approveReport(report: PaymentReport) {
+    if (report.status !== "pendente") {
+      setMessage("Este informe já foi analisado.");
+      return;
+    }
+
+    setProcessingId(report.id);
+    setMessage("");
+
+    if (getOriginType(report) === "extra") {
+      await approveExtraReport(report);
+    } else {
+      await approveMonthlyReport(report);
     }
 
     setProcessingId(null);
@@ -471,11 +621,11 @@ export default function DashboardPagamentosPage() {
           </h1>
 
           <p className="mt-3 max-w-3xl leading-7 text-white/75">
-            Analise os informes enviados pelos associados e aprove somente após conferência da Pagamentos informados.
+            Analise os informes enviados pelos associados e aprove somente após conferência da Tesouraria.
           </p>
         </section>
 
-        <section className="grid gap-5 md:grid-cols-4">
+        <section className="grid gap-5 md:grid-cols-2">
           <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
             <p className="text-sm font-bold text-[#596579]">Pendentes</p>
             <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[#13233a]">
@@ -489,24 +639,10 @@ export default function DashboardPagamentosPage() {
               {formatCurrency(summary.pendingAmount)}
             </p>
           </div>
-
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-            <p className="text-sm font-bold text-[#596579]">Aprovados</p>
-            <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[#13233a]">
-              {summary.approved.length}
-            </p>
-          </div>
-
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-            <p className="text-sm font-bold text-[#596579]">Rejeitados</p>
-            <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[#13233a]">
-              {summary.rejected.length}
-            </p>
-          </div>
         </section>
 
         <p className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
-          Conferência: antes de aprovar, verifique extrato, comprovante, valor, data efetiva e mês de referência.
+          Conferência: antes de aprovar, verifique extrato, comprovante, valor, data efetiva e referência.
         </p>
 
         <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
@@ -517,7 +653,7 @@ export default function DashboardPagamentosPage() {
               </h2>
 
               <p className="mt-2 text-sm font-medium text-[#596579]">
-                Os informes pendentes podem ser aprovados ou rejeitados pela Pagamentos informados.
+                Os informes pendentes podem ser aprovados ou rejeitados pela Tesouraria.
               </p>
             </div>
 
@@ -541,7 +677,7 @@ export default function DashboardPagamentosPage() {
           ) : reports.length === 0 ? (
             <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-5">
               <h3 className="text-xl font-black tracking-[-0.04em] text-[#13233a]">
-                Nenhum informe recebido
+                Nenhum informe pendente
               </h3>
 
               <p className="mt-2 leading-7 text-[#596579]">
@@ -552,8 +688,13 @@ export default function DashboardPagamentosPage() {
             <div className="mt-5 grid gap-4">
               {reports.map((report) => {
                 const associate = getAssociate(report);
-                const fee = getMonthlyFee(report);
-                const calculated = calculateAmountDueAtDate(report);
+                const originType = getOriginType(report);
+                const monthlyCalculated = calculateMonthlyAmountDueAtDate(report);
+                const extraCalculated = calculateExtraAmountDue(report);
+                const amountDue =
+                  originType === "extra"
+                    ? extraCalculated.remaining
+                    : monthlyCalculated.remaining;
 
                 return (
                   <article
@@ -562,9 +703,15 @@ export default function DashboardPagamentosPage() {
                   >
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                       <div>
-                        <p className="text-xs font-black uppercase tracking-[0.2em] text-[#c7a56b]">
-                          {getMonthLabel(report)}
-                        </p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-xs font-black uppercase tracking-[0.2em] text-[#c7a56b]">
+                            {getOriginLabel(report)}
+                          </p>
+
+                          <span className="rounded-full bg-[#f7f8fa] px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#13233a]">
+                            {getOriginBadge(report)}
+                          </span>
+                        </div>
 
                         <h3 className="mt-2 text-xl font-black tracking-[-0.04em] text-[#13233a]">
                           {associate?.full_name ?? "Associado não localizado"}
@@ -602,33 +749,38 @@ export default function DashboardPagamentosPage() {
 
                       <p>
                         <strong>Vencimento:</strong>{" "}
-                        {fee ? formatDate(fee.due_date) : "Não informado"}
+                        {formatDate(getDueDate(report))}
                       </p>
 
                       <p>
                         <strong>Valor devido na data:</strong>{" "}
-                        {formatCurrency(calculated.remaining)}
+                        {formatCurrency(amountDue)}
                       </p>
 
                       <p>
-                        <strong>Status da mensalidade:</strong>{" "}
-                        {fee?.status ?? "Não informado"}
+                        <strong>Status da cobrança:</strong>{" "}
+                        {feeStatusLabels[getCurrentStatus(report)] ??
+                          getCurrentStatus(report)}
                       </p>
 
-                      <p>
-                        <strong>Multa:</strong>{" "}
-                        {formatCurrency(calculated.lateFeeAmount)}
-                      </p>
+                      {originType === "monthly" && (
+                        <>
+                          <p>
+                            <strong>Multa:</strong>{" "}
+                            {formatCurrency(monthlyCalculated.lateFeeAmount)}
+                          </p>
 
-                      <p>
-                        <strong>Juros:</strong>{" "}
-                        {formatCurrency(calculated.interestAmount)}
-                      </p>
+                          <p>
+                            <strong>Juros:</strong>{" "}
+                            {formatCurrency(monthlyCalculated.interestAmount)}
+                          </p>
 
-                      <p>
-                        <strong>Dias com encargos:</strong>{" "}
-                        {calculated.daysWithCharges}
-                      </p>
+                          <p>
+                            <strong>Dias com encargos:</strong>{" "}
+                            {monthlyCalculated.daysWithCharges}
+                          </p>
+                        </>
+                      )}
                     </div>
 
                     {report.reference && (
@@ -647,13 +799,16 @@ export default function DashboardPagamentosPage() {
                     <div className="mt-4 grid gap-3">
                       <label className="grid gap-2">
                         <span className="text-sm font-bold text-[#13233a]">
-                          Observação da Pagamentos informados
+                          Observação da Tesouraria
                         </span>
 
                         <textarea
                           rows={3}
                           value={forms[report.id]?.review_notes ?? ""}
-                          disabled={report.status !== "pendente" || processingId === report.id}
+                          disabled={
+                            report.status !== "pendente" ||
+                            processingId === report.id
+                          }
                           onChange={(event) =>
                             updateReviewNotes(report.id, event.target.value)
                           }
