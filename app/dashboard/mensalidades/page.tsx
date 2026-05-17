@@ -28,6 +28,8 @@ type MonthlyFee = {
   month: number;
   base_amount: number;
   due_date: string;
+  late_fee_percent: number;
+  daily_interest_percent: number;
   late_fee_amount: number;
   interest_amount: number;
   total_amount: number;
@@ -43,6 +45,14 @@ type MonthlyFee = {
     | {
         full_name: string;
         email: string | null;
+      }[]
+    | null;
+  financial_settings:
+    | {
+        late_fee_grace_days: number;
+      }
+    | {
+        late_fee_grace_days: number;
       }[]
     | null;
 };
@@ -107,6 +117,63 @@ function getAssociateEmail(fee: MonthlyFee) {
   }
 
   return fee.associates?.email || "";
+}
+
+
+function getGraceDays(fee: MonthlyFee) {
+  if (Array.isArray(fee.financial_settings)) {
+    return Number(fee.financial_settings[0]?.late_fee_grace_days ?? 0);
+  }
+
+  return Number(fee.financial_settings?.late_fee_grace_days ?? 0);
+}
+
+function calculateAmountDueAtDate(fee: MonthlyFee, paymentDateValue: string) {
+  const baseAmount = Number(fee.base_amount ?? 0);
+  const dueDate = new Date(fee.due_date + "T00:00:00");
+  const paymentDate = new Date(paymentDateValue + "T00:00:00");
+
+  if (Number.isNaN(dueDate.getTime()) || Number.isNaN(paymentDate.getTime())) {
+    return {
+      daysWithCharges: 0,
+      lateFeeAmount: 0,
+      interestAmount: 0,
+      totalDue: baseAmount,
+    };
+  }
+
+  const millisecondsPerDay = 1000 * 60 * 60 * 24;
+  const daysAfterDue = Math.floor(
+    (paymentDate.getTime() - dueDate.getTime()) / millisecondsPerDay
+  );
+
+  const graceDays = getGraceDays(fee);
+  const daysWithCharges = Math.max(daysAfterDue - graceDays, 0);
+
+  const lateFeeAmount =
+    daysWithCharges > 0
+      ? Number((baseAmount * (Number(fee.late_fee_percent ?? 0) / 100)).toFixed(2))
+      : 0;
+
+  const interestAmount =
+    daysWithCharges > 0
+      ? Number(
+          (
+            baseAmount *
+            (Number(fee.daily_interest_percent ?? 0) / 100) *
+            daysWithCharges
+          ).toFixed(2)
+        )
+      : 0;
+
+  const totalDue = Number((baseAmount + lateFeeAmount + interestAmount).toFixed(2));
+
+  return {
+    daysWithCharges,
+    lateFeeAmount,
+    interestAmount,
+    totalDue,
+  };
 }
 
 export default function DashboardMensalidadesPage() {
@@ -220,7 +287,7 @@ export default function DashboardMensalidadesPage() {
     const { data, error } = await supabase
       .from("monthly_fees")
       .select(
-        "id, associate_id, year, month, base_amount, due_date, late_fee_amount, interest_amount, total_amount, paid_amount, paid_at, status, notes, associates(full_name, email)"
+        "id, associate_id, year, month, base_amount, due_date, late_fee_percent, daily_interest_percent, late_fee_amount, interest_amount, total_amount, paid_amount, paid_at, status, notes, associates(full_name, email), financial_settings(late_fee_grace_days)"
       )
       .eq("year", Number(selectedYear))
       .eq("month", Number(selectedMonth))
@@ -344,13 +411,19 @@ export default function DashboardMensalidadesPage() {
     }
 
     const currentPaidAmount = Number(selectedFee.paid_amount ?? 0);
-    const totalAmount = Number(selectedFee.total_amount ?? 0);
+    const amountDueAtPaymentDate = calculateAmountDueAtDate(
+      selectedFee,
+      paymentForm.paid_at
+    );
+
+    const totalAmount = amountDueAtPaymentDate.totalDue;
     const newPaidAmount = Number((currentPaidAmount + amount).toFixed(2));
+    const remainingAmount = Number((totalAmount - currentPaidAmount).toFixed(2));
 
     if (newPaidAmount > totalAmount) {
       setMessage(
-        `O valor informado ultrapassa o saldo da mensalidade. Saldo atual: ${formatCurrency(
-          totalAmount - currentPaidAmount
+        `O valor informado ultrapassa o saldo devido na data efetiva do pagamento. Saldo nessa data: ${formatCurrency(
+          remainingAmount
         )}.`
       );
       return;
@@ -400,6 +473,9 @@ export default function DashboardMensalidadesPage() {
     const { error: feeError } = await supabase
       .from("monthly_fees")
       .update({
+        late_fee_amount: amountDueAtPaymentDate.lateFeeAmount,
+        interest_amount: amountDueAtPaymentDate.interestAmount,
+        total_amount: amountDueAtPaymentDate.totalDue,
         paid_amount: newPaidAmount,
         paid_at: paymentForm.paid_at,
         status: newStatus,
@@ -538,8 +614,10 @@ export default function DashboardMensalidadesPage() {
                 <p className="mt-2 text-sm font-bold text-[#596579]">
                   {getAssociateName(selectedFee)} · saldo{" "}
                   {formatCurrency(
-                    Number(selectedFee.total_amount ?? 0) -
-                      Number(selectedFee.paid_amount ?? 0)
+                    calculateAmountDueAtDate(
+                      selectedFee,
+                      paymentForm.paid_at
+                    ).totalDue - Number(selectedFee.paid_amount ?? 0)
                   )}
                 </p>
               </div>
@@ -570,7 +648,7 @@ export default function DashboardMensalidadesPage() {
               </label>
 
               <label className="grid gap-2">
-                <span className="text-sm font-bold text-[#596579]">Data</span>
+                <span className="text-sm font-bold text-[#596579]">Data efetiva do pagamento</span>
                 <input
                   type="date"
                   value={paymentForm.paid_at}
@@ -597,7 +675,7 @@ export default function DashboardMensalidadesPage() {
               </label>
 
               <label className="grid gap-2">
-                <span className="text-sm font-bold text-[#596579]">Referência</span>
+                <span className="text-sm font-bold text-[#596579]">Comprovante/Referência</span>
                 <input
                   type="text"
                   value={paymentForm.reference}
