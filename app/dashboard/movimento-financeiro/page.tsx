@@ -526,23 +526,23 @@ export default function DashboardMovimentoFinanceiroPage() {
 
   return (
     <ProtectedDashboard>
-      <div className="space-y-5">
-        <section className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10">
+      <div className="space-y-4">
+        <section className="rounded-2xl bg-[#13233a] p-5 text-white shadow-xl shadow-slate-900/10">
           <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
             Caixa
           </p>
 
-          <h1 className="mt-3 text-3xl font-black tracking-[-0.04em] md:text-4xl">
+          <h1 className="mt-2 text-2xl font-black tracking-[-0.04em]">
             Movimento Financeiro
           </h1>
 
-          <p className="mt-3 max-w-3xl leading-7 text-white/75">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
             Acompanhe entradas, saídas, saldo inicial e saldo final do período.
           </p>
         </section>
 
         {!cashBalance && (
-          <p className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-900">
+          <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm font-bold text-amber-900">
             Atenção: não há saldo inicial cadastrado para este mês. O saldo final será calculado considerando saldo inicial igual a R$ 0,00.{" "}
             <Link href="/dashboard/saldos-caixa" className="underline">
               Cadastrar saldo inicial
@@ -551,12 +551,12 @@ export default function DashboardMovimentoFinanceiroPage() {
         )}
 
         {cashBalance?.notes && (
-          <p className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
+          <p className="rounded-xl border border-[#e8dccb] bg-white px-3 py-2.5 text-sm font-bold text-[#596579]">
             Observação do saldo inicial: {cashBalance.notes}
           </p>
         )}
 
-        <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+        <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
           <div className="grid gap-4 md:grid-cols-3">
             <label className="grid gap-2">
               <span className="text-sm font-bold text-[#13233a]">
@@ -572,7 +572,7 @@ export default function DashboardMovimentoFinanceiroPage() {
                     month: event.target.value,
                   }))
                 }
-                className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
               />
             </label>
 
@@ -589,7 +589,7 @@ export default function DashboardMovimentoFinanceiroPage() {
                     origin: event.target.value,
                   }))
                 }
-                className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
               >
                 <option value="todos">Todas as movimentações</option>
                 <option value="monthly">Mensalidades</option>
@@ -603,7 +603,7 @@ export default function DashboardMovimentoFinanceiroPage() {
               <button
                 type="button"
                 onClick={loadMovements}
-                className="w-fit rounded-full border border-[#e8dccb] bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.08em] text-[#13233a]"
+                className="w-fit rounded-full border border-[#e8dccb] bg-white px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#13233a]"
               >
                 Atualizar
               </button>
@@ -611,13 +611,13 @@ export default function DashboardMovimentoFinanceiroPage() {
           </div>
         </section>
 
-        <section className="grid gap-5 md:grid-cols-4">
-          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+        <section className="grid gap-3 md:grid-cols-4">
+          <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">
               Saldo inicial
             </p>
 
-            <p className="mt-1 text-2xl font-black tracking-[-0.05em] text-[#13233a]">
+            <p className="mt-1 text-xl font-black tracking-[-0.04em] text-[#13233a]">
               {formatCurrency(summary.openingBalance)}
             </p>
 
@@ -626,12 +626,12 @@ export default function DashboardMovimentoFinanceiroPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-green-200 bg-green-50 p-4 shadow-sm">
+          <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.06em] text-green-800">
               Entradas
             </p>
 
-            <p className="mt-1 text-2xl font-black tracking-[-0.05em] text-green-800">
+            <p className="mt-1 text-xl font-black tracking-[-0.04em] text-green-800">
               {formatCurrency(summary.totalEntries)}
             </p>
 
@@ -640,12 +640,12 @@ export default function DashboardMovimentoFinanceiroPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.06em] text-red-800">
               Saídas
             </p>
 
-            <p className="mt-1 text-2xl font-black tracking-[-0.05em] text-red-800">
+            <p className="mt-1 text-xl font-black tracking-[-0.04em] text-red-800">
               {formatCurrency(summary.totalExits)}
             </p>
 
@@ -654,13 +654,13 @@ export default function DashboardMovimentoFinanceiroPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">
               Saldo final
             </p>
 
             <p
-              className={`mt-1 text-2xl font-black tracking-[-0.05em] ${
+              className={`mt-1 text-xl font-black tracking-[-0.04em] ${
                 summary.finalBalance < 0 ? "text-red-700" : "text-[#13233a]"
               }`}
             >
@@ -673,14 +673,14 @@ export default function DashboardMovimentoFinanceiroPage() {
           </div>
         </section>
 
-        <section className="grid gap-5 md:grid-cols-5">
-          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+        <section className="grid gap-3 md:grid-cols-5">
+          <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">
               Resultado do mês
             </p>
 
             <p
-              className={`mt-1 text-xl font-black tracking-[-0.05em] ${
+              className={`mt-1 text-lg font-black tracking-[-0.04em] ${
                 summary.periodBalance < 0 ? "text-red-700" : "text-[#13233a]"
               }`}
             >
@@ -692,12 +692,12 @@ export default function DashboardMovimentoFinanceiroPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">
               Mensalidades
             </p>
 
-            <p className="mt-1 text-xl font-black tracking-[-0.05em] text-[#13233a]">
+            <p className="mt-1 text-lg font-black tracking-[-0.04em] text-[#13233a]">
               {formatCurrency(summary.monthlyTotal)}
             </p>
 
@@ -706,12 +706,12 @@ export default function DashboardMovimentoFinanceiroPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">
               Contribuições extras
             </p>
 
-            <p className="mt-1 text-xl font-black tracking-[-0.05em] text-[#13233a]">
+            <p className="mt-1 text-lg font-black tracking-[-0.04em] text-[#13233a]">
               {formatCurrency(summary.extraTotal)}
             </p>
 
@@ -720,12 +720,12 @@ export default function DashboardMovimentoFinanceiroPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">
               Receitas avulsas
             </p>
 
-            <p className="mt-1 text-xl font-black tracking-[-0.05em] text-[#13233a]">
+            <p className="mt-1 text-lg font-black tracking-[-0.04em] text-[#13233a]">
               {formatCurrency(summary.otherTotal)}
             </p>
 
@@ -734,12 +734,12 @@ export default function DashboardMovimentoFinanceiroPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">
               Despesas pagas
             </p>
 
-            <p className="mt-1 text-xl font-black tracking-[-0.05em] text-red-700">
+            <p className="mt-1 text-lg font-black tracking-[-0.04em] text-red-700">
               {formatCurrency(summary.expenseTotal)}
             </p>
 
@@ -750,192 +750,124 @@ export default function DashboardMovimentoFinanceiroPage() {
         </section>
 
         <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
-          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
             <div>
-              <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
+              <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
                 Movimentações do período
               </h2>
 
-              <p className="mt-2 text-sm font-medium text-[#596579]">
-                Cada registro abaixo representa entrada ou saída efetivamente registrada no sistema.
+              <p className="text-xs font-bold text-[#596579]">
+                Entradas e saídas efetivamente registradas no sistema.
               </p>
             </div>
+
+            <p className="text-xs font-bold text-[#596579]">
+              {filteredMovements.length} registro(s)
+            </p>
           </div>
 
           {loading ? (
-            <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-4 text-sm font-bold text-[#596579]">
+            <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-3 text-sm font-bold text-[#596579]">
               Carregando movimento financeiro...
             </div>
           ) : message ? (
-            <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
               {message}
             </div>
           ) : filteredMovements.length === 0 ? (
-            <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-5">
-              <h3 className="text-xl font-black tracking-[-0.04em] text-[#13233a]">
+            <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-4">
+              <h3 className="text-base font-black tracking-[-0.03em] text-[#13233a]">
                 Nenhuma movimentação neste período
               </h3>
 
-              <p className="mt-2 leading-7 text-[#596579]">
+              <p className="mt-1 text-sm leading-6 text-[#596579]">
                 Não há entradas ou saídas confirmadas para o mês e origem selecionados.
               </p>
             </div>
           ) : (
-            <div className="mt-5 overflow-hidden rounded-3xl border border-[#e8dccb]">
-              <div className="hidden md:block">
-                <table className="w-full border-collapse bg-white text-left text-sm">
-                  <thead className="bg-[#f7f8fa] text-xs uppercase tracking-[0.08em] text-[#596579]">
-                    <tr>
-                      <th className="px-4 py-3">Data</th>
-                      <th className="px-4 py-3">Tipo</th>
-                      <th className="px-4 py-3">Origem</th>
-                      <th className="px-4 py-3">Descrição</th>
-                      <th className="px-4 py-3">Pessoa</th>
-                      <th className="px-4 py-3">Forma</th>
-                      <th className="px-4 py-3 text-right">Valor</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {filteredMovements.map((movement) => (
-                      <tr
-                        key={movement.id}
-                        className="border-t border-[#e8dccb] align-top"
-                      >
-                        <td className="px-4 py-3 font-bold text-[#13233a]">
-                          {formatDate(movement.date)}
-                        </td>
-
-                        <td className="px-4 py-3">
-                          <span
-                            className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] ${
-                              movement.direction === "saida"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-green-100 text-green-800"
-                            }`}
-                          >
-                            {getDirectionLabel(movement.direction)}
-                          </span>
-                        </td>
-
-                        <td className="px-4 py-3">
-                          <span className="rounded-full bg-[#f7f8fa] px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#13233a]">
-                            {movement.originBadge}
-                          </span>
-                        </td>
-
-                        <td className="px-4 py-3">
-                          <p className="font-black text-[#13233a]">
-                            {movement.title}
-                          </p>
-
-                          <p className="mt-1 text-xs font-bold text-[#596579]">
-                            Ref.: {movement.reference || "Não informado"}
-                          </p>
-
-                          {movement.notes && (
-                            <p className="mt-2 line-clamp-2 text-xs text-[#596579]">
-                              {movement.notes}
-                            </p>
-                          )}
-                        </td>
-
-                        <td className="px-4 py-3">
-                          <p className="font-bold text-[#13233a]">
-                            {movement.person}
-                          </p>
-
-                          {movement.personDetail && (
-                            <p className="mt-1 text-xs font-bold text-[#596579]">
-                              {movement.personDetail}
-                            </p>
-                          )}
-                        </td>
-
-                        <td className="px-4 py-3 font-bold text-[#596579]">
-                          {movement.payment_method
-                            ? paymentMethodLabels[movement.payment_method] ??
-                              movement.payment_method
-                            : "Não informado"}
-                        </td>
-
-                        <td
-                          className={`px-4 py-3 text-right font-black ${getAmountClass(
-                            movement.direction
-                          )}`}
-                        >
-                          {movement.direction === "saida" ? "- " : "+ "}
-                          {formatCurrency(movement.amount)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
+              <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#596579] md:grid">
+                <div className="col-span-1">Data</div>
+                <div className="col-span-2">Tipo/Origem</div>
+                <div className="col-span-3">Descrição</div>
+                <div className="col-span-2">Pessoa</div>
+                <div className="col-span-2">Forma/Referência</div>
+                <div className="col-span-2 text-right">Valor</div>
               </div>
 
-              <div className="grid gap-3 bg-white p-3 md:hidden">
+              <div className="divide-y divide-[#eee7db]">
                 {filteredMovements.map((movement) => (
                   <article
                     key={movement.id}
-                    className="rounded-2xl border border-[#e8dccb] p-4"
+                    className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-center"
                   >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span
-                        className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] ${
-                          movement.direction === "saida"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-green-100 text-green-800"
-                        }`}
-                      >
-                        {getDirectionLabel(movement.direction)}
-                      </span>
-
-                      <span className="rounded-full bg-[#f7f8fa] px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#13233a]">
-                        {movement.originBadge}
-                      </span>
-
-                      <span className="text-xs font-black uppercase tracking-[0.12em] text-[#c7a56b]">
-                        {formatDate(movement.date)}
-                      </span>
+                    <div className="font-bold text-[#13233a] md:col-span-1">
+                      {formatDate(movement.date)}
                     </div>
 
-                    <h3
-                      className={`mt-3 text-lg font-black tracking-[-0.04em] ${getAmountClass(
-                        movement.direction
-                      )}`}
-                    >
-                      {movement.direction === "saida" ? "- " : "+ "}
-                      {formatCurrency(movement.amount)}
-                    </h3>
+                    <div className="md:col-span-2">
+                      <div className="flex flex-wrap gap-1.5">
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] ${
+                            movement.direction === "saida"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-green-100 text-green-800"
+                          }`}
+                        >
+                          {getDirectionLabel(movement.direction)}
+                        </span>
 
-                    <p className="mt-1 text-sm font-bold text-[#13233a]">
-                      {movement.title}
-                    </p>
+                        <span className="rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                          {movement.originBadge}
+                        </span>
+                      </div>
+                    </div>
 
-                    <p className="mt-1 text-sm font-bold text-[#596579]">
-                      {movement.person}
-                    </p>
+                    <div className="md:col-span-3">
+                      <p className="font-black text-[#13233a]">
+                        {movement.title}
+                      </p>
 
-                    <div className="mt-3 grid gap-2 text-sm text-[#596579]">
+                      {movement.notes && (
+                        <p className="mt-1 line-clamp-2 text-xs font-bold leading-5 text-[#596579]">
+                          {movement.notes}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <p className="font-bold text-[#13233a]">
+                        {movement.person}
+                      </p>
+
+                      {movement.personDetail && (
+                        <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                          {movement.personDetail}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="font-bold text-[#596579] md:col-span-2">
                       <p>
-                        <strong>Forma:</strong>{" "}
                         {movement.payment_method
                           ? paymentMethodLabels[movement.payment_method] ??
                             movement.payment_method
                           : "Não informado"}
                       </p>
 
-                      <p>
-                        <strong>Referência:</strong>{" "}
-                        {movement.reference || "Não informado"}
+                      <p className="text-xs">
+                        Ref.: {movement.reference || "Não informada"}
                       </p>
                     </div>
 
-                    {movement.notes && (
-                      <p className="mt-3 whitespace-pre-line rounded-2xl bg-[#f7f8fa] p-3 text-sm leading-6 text-[#596579]">
-                        {movement.notes}
-                      </p>
-                    )}
+                    <div
+                      className={`font-black md:col-span-2 md:text-right ${getAmountClass(
+                        movement.direction
+                      )}`}
+                    >
+                      {movement.direction === "saida" ? "- " : "+ "}
+                      {formatCurrency(movement.amount)}
+                    </div>
                   </article>
                 ))}
               </div>

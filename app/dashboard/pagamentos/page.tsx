@@ -610,240 +610,240 @@ export default function DashboardPagamentosPage() {
 
   return (
     <ProtectedDashboard>
-      <div className="space-y-6">
-        <section className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10">
+      <div className="space-y-4">
+        <section className="rounded-2xl bg-[#13233a] p-5 text-white shadow-xl shadow-slate-900/10">
           <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
             Pagamentos informados
           </p>
 
-          <h1 className="mt-3 text-3xl font-black tracking-[-0.04em] md:text-4xl">
+          <h1 className="mt-2 text-2xl font-black tracking-[-0.04em]">
             Informes de Pagamento
           </h1>
 
-          <p className="mt-3 max-w-3xl leading-7 text-white/75">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
             Analise os informes enviados pelos associados e aprove somente após conferência da Tesouraria.
           </p>
         </section>
 
-        <section className="grid gap-5 md:grid-cols-2">
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+        <section className="grid gap-3 md:grid-cols-2">
+          <div className="rounded-xl border border-[#e8dccb] bg-white px-4 py-3 shadow-sm">
             <p className="text-sm font-bold text-[#596579]">Pendentes</p>
-            <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[#13233a]">
+            <p className="mt-2 text-lg font-black tracking-[-0.03em] text-[#13233a]">
               {summary.pending.length}
             </p>
           </div>
 
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+          <div className="rounded-xl border border-[#e8dccb] bg-white px-4 py-3 shadow-sm">
             <p className="text-sm font-bold text-[#596579]">Valor pendente</p>
-            <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[#13233a]">
+            <p className="mt-2 text-lg font-black tracking-[-0.03em] text-[#13233a]">
               {formatCurrency(summary.pendingAmount)}
             </p>
           </div>
         </section>
 
-        <p className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
+        <p className="rounded-xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
           Conferência: antes de aprovar, verifique extrato, comprovante, valor, data efetiva e referência.
         </p>
 
-        <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
             <div>
-              <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
+              <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
                 Informes recebidos
               </h2>
 
-              <p className="mt-2 text-sm font-medium text-[#596579]">
-                Os informes pendentes podem ser aprovados ou rejeitados pela Tesouraria.
+              <p className="text-xs font-bold text-[#596579]">
+                Analise os informes pendentes antes de aprovar a baixa no sistema.
               </p>
             </div>
 
             <button
               type="button"
               onClick={loadReports}
-              className="w-fit rounded-full border border-[#e8dccb] bg-white px-5 py-2 text-xs font-black uppercase tracking-[0.08em] text-[#13233a]"
+              className="w-fit rounded-full border border-[#e8dccb] bg-white px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#13233a] hover:bg-[#f7f8fa]"
             >
               Atualizar
             </button>
           </div>
 
           {loading ? (
-            <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-4 text-sm font-bold text-[#596579]">
+            <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-3 text-sm font-bold text-[#596579]">
               Carregando informes...
             </div>
           ) : message ? (
-            <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
               {message}
             </div>
           ) : reports.length === 0 ? (
-            <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-5">
-              <h3 className="text-xl font-black tracking-[-0.04em] text-[#13233a]">
+            <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-4">
+              <h3 className="text-base font-black tracking-[-0.03em] text-[#13233a]">
                 Nenhum informe pendente
               </h3>
 
-              <p className="mt-2 leading-7 text-[#596579]">
+              <p className="mt-1 text-sm leading-6 text-[#596579]">
                 Não há informes pendentes de análise no momento. Informes já aprovados ou rejeitados não ficam nesta tela de trabalho.
               </p>
             </div>
           ) : (
-            <div className="mt-5 grid gap-4">
-              {reports.map((report) => {
-                const associate = getAssociate(report);
-                const originType = getOriginType(report);
-                const monthlyCalculated = calculateMonthlyAmountDueAtDate(report);
-                const extraCalculated = calculateExtraAmountDue(report);
-                const amountDue =
-                  originType === "extra"
-                    ? extraCalculated.remaining
-                    : monthlyCalculated.remaining;
+            <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
+              <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#596579] lg:grid">
+                <div className="col-span-2">Associado</div>
+                <div className="col-span-2">Origem</div>
+                <div className="col-span-2">Pagamento</div>
+                <div className="col-span-2">Cobrança</div>
+                <div className="col-span-2">Conferência</div>
+                <div className="col-span-2 text-right">Ação</div>
+              </div>
 
-                return (
-                  <article
-                    key={report.id}
-                    className="rounded-3xl border border-[#e8dccb] p-5"
-                  >
-                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                      <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-xs font-black uppercase tracking-[0.2em] text-[#c7a56b]">
-                            {getOriginLabel(report)}
+              <div className="divide-y divide-[#eee7db]">
+                {reports.map((report) => {
+                  const associate = getAssociate(report);
+                  const originType = getOriginType(report);
+                  const monthlyCalculated = calculateMonthlyAmountDueAtDate(report);
+                  const extraCalculated = calculateExtraAmountDue(report);
+                  const amountDue =
+                    originType === "extra"
+                      ? extraCalculated.remaining
+                      : monthlyCalculated.remaining;
+
+                  return (
+                    <article
+                      key={report.id}
+                      className="grid gap-3 px-3 py-3 text-sm lg:grid-cols-12 lg:items-start"
+                    >
+                      <div className="lg:col-span-2">
+                        <p className="font-black text-[#13233a]">
+                          {associate?.full_name ?? "Associado não localizado"}
+                        </p>
+
+                        <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                          {associate?.email || "E-mail não informado"}
+                        </p>
+
+                        {associate?.phone && (
+                          <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                            {associate.phone}
                           </p>
+                        )}
+                      </div>
 
-                          <span className="rounded-full bg-[#f7f8fa] px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#13233a]">
+                      <div className="lg:col-span-2">
+                        <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[#b28743]">
+                          {getOriginLabel(report)}
+                        </p>
+
+                        <div className="mt-1 flex flex-wrap gap-1.5">
+                          <span className="rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
                             {getOriginBadge(report)}
                           </span>
+
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] ${getReportBadgeClass(report.status)}`}
+                          >
+                            {statusLabels[report.status] ?? report.status}
+                          </span>
                         </div>
+                      </div>
 
-                        <h3 className="mt-2 text-xl font-black tracking-[-0.04em] text-[#13233a]">
-                          {associate?.full_name ?? "Associado não localizado"}
-                        </h3>
+                      <div className="font-bold text-[#596579] lg:col-span-2">
+                        <p className="font-black text-[#13233a]">
+                          {formatCurrency(report.amount)}
+                        </p>
 
-                        <p className="mt-1 text-sm font-bold text-[#596579]">
-                          {associate?.email || "E-mail não informado"}
-                          {associate?.phone ? ` · ${associate.phone}` : ""}
+                        <p className="text-xs">
+                          Data: {formatDate(report.paid_at)}
+                        </p>
+
+                        <p className="text-xs">
+                          Forma:{" "}
+                          {paymentMethodLabels[report.payment_method] ??
+                            report.payment_method}
+                        </p>
+
+                        <p className="text-xs">
+                          Ref.: {report.reference || "Não informada"}
                         </p>
                       </div>
 
-                      <span
-                        className={`w-fit rounded-full px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] ${getReportBadgeClass(report.status)}`}
-                      >
-                        {statusLabels[report.status] ?? report.status}
-                      </span>
-                    </div>
+                      <div className="font-bold text-[#596579] lg:col-span-2">
+                        <p>Venc.: {formatDate(getDueDate(report))}</p>
 
-                    <div className="mt-4 grid gap-3 text-sm text-[#596579] md:grid-cols-3">
-                      <p>
-                        <strong>Valor informado:</strong>{" "}
-                        {formatCurrency(report.amount)}
-                      </p>
+                        <p className="text-xs">
+                          Devido: {formatCurrency(amountDue)}
+                        </p>
 
-                      <p>
-                        <strong>Data informada:</strong>{" "}
-                        {formatDate(report.paid_at)}
-                      </p>
+                        <p className="text-xs">
+                          Status:{" "}
+                          {feeStatusLabels[getCurrentStatus(report)] ??
+                            getCurrentStatus(report)}
+                        </p>
 
-                      <p>
-                        <strong>Forma:</strong>{" "}
-                        {paymentMethodLabels[report.payment_method] ??
-                          report.payment_method}
-                      </p>
-
-                      <p>
-                        <strong>Vencimento:</strong>{" "}
-                        {formatDate(getDueDate(report))}
-                      </p>
-
-                      <p>
-                        <strong>Valor devido na data:</strong>{" "}
-                        {formatCurrency(amountDue)}
-                      </p>
-
-                      <p>
-                        <strong>Status da cobrança:</strong>{" "}
-                        {feeStatusLabels[getCurrentStatus(report)] ??
-                          getCurrentStatus(report)}
-                      </p>
-
-                      {originType === "monthly" && (
-                        <>
-                          <p>
-                            <strong>Multa:</strong>{" "}
-                            {formatCurrency(monthlyCalculated.lateFeeAmount)}
-                          </p>
-
-                          <p>
-                            <strong>Juros:</strong>{" "}
-                            {formatCurrency(monthlyCalculated.interestAmount)}
-                          </p>
-
-                          <p>
-                            <strong>Dias com encargos:</strong>{" "}
+                        {originType === "monthly" && (
+                          <p className="text-xs">
+                            Multa: {formatCurrency(monthlyCalculated.lateFeeAmount)} · Juros:{" "}
+                            {formatCurrency(monthlyCalculated.interestAmount)} · Dias:{" "}
                             {monthlyCalculated.daysWithCharges}
                           </p>
-                        </>
-                      )}
-                    </div>
+                        )}
+                      </div>
 
-                    {report.reference && (
-                      <p className="mt-4 rounded-2xl bg-[#f7f8fa] p-3 text-sm text-[#596579]">
-                        <strong>Comprovante/Referência:</strong>{" "}
-                        {report.reference}
-                      </p>
-                    )}
+                      <div className="space-y-2 lg:col-span-2">
+                        {report.notes && (
+                          <p className="rounded-lg bg-[#f7f8fa] px-3 py-2 text-xs font-bold leading-5 text-[#596579]">
+                            Associado: {report.notes}
+                          </p>
+                        )}
 
-                    {report.notes && (
-                      <p className="mt-3 rounded-2xl bg-[#f7f8fa] p-3 text-sm text-[#596579]">
-                        <strong>Observação do associado:</strong> {report.notes}
-                      </p>
-                    )}
+                        <label className="grid gap-1">
+                          <span className="text-xs font-black text-[#13233a]">
+                            Observação da Tesouraria
+                          </span>
 
-                    <div className="mt-4 grid gap-3">
-                      <label className="grid gap-2">
-                        <span className="text-sm font-bold text-[#13233a]">
-                          Observação da Tesouraria
-                        </span>
+                          <textarea
+                            rows={3}
+                            value={forms[report.id]?.review_notes ?? ""}
+                            disabled={
+                              report.status !== "pendente" ||
+                              processingId === report.id
+                            }
+                            onChange={(event) =>
+                              updateReviewNotes(report.id, event.target.value)
+                            }
+                            placeholder="Anotação ou motivo da rejeição."
+                            className="w-full resize-none rounded-xl border border-[#e8dccb] px-3 py-2 text-xs font-bold text-[#13233a] outline-none disabled:bg-slate-50"
+                          />
+                        </label>
+                      </div>
 
-                        <textarea
-                          rows={3}
-                          value={forms[report.id]?.review_notes ?? ""}
-                          disabled={
-                            report.status !== "pendente" ||
-                            processingId === report.id
-                          }
-                          onChange={(event) =>
-                            updateReviewNotes(report.id, event.target.value)
-                          }
-                          placeholder="Informe observação, motivo da rejeição ou anotação da conferência."
-                          className="w-full resize-none rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none disabled:bg-slate-50"
-                        />
-                      </label>
+                      <div className="flex flex-wrap gap-2 lg:col-span-2 lg:justify-end">
+                        {report.status === "pendente" && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => approveReport(report)}
+                              disabled={processingId === report.id}
+                              className="rounded-full border border-green-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              {processingId === report.id
+                                ? "Processando..."
+                                : "Aprovar"}
+                            </button>
 
-                      {report.status === "pendente" && (
-                        <div className="flex flex-col gap-3 md:flex-row">
-                          <button
-                            type="button"
-                            onClick={() => approveReport(report)}
-                            disabled={processingId === report.id}
-                            className="rounded-full bg-green-700 px-5 py-2.5 text-xs font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            {processingId === report.id
-                              ? "Processando..."
-                              : "Aprovar e dar baixa"}
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => rejectReport(report)}
-                            disabled={processingId === report.id}
-                            className="rounded-full bg-red-700 px-5 py-2.5 text-xs font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            Rejeitar
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
+                            <button
+                              type="button"
+                              onClick={() => rejectReport(report)}
+                              disabled={processingId === report.id}
+                              className="rounded-full border border-red-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              Rejeitar
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
             </div>
           )}
         </section>
