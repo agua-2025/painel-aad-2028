@@ -21,6 +21,8 @@ const menuItems = [
   { label: "Contribuições Extras", href: "/dashboard/contribuicoes-extras", icon: "➕" },
   { label: "Informes de Pagamento", href: "/dashboard/pagamentos", icon: "💳" },
   { label: "Inadimplência", href: "/dashboard/inadimplencia", icon: "⚠️" },
+  { label: "Movimento Financeiro", href: "/dashboard/movimento-financeiro", icon: "📒" },
+  { label: "Receitas Avulsas", href: "/dashboard/receitas-avulsas", icon: "➕" },
   { label: "Relatórios", href: "/dashboard/relatorios", icon: "📊" },
   { label: "Configurações", href: "/dashboard/configuracoes", icon: "⚙️" },
 ];
