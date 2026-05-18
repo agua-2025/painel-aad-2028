@@ -296,39 +296,39 @@ export default function DashboardReceitasAvulsasPage() {
 
   return (
     <ProtectedDashboard>
-      <div className="space-y-6">
-        <section className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10">
+      <div className="space-y-4">
+        <section className="rounded-2xl bg-[#13233a] p-5 text-white shadow-xl shadow-slate-900/10">
           <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
             Entradas financeiras
           </p>
 
-          <h1 className="mt-3 text-3xl font-black tracking-[-0.04em] md:text-4xl">
+          <h1 className="mt-3 text-lg font-black tracking-[-0.03em]">
             Receitas Avulsas
           </h1>
 
-          <p className="mt-3 max-w-3xl leading-7 text-white/75">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
             Registre entradas que não sejam mensalidades nem contribuições extras, como doações, patrocínios, rifas, vendas, eventos e outros recebimentos.
           </p>
         </section>
 
-        <p className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
+        <p className="rounded-xl border border-[#e8dccb] bg-white px-3 py-2.5 text-sm font-bold text-[#596579]">
           Use esta tela somente para receitas sem cobrança vinculada. Mensalidades e contribuições extras devem continuar sendo baixadas nos módulos próprios.
         </p>
 
         {successMessage && (
-          <section className="rounded-3xl border border-green-200 bg-green-50 p-5 shadow-sm">
+          <section className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 shadow-sm">
             <p className="font-bold text-green-800">{successMessage}</p>
           </section>
         )}
 
         {message && (
-          <section className="rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm">
+          <section className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 shadow-sm">
             <p className="font-bold text-red-700">{message}</p>
           </section>
         )}
 
-        <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-          <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
+        <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+          <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
             Nova receita avulsa
           </h2>
 
@@ -348,7 +348,7 @@ export default function DashboardReceitasAvulsasPage() {
                       received_at: event.target.value,
                     }))
                   }
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                 />
               </label>
 
@@ -369,7 +369,7 @@ export default function DashboardReceitasAvulsasPage() {
                     }))
                   }
                   placeholder="0,00"
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                 />
               </label>
 
@@ -386,7 +386,7 @@ export default function DashboardReceitasAvulsasPage() {
                       category: event.target.value,
                     }))
                   }
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                 >
                   {categoryOptions.map((category) => (
                     <option key={category.value} value={category.value}>
@@ -409,7 +409,7 @@ export default function DashboardReceitasAvulsasPage() {
                       payment_method: event.target.value,
                     }))
                   }
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                 >
                   {paymentMethodOptions.map((method) => (
                     <option key={method.value} value={method.value}>
@@ -436,7 +436,7 @@ export default function DashboardReceitasAvulsasPage() {
                     }))
                   }
                   placeholder="Ex.: João da Silva, Comércio X ou não identificado"
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                 />
               </label>
 
@@ -455,7 +455,7 @@ export default function DashboardReceitasAvulsasPage() {
                     }))
                   }
                   placeholder="Ex.: ID do Pix, extrato, recibo, comprovante"
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                 />
               </label>
             </div>
@@ -475,7 +475,7 @@ export default function DashboardReceitasAvulsasPage() {
                   }))
                 }
                 placeholder="Ex.: Doação espontânea para a Associação"
-                className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
               />
             </label>
 
@@ -494,14 +494,14 @@ export default function DashboardReceitasAvulsasPage() {
                   }))
                 }
                 placeholder="Informações adicionais sobre a receita."
-                className="w-full resize-none rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                className="w-full resize-none rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
               />
             </label>
 
             <button
               type="submit"
               disabled={saving}
-              className="w-fit rounded-full bg-[#13233a] px-6 py-3 text-sm font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-fit rounded-full bg-[#13233a] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? "Salvando..." : "Registrar receita"}
             </button>
@@ -509,12 +509,12 @@ export default function DashboardReceitasAvulsasPage() {
         </section>
 
         <section className="grid gap-5 md:grid-cols-3">
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm md:col-span-2">
+          <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm md:col-span-2">
             <p className="text-sm font-bold text-[#596579]">
               Total confirmado no período
             </p>
 
-            <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[#13233a]">
+            <p className="mt-2 text-2xl font-black tracking-[-0.04em] text-[#13233a]">
               {formatCurrency(summary.total)}
             </p>
 
@@ -523,18 +523,18 @@ export default function DashboardReceitasAvulsasPage() {
             </p>
           </div>
 
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+          <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <p className="text-sm font-bold text-[#596579]">
               Canceladas no período
             </p>
 
-            <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[#13233a]">
+            <p className="mt-2 text-2xl font-black tracking-[-0.04em] text-[#13233a]">
               {summary.canceledCount}
             </p>
           </div>
         </section>
 
-        <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+        <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
           <div className="grid gap-4 md:grid-cols-3">
             <label className="grid gap-2">
               <span className="text-sm font-bold text-[#13233a]">
@@ -550,7 +550,7 @@ export default function DashboardReceitasAvulsasPage() {
                     month: event.target.value,
                   }))
                 }
-                className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
               />
             </label>
 
@@ -567,7 +567,7 @@ export default function DashboardReceitasAvulsasPage() {
                     category: event.target.value,
                   }))
                 }
-                className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
               >
                 <option value="todas">Todas as categorias</option>
                 {categoryOptions.map((category) => (
@@ -590,96 +590,114 @@ export default function DashboardReceitasAvulsasPage() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-          <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
-            Receitas registradas
-          </h2>
+        <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
+                Receitas registradas
+              </h2>
+
+              <p className="text-xs font-bold text-[#596579]">
+                Entradas avulsas filtradas por mês e categoria.
+              </p>
+            </div>
+
+            <p className="text-xs font-bold text-[#596579]">
+              {filteredRevenues.length} registro(s)
+            </p>
+          </div>
 
           {loading ? (
-            <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-4 text-sm font-bold text-[#596579]">
+            <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-3 text-sm font-bold text-[#596579]">
               Carregando receitas avulsas...
             </div>
           ) : filteredRevenues.length === 0 ? (
-            <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-5">
-              <h3 className="text-xl font-black tracking-[-0.04em] text-[#13233a]">
+            <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-4">
+              <h3 className="text-base font-black tracking-[-0.03em] text-[#13233a]">
                 Nenhuma receita avulsa encontrada
               </h3>
 
-              <p className="mt-2 leading-7 text-[#596579]">
+              <p className="mt-1 text-sm leading-6 text-[#596579]">
                 Não há receitas avulsas para o mês e categoria selecionados.
               </p>
             </div>
           ) : (
-            <div className="mt-5 grid gap-3">
-              {filteredRevenues.map((revenue) => (
-                <article
-                  key={revenue.id}
-                  className="rounded-3xl border border-[#e8dccb] p-4"
-                >
-                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-xs font-black uppercase tracking-[0.2em] text-[#c7a56b]">
-                          {categoryLabels[revenue.category] ?? revenue.category}
-                        </p>
+            <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
+              <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#596579] md:grid">
+                <div className="col-span-2">Categoria</div>
+                <div className="col-span-3">Descrição</div>
+                <div className="col-span-2">Pagador</div>
+                <div className="col-span-2">Data/Forma</div>
+                <div className="col-span-2 text-right">Valor</div>
+                <div className="col-span-1 text-right">Ação</div>
+              </div>
 
-                        <span className="rounded-full bg-[#f7f8fa] px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#13233a]">
-                          {statusLabels[revenue.status] ?? revenue.status}
-                        </span>
-                      </div>
-
-                      <h3 className="mt-2 text-xl font-black tracking-[-0.04em] text-[#13233a]">
-                        {formatCurrency(revenue.amount)}
-                      </h3>
-
-                      <p className="mt-1 text-sm font-bold text-[#596579]">
-                        {revenue.description}
+              <div className="divide-y divide-[#eee7db]">
+                {filteredRevenues.map((revenue) => (
+                  <article
+                    key={revenue.id}
+                    className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-center"
+                  >
+                    <div className="md:col-span-2">
+                      <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[#b28743]">
+                        {categoryLabels[revenue.category] ?? revenue.category}
                       </p>
+
+                      <span className="mt-1 inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                        {statusLabels[revenue.status] ?? revenue.status}
+                      </span>
                     </div>
 
-                    <div className="text-left lg:text-right">
-                      <p className="text-sm font-black text-[#13233a]">
-                        {formatDate(revenue.received_at)}
+                    <div className="md:col-span-3">
+                      <p className="font-black text-[#13233a]">
+                        {revenue.description}
                       </p>
 
-                      <p className="mt-1 text-sm font-bold text-[#596579]">
+                      <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                        Ref.: {revenue.reference || "Não informada"}
+                      </p>
+
+                      {revenue.notes && (
+                        <p className="mt-1 line-clamp-2 text-xs font-bold leading-5 text-[#596579]">
+                          {revenue.notes}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="font-bold text-[#596579] md:col-span-2">
+                      {revenue.payer_name || "Não informado"}
+                    </div>
+
+                    <div className="font-bold text-[#596579] md:col-span-2">
+                      <p>{formatDate(revenue.received_at)}</p>
+                      <p className="text-xs">
                         {paymentMethodLabels[revenue.payment_method] ??
                           revenue.payment_method}
                       </p>
                     </div>
-                  </div>
 
-                  <div className="mt-3 grid gap-2 text-sm text-[#596579] md:grid-cols-2">
-                    <p>
-                      <strong>Pagador/contribuinte:</strong>{" "}
-                      {revenue.payer_name || "Não informado"}
-                    </p>
-
-                    <p>
-                      <strong>Referência:</strong>{" "}
-                      {revenue.reference || "Não informado"}
-                    </p>
-                  </div>
-
-                  {revenue.notes && (
-                    <p className="mt-3 whitespace-pre-line rounded-2xl bg-[#f7f8fa] p-3 text-sm leading-6 text-[#596579]">
-                      {revenue.notes}
-                    </p>
-                  )}
-
-                  {revenue.status === "confirmada" && (
-                    <div className="mt-4">
-                      <button
-                        type="button"
-                        onClick={() => cancelRevenue(revenue)}
-                        className="rounded-full bg-red-700 px-5 py-2.5 text-xs font-black uppercase tracking-[0.08em] text-white"
-                      >
-                        Cancelar receita
-                      </button>
+                    <div className="font-black text-[#13233a] md:col-span-2 md:text-right">
+                      {formatCurrency(revenue.amount)}
                     </div>
-                  )}
-                </article>
-              ))}
+
+                    <div className="md:col-span-1 md:text-right">
+                      {revenue.status === "confirmada" ? (
+                        <button
+                          type="button"
+                          onClick={() => cancelRevenue(revenue)}
+                          className="rounded-full border border-red-200 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.06em] text-red-700 hover:bg-red-50"
+                        >
+                          Cancelar
+                        </button>
+                      ) : (
+                        <span className="text-xs font-bold text-[#596579]">
+                          —
+                        </span>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
             </div>
           )}
         </section>

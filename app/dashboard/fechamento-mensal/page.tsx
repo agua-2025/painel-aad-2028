@@ -47,6 +47,7 @@ type MonthlyClosing = {
   notes: string | null;
   closed_at: string;
   reopened_at: string | null;
+  reopen_reason: string | null;
 };
 
 const monthNames = [
@@ -135,7 +136,7 @@ function getConciliationInfo(difference: number | null) {
 
   if (difference > 0) {
     return {
-      title: "O banco está com valor maior que o sistema.",
+      title: "O saldo do banco está maior que o saldo calculado pelo sistema.",
       description:
         "Verifique se faltou lançar alguma entrada, se alguma despesa foi lançada em duplicidade, se houve despesa lançada a maior ou se o saldo inicial está incorreto.",
       status: "warning",
@@ -143,7 +144,7 @@ function getConciliationInfo(difference: number | null) {
   }
 
   return {
-    title: "O sistema está com valor maior que o banco.",
+    title: "O saldo calculado pelo sistema está maior que o saldo do banco.",
     description:
       "Verifique se faltou lançar alguma despesa, tarifa bancária ou saída, se alguma receita foi lançada a maior ou se o saldo inicial está incorreto.",
     status: "danger",
@@ -317,7 +318,7 @@ export default function DashboardFechamentoMensalPage() {
     const { data: closingsData, error: closingsError } = await supabase
       .from("monthly_closings")
       .select(
-        "id, month_ref, status, opening_balance, total_entries, total_exits, period_result, final_balance, bank_balance, difference_amount, checked_with_bank_statement, has_pending_receipts, notes, closed_at, reopened_at"
+        "id, month_ref, status, opening_balance, total_entries, total_exits, period_result, final_balance, bank_balance, difference_amount, checked_with_bank_statement, has_pending_receipts, notes, closed_at, reopened_at, reopen_reason"
       )
       .order("month_ref", { ascending: false });
 
@@ -415,6 +416,7 @@ export default function DashboardFechamentoMensalPage() {
       closed_at: new Date().toISOString(),
       reopened_by: null,
       reopened_at: null,
+      reopen_reason: null,
       updated_at: new Date().toISOString(),
     };
 
@@ -439,8 +441,21 @@ export default function DashboardFechamentoMensalPage() {
 
     if (!selectedClosing) return;
 
+    const reason = window.prompt(
+      "Informe o motivo da reabertura do mês. Ex.: corrigir receita lançada incorretamente, incluir tarifa bancária, corrigir despesa duplicada etc."
+    );
+
+    if (reason === null) return;
+
+    const trimmedReason = reason.trim();
+
+    if (trimmedReason.length < 10) {
+      setMessage("Informe uma justificativa mais detalhada para reabrir o mês.");
+      return;
+    }
+
     const confirmed = window.confirm(
-      "Deseja reabrir este mês? O fechamento ficará registrado como reaberto."
+      "Confirma a reabertura deste mês? Após reabrir, lançamentos financeiros do mês poderão ser alterados e o mês deverá ser fechado novamente."
     );
 
     if (!confirmed) return;
@@ -456,6 +471,7 @@ export default function DashboardFechamentoMensalPage() {
         status: "reaberto",
         reopened_by: profileId,
         reopened_at: new Date().toISOString(),
+        reopen_reason: trimmedReason,
         updated_at: new Date().toISOString(),
       })
       .eq("id", selectedClosing.id);
@@ -466,7 +482,7 @@ export default function DashboardFechamentoMensalPage() {
       return;
     }
 
-    setSuccess("Mês reaberto com sucesso.");
+    setSuccess("Mês reaberto com justificativa registrada.");
     setSaving(false);
     await loadData();
   }
@@ -543,6 +559,22 @@ export default function DashboardFechamentoMensalPage() {
           <section className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 shadow-sm">
             <p className="text-sm font-bold text-amber-900">
               Cadastre o saldo inicial deste mês em “Saldos do Caixa” antes de fazer o fechamento.
+            </p>
+          </section>
+        )}
+
+        {selectedClosing?.status === "reaberto" && (
+          <section className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 shadow-sm">
+            <p className="text-sm font-black text-amber-900">
+              Este mês está reaberto para correção.
+            </p>
+
+            <p className="mt-1 text-xs font-bold leading-5 text-amber-900">
+              Motivo: {selectedClosing.reopen_reason || "Motivo não informado."}
+            </p>
+
+            <p className="mt-1 text-xs font-bold leading-5 text-amber-900">
+              Após concluir os ajustes, faça novo fechamento e confira se o saldo final alterou o saldo inicial dos meses seguintes.
             </p>
           </section>
         )}
@@ -641,8 +673,10 @@ export default function DashboardFechamentoMensalPage() {
           </h2>
 
           <p className="mt-1 text-sm leading-6 text-[#596579]">
-            Informe o saldo final do extrato bancário. O sistema calcula automaticamente a diferença entre o banco e o saldo apurado no painel.
+            Informe o saldo final do extrato bancário. O sistema calcula automaticamente se o saldo do banco confere com o saldo apurado no painel.
           </p>
+
+
 
           {summary.finalBalance < 0 && (
             <p className="mt-3 rounded-xl border border-[#f1d4d4] bg-[#fffafa] px-3 py-2 text-xs font-bold leading-5 text-[#8b1e1e]">
