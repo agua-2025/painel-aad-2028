@@ -116,10 +116,10 @@ export function DashboardLayout({
       </header>
 
       <div className="mx-auto grid min-h-screen max-w-[1600px] lg:grid-cols-[260px_1fr]">
-        <aside className="sticky top-0 hidden h-screen flex-col border-r border-[#e8dccb] bg-white px-4 py-4 lg:flex">
+        <aside className="sticky top-0 hidden h-screen flex-col overflow-hidden border-r border-[#e8dccb] bg-white px-4 py-4 lg:flex">
           <Link
             href="/dashboard"
-            className="flex items-center gap-3 rounded-3xl bg-[#f7f8fa] px-3 py-3"
+            className="flex shrink-0 items-center gap-3 rounded-3xl bg-[#f7f8fa] px-3 py-3"
           >
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#13233a] text-xs font-black text-[#c7a56b]">
               AAD
@@ -135,20 +135,20 @@ export function DashboardLayout({
             </div>
           </Link>
 
-          <nav className="mt-5 grid gap-1.5">
+          <nav className="mt-4 flex-1 space-y-1 overflow-y-auto pr-1 pb-3">
             {menuItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[15px] font-bold text-[#596579] transition hover:bg-[#f7f8fa] hover:text-[#13233a]"
+                className="flex items-center gap-3 rounded-2xl px-3 py-2 text-[14px] font-bold text-[#596579] transition hover:bg-[#f7f8fa] hover:text-[#13233a]"
               >
-                <span className="w-5 text-center text-base">{item.icon}</span>
+                <span className="w-5 text-center text-sm">{item.icon}</span>
                 <span>{item.label}</span>
               </Link>
             ))}
           </nav>
 
-          <div className="mt-auto rounded-3xl border border-[#e8dccb] bg-[#f7f8fa] p-3">
+          <div className="shrink-0 rounded-3xl border border-[#e8dccb] bg-[#f7f8fa] p-3">
             <p className="text-sm font-black text-[#13233a]">
               {userName || "Usuário"}
             </p>
