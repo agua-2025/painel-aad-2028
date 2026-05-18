@@ -299,31 +299,31 @@ export default function AreaPagamentosPage() {
 
   return (
     <ProtectedArea>
-      <div className="space-y-6">
-        <section className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10">
+      <div className="space-y-4">
+        <section className="rounded-2xl bg-[#13233a] p-5 text-white shadow-xl shadow-slate-900/10">
           <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
             Minha área
           </p>
 
-          <h1 className="mt-3 text-3xl font-black tracking-[-0.04em] md:text-4xl">
+          <h1 className="mt-2 text-2xl font-black tracking-[-0.04em]">
             Pagamentos
           </h1>
 
-          <p className="mt-3 max-w-3xl leading-7 text-white/75">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
             Consulte o histórico de pagamentos baixados pela Tesouraria da AAD Direito 2028.
           </p>
         </section>
 
         {loading ? (
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <p className="font-bold text-[#596579]">Carregando pagamentos...</p>
           </div>
         ) : message ? (
-          <div className="rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm">
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
             <p className="font-bold text-red-700">{message}</p>
           </div>
         ) : !associate ? (
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <h2 className="text-xl font-black text-[#13233a]">
               Histórico de pagamentos indisponível
             </h2>
@@ -334,10 +334,10 @@ export default function AreaPagamentosPage() {
           </div>
         ) : (
           <>
-            <section className="grid gap-5 md:grid-cols-4">
-              <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm md:col-span-2">
+            <section className="grid gap-3 md:grid-cols-4">
+              <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm md:col-span-2">
                 <p className="text-sm font-bold text-[#596579]">Associado</p>
-                <p className="mt-2 text-2xl font-black tracking-[-0.05em] text-[#13233a]">
+                <p className="mt-2 text-base font-black tracking-[-0.03em] text-[#13233a]">
                   {associate.full_name}
                 </p>
                 <p className="mt-2 text-sm font-bold text-[#596579]">
@@ -345,131 +345,151 @@ export default function AreaPagamentosPage() {
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+              <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
                 <p className="text-sm font-bold text-[#596579]">Mensalidades</p>
-                <p className="mt-2 text-2xl font-black tracking-[-0.05em] text-[#13233a]">
+                <p className="mt-2 text-base font-black tracking-[-0.03em] text-[#13233a]">
                   {formatCurrency(summary.monthlyTotal)}
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+              <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
                 <p className="text-sm font-bold text-[#596579]">
                   Contribuições extras
                 </p>
-                <p className="mt-2 text-2xl font-black tracking-[-0.05em] text-[#13233a]">
+                <p className="mt-2 text-base font-black tracking-[-0.03em] text-[#13233a]">
                   {formatCurrency(summary.extraTotal)}
                 </p>
               </div>
             </section>
 
-            <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-              <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+              <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
+                  <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
                     Histórico de pagamentos
                   </h2>
 
-                  <p className="mt-2 text-sm font-medium text-[#596579]">
-                    Os registros abaixo correspondem aos pagamentos lançados pela Tesouraria.
+                  <p className="text-xs font-bold text-[#596579]">
+                    Pagamentos lançados pela Tesouraria em seu nome.
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-[#f7f8fa] px-4 py-3">
-                  <p className="text-sm font-bold text-[#596579]">Total pago</p>
-                  <p className="text-xl font-black text-[#13233a]">
+                <div className="rounded-xl bg-[#f7f8fa] px-4 py-2.5">
+                  <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[#596579]">
+                    Total pago
+                  </p>
+
+                  <p className="text-lg font-black text-[#13233a]">
                     {formatCurrency(summary.totalPaid)}
                   </p>
                 </div>
               </div>
 
               {payments.length === 0 ? (
-                <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-5">
-                  <h3 className="text-xl font-black tracking-[-0.04em] text-[#13233a]">
+                <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-4">
+                  <h3 className="text-base font-black tracking-[-0.03em] text-[#13233a]">
                     Nenhum pagamento registrado
                   </h3>
 
-                  <p className="mt-2 leading-7 text-[#596579]">
+                  <p className="mt-1 text-sm leading-6 text-[#596579]">
                     Quando a Tesouraria registrar pagamentos em seu nome, eles aparecerão nesta página.
                   </p>
                 </div>
               ) : (
-                <div className="mt-5 grid gap-3">
-                  {payments.map((payment) => {
-                    const originType = getPaymentOriginType(payment);
-                    const dueDate = getDueDate(payment);
-                    const chargeStatus = getChargeStatus(payment);
-                    const chargeAmount = getChargeAmount(payment);
+                <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
+                  <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#596579] md:grid">
+                    <div className="col-span-3">Referência</div>
+                    <div className="col-span-2">Data/Forma</div>
+                    <div className="col-span-2 text-right">Valor pago</div>
+                    <div className="col-span-2 text-right">Cobrança</div>
+                    <div className="col-span-1 text-center">Status</div>
+                    <div className="col-span-2">Comprovante/Obs.</div>
+                  </div>
 
-                    return (
-                      <article
-                        key={payment.id}
-                        className="rounded-3xl border border-[#e8dccb] p-4"
-                      >
-                        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                          <div>
-                            <div className="flex flex-wrap items-center gap-2">
-                              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#c7a56b]">
-                                {getReferenceLabel(payment)}
-                              </p>
+                  <div className="divide-y divide-[#eee7db]">
+                    {payments.map((payment) => {
+                      const originType = getPaymentOriginType(payment);
+                      const dueDate = getDueDate(payment);
+                      const chargeStatus = getChargeStatus(payment);
+                      const chargeAmount = getChargeAmount(payment);
 
-                              <span className="rounded-full bg-[#f7f8fa] px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#13233a]">
+                      return (
+                        <article
+                          key={payment.id}
+                          className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-start"
+                        >
+                          <div className="md:col-span-3">
+                            <p className="font-black text-[#13233a]">
+                              {getReferenceLabel(payment)}
+                            </p>
+
+                            <div className="mt-1 flex flex-wrap gap-1.5">
+                              <span className="rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
                                 {getOriginBadge(payment)}
                               </span>
+
+                              {originType === "extra" && (
+                                <span className="rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                                  Rateio
+                                </span>
+                              )}
                             </div>
+                          </div>
 
-                            <h3 className="mt-2 text-xl font-black tracking-[-0.04em] text-[#13233a]">
-                              {formatCurrency(payment.amount)}
-                            </h3>
+                          <div className="font-bold text-[#596579] md:col-span-2">
+                            <p>{formatDate(payment.paid_at)}</p>
 
-                            <p className="mt-1 text-sm font-bold text-[#596579]">
-                              Pago em {formatDate(payment.paid_at)}
+                            <p className="text-xs">
+                              {paymentMethodLabels[payment.payment_method] ??
+                                payment.payment_method}
                             </p>
                           </div>
 
-                          {chargeStatus && (
-                            <span className="w-fit rounded-full bg-[#f7f8fa] px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-[#13233a]">
-                              {statusLabels[chargeStatus] ?? chargeStatus}
-                            </span>
-                          )}
-                        </div>
+                          <div className="font-black text-[#13233a] md:col-span-2 md:text-right">
+                            {formatCurrency(payment.amount)}
+                          </div>
 
-                        <div className="mt-3 grid gap-2 text-sm text-[#596579] md:grid-cols-2">
-                          <p>
-                            <strong>Forma de pagamento:</strong>{" "}
-                            {paymentMethodLabels[payment.payment_method] ??
-                              payment.payment_method}
-                          </p>
+                          <div className="font-bold text-[#596579] md:col-span-2 md:text-right">
+                            <p>{formatCurrency(chargeAmount)}</p>
 
-                          <p>
-                            <strong>Comprovante/Referência:</strong>{" "}
-                            {payment.reference || "Não informado"}
-                          </p>
+                            <p className="text-xs">
+                              Venc.: {formatDate(dueDate)}
+                            </p>
+                          </div>
 
-                          <p>
-                            <strong>Vencimento da cobrança:</strong>{" "}
-                            {formatDate(dueDate)}
-                          </p>
+                          <div className="md:col-span-1 md:text-center">
+                            {chargeStatus ? (
+                              <span className="inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                                {statusLabels[chargeStatus] ?? chargeStatus}
+                              </span>
+                            ) : (
+                              <span className="text-xs font-bold text-[#596579]">
+                                -
+                              </span>
+                            )}
+                          </div>
 
-                          <p>
-                            <strong>Valor da cobrança:</strong>{" "}
-                            {formatCurrency(chargeAmount)}
-                          </p>
-                        </div>
+                          <div className="text-xs font-bold leading-5 text-[#596579] md:col-span-2">
+                            <p>
+                              Ref.: {payment.reference || "Não informada"}
+                            </p>
 
-                        {originType === "extra" && (
-                          <p className="mt-3 rounded-2xl bg-[#f7f8fa] p-3 text-sm leading-6 text-[#596579]">
-                            Este pagamento foi vinculado a uma contribuição extra/rateio lançado pela Associação.
-                          </p>
-                        )}
+                            {payment.notes && (
+                              <p className="mt-1 rounded-lg bg-[#f7f8fa] px-3 py-2">
+                                {payment.notes}
+                              </p>
+                            )}
 
-                        {payment.notes && (
-                          <p className="mt-3 whitespace-pre-line rounded-2xl bg-[#f7f8fa] p-3 text-sm leading-6 text-[#596579]">
-                            {payment.notes}
-                          </p>
-                        )}
-                      </article>
-                    );
-                  })}
+                            {originType === "extra" && !payment.notes && (
+                              <p className="mt-1">
+                                Pagamento vinculado a contribuição extra.
+                              </p>
+                            )}
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </section>

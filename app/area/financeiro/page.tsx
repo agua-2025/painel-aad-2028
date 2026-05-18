@@ -272,23 +272,23 @@ export default function AreaFinanceiroPage() {
 
   return (
     <ProtectedArea>
-      <div className="space-y-6">
-        <section className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10">
+      <div className="space-y-4">
+        <section className="rounded-2xl bg-[#13233a] p-5 text-white shadow-xl shadow-slate-900/10">
           <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
             Minha área
           </p>
 
-          <h1 className="mt-3 text-3xl font-black tracking-[-0.04em] md:text-4xl">
+          <h1 className="mt-2 text-2xl font-black tracking-[-0.04em]">
             Financeiro
           </h1>
 
-          <p className="mt-3 max-w-3xl leading-7 text-white/75">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
             Acompanhe sua situação financeira, mensalidades em aberto e valores atualizados.
           </p>
         </section>
 
         {loading ? (
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+          <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <p className="font-bold text-[#596579]">Carregando informações financeiras...</p>
           </div>
         ) : message ? (
@@ -296,7 +296,7 @@ export default function AreaFinanceiroPage() {
             <p className="font-bold text-red-700">{message}</p>
           </div>
         ) : !associate ? (
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+          <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <h2 className="text-xl font-black text-[#13233a]">
               Área financeira indisponível no momento
             </h2>
@@ -307,10 +307,10 @@ export default function AreaFinanceiroPage() {
           </div>
         ) : (
           <>
-            <section className="grid gap-5 md:grid-cols-3">
-              <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+            <section className="grid gap-3 md:grid-cols-3">
+              <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
                 <p className="text-sm font-bold text-[#596579]">Situação</p>
-                <p className="mt-2 text-2xl font-black tracking-[-0.05em] text-[#13233a]">
+                <p className="mt-2 text-base font-black tracking-[-0.03em] text-[#13233a]">
                   {summary.totalOpen > 0 ? "Com pendência" : "Em dia"}
                 </p>
                 <p className="mt-2 text-sm font-bold text-[#596579]">
@@ -318,9 +318,9 @@ export default function AreaFinanceiroPage() {
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+              <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
                 <p className="text-sm font-bold text-[#596579]">Total em aberto</p>
-                <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[#13233a]">
+                <p className="mt-2 text-lg font-black tracking-[-0.03em] text-[#13233a]">
                   {formatCurrency(summary.totalOpen)}
                 </p>
                 <p className="mt-2 text-sm font-bold text-[#596579]">
@@ -328,9 +328,9 @@ export default function AreaFinanceiroPage() {
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+              <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
                 <p className="text-sm font-bold text-[#596579]">Total pago</p>
-                <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[#13233a]">
+                <p className="mt-2 text-lg font-black tracking-[-0.03em] text-[#13233a]">
                   {formatCurrency(summary.totalPaid)}
                 </p>
                 <p className="mt-2 text-sm font-bold text-[#596579]">
@@ -340,139 +340,152 @@ export default function AreaFinanceiroPage() {
             </section>
 
             {summary.openFees.length > 1 && (
-              <p className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
+              <p className="rounded-xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
                 Orientação: havendo mais de uma mensalidade em aberto, recomenda-se quitar primeiro a mais antiga e informar corretamente a referência do pagamento.
               </p>
             )}
 
             {summary.overdueFees.length > 0 && (
-              <p className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
+              <p className="rounded-xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
                 Atenção: há mensalidade vencida com encargos. O valor exibido considera a data de hoje e pode mudar em outra data.
               </p>
             )}
 
-            <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-              <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
-                Mensalidades em aberto
-              </h2>
+            <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+              <div>
+                <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
+                  Mensalidades em aberto
+                </h2>
 
-              <p className="mt-2 text-sm font-medium text-[#596579]">
-                Valores calculados até a data de hoje. Após o pagamento, a baixa será lançada pela Tesouraria.
-              </p>
+                <p className="text-xs font-bold text-[#596579]">
+                  Valores calculados até hoje. Após o pagamento, informe a Tesouraria pelo botão correspondente.
+                </p>
+              </div>
 
               {summary.openFees.length === 0 ? (
-                <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-5">
-                  <h3 className="text-xl font-black tracking-[-0.04em] text-[#13233a]">
+                <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-4">
+                  <h3 className="text-base font-black tracking-[-0.03em] text-[#13233a]">
                     Nenhuma mensalidade em aberto
                   </h3>
 
-                  <p className="mt-2 leading-7 text-[#596579]">
+                  <p className="mt-1 text-sm leading-6 text-[#596579]">
                     Não há pendências financeiras registradas no momento.
                   </p>
                 </div>
               ) : (
-                <div className="mt-5 grid gap-4">
-                  {summary.openFees.map((fee, index) => {
-                    const calculated = calculateAmountDueAtDate(fee, today);
-                    const remaining = Math.max(
-                      calculated.totalDue - Number(fee.paid_amount ?? 0),
-                      0
-                    );
+                <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
+                  <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#596579] md:grid">
+                    <div className="col-span-3">Referência</div>
+                    <div className="col-span-2">Vencimento</div>
+                    <div className="col-span-2 text-right">Valor</div>
+                    <div className="col-span-2 text-right">Encargos</div>
+                    <div className="col-span-1 text-center">Status</div>
+                    <div className="col-span-2 text-right">Ação</div>
+                  </div>
 
-                    return (
-                      <article
-                        key={fee.id}
-                        className="rounded-3xl border border-[#e8dccb] p-5"
-                      >
-                        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                          <div>
-                            <div className="flex flex-wrap items-center gap-2">
-                              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#c7a56b]">
+                  <div className="divide-y divide-[#eee7db]">
+                    {summary.openFees.map((fee, index) => {
+                      const calculated = calculateAmountDueAtDate(fee, today);
+                      const remaining = Math.max(
+                        calculated.totalDue - Number(fee.paid_amount ?? 0),
+                        0
+                      );
+
+                      return (
+                        <article
+                          key={fee.id}
+                          className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-center"
+                        >
+                          <div className="md:col-span-3">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <p className="font-black text-[#13233a]">
                                 {getMonthLabel(fee)}
                               </p>
 
                               {index === 0 && summary.openFees.length > 1 && (
-                                <span className="rounded-full bg-amber-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-amber-900">
-                                  Prioridade de pagamento
+                                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-amber-900">
+                                  Prioridade
                                 </span>
                               )}
                             </div>
 
-                            <h3 className="mt-2 text-xl font-black text-[#13233a]">
-                              {formatCurrency(remaining)}
-                            </h3>
-
-                            <p className="mt-2 text-sm font-bold text-[#596579]">
-                              Vencimento: {formatDate(fee.due_date)}
+                            <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                              Pago: {formatCurrency(fee.paid_amount)}
                             </p>
                           </div>
 
-                          <span className="w-fit rounded-full bg-[#f7f8fa] px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-[#13233a]">
-                            {statusLabels[fee.status] ?? fee.status}
-                          </span>
-                        </div>
+                          <div className="font-bold text-[#596579] md:col-span-2">
+                            {formatDate(fee.due_date)}
+                          </div>
 
-                        <div className="mt-4 grid gap-3 text-sm text-[#596579] md:grid-cols-2">
-                          <p>
-                            <strong>Valor base:</strong>{" "}
-                            {formatCurrency(fee.base_amount)}
-                          </p>
-                          <p>
-                            <strong>Pago:</strong>{" "}
-                            {formatCurrency(fee.paid_amount)}
-                          </p>
-                          <p>
-                            <strong>Multa:</strong>{" "}
-                            {formatCurrency(calculated.lateFeeAmount)}
-                          </p>
-                          <p>
-                            <strong>Juros:</strong>{" "}
-                            {formatCurrency(calculated.interestAmount)}
-                          </p>
-                          <p>
-                            <strong>Dias com encargos:</strong>{" "}
-                            {calculated.daysWithCharges}
-                          </p>
-                          <p>
-                            <strong>Total devido hoje:</strong>{" "}
-                            {formatCurrency(calculated.totalDue)}
-                          </p>
+                          <div className="font-bold text-[#596579] md:col-span-2 md:text-right">
+                            <p className="font-black text-[#13233a]">
+                              {formatCurrency(remaining)}
+                            </p>
 
-                          <a
-                            href={`/area/informar-pagamento/${fee.id}`}
-                            className="mt-3 inline-flex w-fit rounded-full bg-[#13233a] px-5 py-2 text-xs font-black uppercase tracking-[0.08em] text-white"
-                          >
-                            Informar pagamento
-                          </a>
-                        </div>
-                      </article>
-                    );
-                  })}
+                            <p className="text-xs">
+                              Base: {formatCurrency(fee.base_amount)}
+                            </p>
+                          </div>
+
+                          <div className="font-bold text-[#596579] md:col-span-2 md:text-right">
+                            <p>Multa: {formatCurrency(calculated.lateFeeAmount)}</p>
+                            <p className="text-xs">
+                              Juros: {formatCurrency(calculated.interestAmount)} · Dias:{" "}
+                              {calculated.daysWithCharges}
+                            </p>
+                          </div>
+
+                          <div className="md:col-span-1 md:text-center">
+                            <span className="inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                              {statusLabels[fee.status] ?? fee.status}
+                            </span>
+                          </div>
+
+                          <div className="md:col-span-2 md:text-right">
+                            <a
+                              href={`/area/informar-pagamento/${fee.id}`}
+                              className="inline-flex rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
+                            >
+                              Informar
+                            </a>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </section>
 
-            <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-              <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
-                Últimas mensalidades
-              </h2>
+            <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+              <div>
+                <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
+                  Últimas mensalidades
+                </h2>
+
+                <p className="text-xs font-bold text-[#596579]">
+                  Histórico recente das mensalidades registradas no sistema.
+                </p>
+              </div>
 
               {fees.length === 0 ? (
-                <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-5">
+                <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-4">
                   <p className="font-bold text-[#596579]">
                     Nenhuma mensalidade registrada ainda.
                   </p>
                 </div>
               ) : (
-                <div className="mt-5 overflow-hidden rounded-2xl border border-[#e8dccb]">
-                  <div className="hidden bg-[#f7f8fa] px-5 py-3 text-xs font-black uppercase tracking-[0.12em] text-[#596579] md:grid md:grid-cols-[1fr_0.7fr_0.7fr_0.7fr]">
-                    <span>Referência</span>
-                    <span>Vencimento</span>
-                    <span>Valor</span>
-                    <span>Status</span>
+                <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
+                  <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#596579] md:grid">
+                    <div className="col-span-4">Referência</div>
+                    <div className="col-span-2">Vencimento</div>
+                    <div className="col-span-2 text-right">Valor</div>
+                    <div className="col-span-2 text-right">Pago</div>
+                    <div className="col-span-2 text-center">Status</div>
                   </div>
 
-                  <div className="divide-y divide-[#e8dccb]">
+                  <div className="divide-y divide-[#eee7db]">
                     {fees.slice(0, 8).map((fee) => {
                       const calculated = calculateAmountDueAtDate(fee, today);
                       const valueToShow = isOpenFee(fee)
@@ -480,33 +493,34 @@ export default function AreaFinanceiroPage() {
                         : fee.total_amount;
 
                       return (
-                        <div
+                        <article
                           key={fee.id}
-                          className="grid gap-3 px-5 py-4 md:grid-cols-[1fr_0.7fr_0.7fr_0.7fr] md:items-center"
+                          className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-center"
                         >
-                          <div>
+                          <div className="md:col-span-4">
                             <p className="font-black text-[#13233a]">
                               {getMonthLabel(fee)}
                             </p>
-                            <p className="mt-1 text-sm font-medium text-[#596579]">
-                              Pago: {formatCurrency(fee.paid_amount)}
-                            </p>
                           </div>
 
-                          <div className="text-sm font-bold text-[#596579]">
+                          <div className="font-bold text-[#596579] md:col-span-2">
                             {formatDate(fee.due_date)}
                           </div>
 
-                          <div className="text-sm font-black text-[#13233a]">
+                          <div className="font-black text-[#13233a] md:col-span-2 md:text-right">
                             {formatCurrency(valueToShow)}
                           </div>
 
-                          <div>
-                            <span className="inline-flex rounded-full bg-[#f7f8fa] px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-[#13233a]">
+                          <div className="font-bold text-[#596579] md:col-span-2 md:text-right">
+                            {formatCurrency(fee.paid_amount)}
+                          </div>
+
+                          <div className="md:col-span-2 md:text-center">
+                            <span className="inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
                               {statusLabels[fee.status] ?? fee.status}
                             </span>
                           </div>
-                        </div>
+                        </article>
                       );
                     })}
                   </div>
