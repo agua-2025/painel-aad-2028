@@ -25,6 +25,7 @@ const menuItems = [
   { label: "Saldos do Caixa", href: "/dashboard/saldos-caixa", icon: "🏦" },
   { label: "Receitas Avulsas", href: "/dashboard/receitas-avulsas", icon: "➕" },
   { label: "Despesas", href: "/dashboard/despesas", icon: "📤" },
+  { label: "Prestação de Contas", href: "/dashboard/prestacao-contas", icon: "📑" },
   { label: "Relatórios", href: "/dashboard/relatorios", icon: "📊" },
   { label: "Configurações", href: "/dashboard/configuracoes", icon: "⚙️" },
 ];
