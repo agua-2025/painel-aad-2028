@@ -452,8 +452,59 @@ export default function DashboardPrestacaoContasPage() {
 
   return (
     <ProtectedDashboard>
-      <div className="space-y-4 print:space-y-2 print:bg-white print:text-black">
-        <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm print:hidden">
+      <style jsx global>{`
+        .pc-relatorio {
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 13px;
+        }
+
+        .pc-relatorio table {
+          font-size: 12px;
+        }
+
+        .pc-relatorio th,
+        .pc-relatorio td {
+          vertical-align: top;
+        }
+
+        @media print {
+          @page {
+            size: A4 portrait;
+            margin: 12mm;
+          }
+
+          body {
+            background: white !important;
+          }
+
+          .pc-relatorio {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 10.5px;
+            line-height: 1.25;
+          }
+
+          .pc-relatorio table {
+            font-size: 9.5px;
+          }
+
+          .pc-relatorio section {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+
+          .pc-relatorio thead {
+            display: table-header-group;
+          }
+
+          .pc-relatorio tr {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+        }
+      `}</style>
+
+      <div className="pc-relatorio space-y-3 print:space-y-1 print:bg-white print:text-black">
+        <section className="rounded-2xl border border-[#e8dccb] bg-white p-3 shadow-sm print:hidden">
           <div className="grid gap-4 md:grid-cols-3">
             <label className="grid gap-2">
               <span className="text-sm font-bold text-[#13233a]">
@@ -488,7 +539,7 @@ export default function DashboardPrestacaoContasPage() {
           </div>
         </section>
 
-        <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm print:rounded-none print:border-black print:p-3 print:shadow-none">
+        <section className="rounded-xl border border-[#e8dccb] bg-white p-3 shadow-sm print:rounded-none print:border-black print:p-2 print:shadow-none">
           <div className="flex flex-col gap-2 border-b border-[#e8dccb] pb-3 print:border-black">
             <p className="text-xs font-black uppercase tracking-[0.2em] text-[#596579] print:text-black">
               Associação dos Acadêmicos do Curso de Direito - Turma de Formatura 2028
@@ -496,7 +547,7 @@ export default function DashboardPrestacaoContasPage() {
 
             <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
               <div>
-                <h1 className="text-2xl font-black tracking-[-0.04em] text-[#13233a] print:text-xl print:text-black">
+                <h1 className="text-lg font-black tracking-[-0.04em] text-[#13233a] print:text-xl print:text-black">
                   Prestação de Contas Mensal
                 </h1>
 
@@ -524,55 +575,55 @@ export default function DashboardPrestacaoContasPage() {
           )}
         </section>
 
-        <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm print:rounded-none print:border-black print:p-3 print:shadow-none">
-          <h2 className="text-base font-black uppercase tracking-[0.08em] text-[#13233a] print:text-sm print:text-black">
+        <section className="rounded-xl border border-[#e8dccb] bg-white p-3 shadow-sm print:rounded-none print:border-black print:p-2 print:shadow-none">
+          <h2 className="text-sm font-black uppercase tracking-[0.08em] text-[#13233a] print:text-sm print:text-black">
             1. Resumo financeiro
           </h2>
 
           <div className="mt-3 overflow-hidden rounded-xl border border-[#e8dccb] print:rounded-none print:border-black">
-            <table className="w-full border-collapse text-sm print:text-[11px]">
+            <table className="w-full border-collapse text-xs print:text-[10px]">
               <tbody>
                 <tr className="border-b border-[#e8dccb] print:border-black">
-                  <td className="bg-[#f7f8fa] px-3 py-2 font-bold text-[#596579] print:bg-white print:text-black">
+                  <td className="bg-[#f7f8fa] px-2 py-1.5 font-bold text-[#596579] print:bg-white print:text-black">
                     Saldo inicial do mês
                   </td>
-                  <td className="px-3 py-2 text-right font-black text-[#13233a] print:text-black">
+                  <td className="px-2 py-1.5 text-right font-black text-[#13233a] print:text-black">
                     {formatCurrency(summary.openingBalance)}
                   </td>
                 </tr>
 
                 <tr className="border-b border-[#e8dccb] print:border-black">
-                  <td className="bg-[#f7f8fa] px-3 py-2 font-bold text-[#596579] print:bg-white print:text-black">
+                  <td className="bg-[#f7f8fa] px-2 py-1.5 font-bold text-[#596579] print:bg-white print:text-black">
                     Total de entradas
                   </td>
-                  <td className="px-3 py-2 text-right font-black text-green-700 print:text-black">
+                  <td className="px-2 py-1.5 text-right font-black text-green-700 print:text-black">
                     {formatCurrency(summary.totalEntries)}
                   </td>
                 </tr>
 
                 <tr className="border-b border-[#e8dccb] print:border-black">
-                  <td className="bg-[#f7f8fa] px-3 py-2 font-bold text-[#596579] print:bg-white print:text-black">
+                  <td className="bg-[#f7f8fa] px-2 py-1.5 font-bold text-[#596579] print:bg-white print:text-black">
                     Total de saídas
                   </td>
-                  <td className="px-3 py-2 text-right font-black text-red-700 print:text-black">
+                  <td className="px-2 py-1.5 text-right font-black text-red-700 print:text-black">
                     {formatCurrency(summary.totalExpenses)}
                   </td>
                 </tr>
 
                 <tr className="border-b border-[#e8dccb] print:border-black">
-                  <td className="bg-[#f7f8fa] px-3 py-2 font-bold text-[#596579] print:bg-white print:text-black">
+                  <td className="bg-[#f7f8fa] px-2 py-1.5 font-bold text-[#596579] print:bg-white print:text-black">
                     Resultado do mês
                   </td>
-                  <td className={`px-3 py-2 text-right font-black ${amountClass(summary.periodResult)}`}>
+                  <td className={`px-2 py-1.5 text-right font-black ${amountClass(summary.periodResult)}`}>
                     {formatCurrency(summary.periodResult)}
                   </td>
                 </tr>
 
                 <tr>
-                  <td className="bg-[#f7f8fa] px-3 py-2 font-black text-[#13233a] print:bg-white print:text-black">
+                  <td className="bg-[#f7f8fa] px-2 py-1.5 font-black text-[#13233a] print:bg-white print:text-black">
                     Saldo final
                   </td>
-                  <td className={`px-3 py-2 text-right font-black ${amountClass(summary.finalBalance)}`}>
+                  <td className={`px-2 py-1.5 text-right font-black ${amountClass(summary.finalBalance)}`}>
                     {formatCurrency(summary.finalBalance)}
                   </td>
                 </tr>
@@ -582,65 +633,65 @@ export default function DashboardPrestacaoContasPage() {
         </section>
 
         <section className="grid gap-4 lg:grid-cols-2 print:grid-cols-2 print:gap-3">
-          <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm print:rounded-none print:border-black print:p-3 print:shadow-none">
-            <h2 className="text-base font-black uppercase tracking-[0.08em] text-[#13233a] print:text-sm print:text-black">
+          <div className="rounded-xl border border-[#e8dccb] bg-white p-3 shadow-sm print:rounded-none print:border-black print:p-2 print:shadow-none">
+            <h2 className="text-sm font-black uppercase tracking-[0.08em] text-[#13233a] print:text-sm print:text-black">
               2. Receitas
             </h2>
 
             <div className="mt-3 overflow-hidden rounded-xl border border-[#e8dccb] print:rounded-none print:border-black">
-              <table className="w-full border-collapse text-sm print:text-[11px]">
+              <table className="w-full border-collapse text-xs print:text-[10px]">
                 <tbody>
                   <tr className="border-b border-[#e8dccb] print:border-black">
-                    <td className="px-3 py-2 font-bold text-[#596579] print:text-black">Mensalidades</td>
-                    <td className="px-3 py-2 text-right font-black text-[#13233a] print:text-black">{formatCurrency(summary.totalMonthly)}</td>
+                    <td className="px-2 py-1.5 font-bold text-[#596579] print:text-black">Mensalidades</td>
+                    <td className="px-2 py-1.5 text-right font-black text-[#13233a] print:text-black">{formatCurrency(summary.totalMonthly)}</td>
                   </tr>
 
                   <tr className="border-b border-[#e8dccb] print:border-black">
-                    <td className="px-3 py-2 font-bold text-[#596579] print:text-black">Contribuições extras</td>
-                    <td className="px-3 py-2 text-right font-black text-[#13233a] print:text-black">{formatCurrency(summary.totalExtra)}</td>
+                    <td className="px-2 py-1.5 font-bold text-[#596579] print:text-black">Contribuições extras</td>
+                    <td className="px-2 py-1.5 text-right font-black text-[#13233a] print:text-black">{formatCurrency(summary.totalExtra)}</td>
                   </tr>
 
                   {Object.entries(summary.revenuesByCategory).map(([category, value]) => (
                     <tr key={category} className="border-b border-[#e8dccb] last:border-b-0 print:border-black">
-                      <td className="px-3 py-2 font-bold text-[#596579] print:text-black">{category}</td>
-                      <td className="px-3 py-2 text-right font-black text-[#13233a] print:text-black">{formatCurrency(value)}</td>
+                      <td className="px-2 py-1.5 font-bold text-[#596579] print:text-black">{category}</td>
+                      <td className="px-2 py-1.5 text-right font-black text-[#13233a] print:text-black">{formatCurrency(value)}</td>
                     </tr>
                   ))}
 
                   <tr>
-                    <td className="bg-[#f7f8fa] px-3 py-2 font-black text-[#13233a] print:bg-white print:text-black">Total</td>
-                    <td className="bg-[#f7f8fa] px-3 py-2 text-right font-black text-[#13233a] print:bg-white print:text-black">{formatCurrency(summary.totalEntries)}</td>
+                    <td className="bg-[#f7f8fa] px-2 py-1.5 font-black text-[#13233a] print:bg-white print:text-black">Total</td>
+                    <td className="bg-[#f7f8fa] px-2 py-1.5 text-right font-black text-[#13233a] print:bg-white print:text-black">{formatCurrency(summary.totalEntries)}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm print:rounded-none print:border-black print:p-3 print:shadow-none">
-            <h2 className="text-base font-black uppercase tracking-[0.08em] text-[#13233a] print:text-sm print:text-black">
+          <div className="rounded-xl border border-[#e8dccb] bg-white p-3 shadow-sm print:rounded-none print:border-black print:p-2 print:shadow-none">
+            <h2 className="text-sm font-black uppercase tracking-[0.08em] text-[#13233a] print:text-sm print:text-black">
               3. Despesas
             </h2>
 
             <div className="mt-3 overflow-hidden rounded-xl border border-[#e8dccb] print:rounded-none print:border-black">
-              <table className="w-full border-collapse text-sm print:text-[11px]">
+              <table className="w-full border-collapse text-xs print:text-[10px]">
                 <tbody>
                   {Object.keys(summary.expensesByCategory).length === 0 ? (
                     <tr>
-                      <td className="px-3 py-2 font-bold text-[#596579] print:text-black">Nenhuma despesa paga no período.</td>
-                      <td className="px-3 py-2 text-right font-black text-[#13233a] print:text-black">{formatCurrency(0)}</td>
+                      <td className="px-2 py-1.5 font-bold text-[#596579] print:text-black">Nenhuma despesa paga no período.</td>
+                      <td className="px-2 py-1.5 text-right font-black text-[#13233a] print:text-black">{formatCurrency(0)}</td>
                     </tr>
                   ) : (
                     Object.entries(summary.expensesByCategory).map(([category, value]) => (
                       <tr key={category} className="border-b border-[#e8dccb] last:border-b-0 print:border-black">
-                        <td className="px-3 py-2 font-bold text-[#596579] print:text-black">{category}</td>
-                        <td className="px-3 py-2 text-right font-black text-red-700 print:text-black">{formatCurrency(value)}</td>
+                        <td className="px-2 py-1.5 font-bold text-[#596579] print:text-black">{category}</td>
+                        <td className="px-2 py-1.5 text-right font-black text-red-700 print:text-black">{formatCurrency(value)}</td>
                       </tr>
                     ))
                   )}
 
                   <tr>
-                    <td className="bg-[#f7f8fa] px-3 py-2 font-black text-[#13233a] print:bg-white print:text-black">Total</td>
-                    <td className="bg-[#f7f8fa] px-3 py-2 text-right font-black text-[#13233a] print:bg-white print:text-black">{formatCurrency(summary.totalExpenses)}</td>
+                    <td className="bg-[#f7f8fa] px-2 py-1.5 font-black text-[#13233a] print:bg-white print:text-black">Total</td>
+                    <td className="bg-[#f7f8fa] px-2 py-1.5 text-right font-black text-[#13233a] print:bg-white print:text-black">{formatCurrency(summary.totalExpenses)}</td>
                   </tr>
                 </tbody>
               </table>
@@ -648,32 +699,32 @@ export default function DashboardPrestacaoContasPage() {
           </div>
         </section>
 
-        <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm print:rounded-none print:border-black print:p-3 print:shadow-none">
-          <h2 className="text-base font-black uppercase tracking-[0.08em] text-[#13233a] print:text-sm print:text-black">
+        <section className="rounded-xl border border-[#e8dccb] bg-white p-3 shadow-sm print:rounded-none print:border-black print:p-2 print:shadow-none">
+          <h2 className="text-sm font-black uppercase tracking-[0.08em] text-[#13233a] print:text-sm print:text-black">
             4. Conferência documental
           </h2>
 
           <div className="mt-3 overflow-hidden rounded-xl border border-[#e8dccb] print:rounded-none print:border-black">
-            <table className="w-full border-collapse text-sm print:text-[11px]">
+            <table className="w-full border-collapse text-xs print:text-[10px]">
               <tbody>
                 <tr className="border-b border-[#e8dccb] print:border-black">
-                  <td className="px-3 py-2 font-bold text-[#596579] print:text-black">Entradas registradas</td>
-                  <td className="px-3 py-2 text-right font-black text-[#13233a] print:text-black">{summary.entriesCount}</td>
+                  <td className="px-2 py-1.5 font-bold text-[#596579] print:text-black">Entradas registradas</td>
+                  <td className="px-2 py-1.5 text-right font-black text-[#13233a] print:text-black">{summary.entriesCount}</td>
                 </tr>
 
                 <tr className="border-b border-[#e8dccb] print:border-black">
-                  <td className="px-3 py-2 font-bold text-[#596579] print:text-black">Despesas pagas</td>
-                  <td className="px-3 py-2 text-right font-black text-[#13233a] print:text-black">{summary.expensesCount}</td>
+                  <td className="px-2 py-1.5 font-bold text-[#596579] print:text-black">Despesas pagas</td>
+                  <td className="px-2 py-1.5 text-right font-black text-[#13233a] print:text-black">{summary.expensesCount}</td>
                 </tr>
 
                 <tr className="border-b border-[#e8dccb] print:border-black">
-                  <td className="px-3 py-2 font-bold text-[#596579] print:text-black">Despesas pagas sem comprovante</td>
-                  <td className="px-3 py-2 text-right font-black text-[#13233a] print:text-black">{summary.expensesWithoutReceipt.length}</td>
+                  <td className="px-2 py-1.5 font-bold text-[#596579] print:text-black">Despesas pagas sem comprovante</td>
+                  <td className="px-2 py-1.5 text-right font-black text-[#13233a] print:text-black">{summary.expensesWithoutReceipt.length}</td>
                 </tr>
 
                 <tr>
-                  <td className="px-3 py-2 font-bold text-[#596579] print:text-black">Total de movimentações</td>
-                  <td className="px-3 py-2 text-right font-black text-[#13233a] print:text-black">{summary.movementsCount}</td>
+                  <td className="px-2 py-1.5 font-bold text-[#596579] print:text-black">Total de movimentações</td>
+                  <td className="px-2 py-1.5 text-right font-black text-[#13233a] print:text-black">{summary.movementsCount}</td>
                 </tr>
               </tbody>
             </table>
@@ -686,8 +737,8 @@ export default function DashboardPrestacaoContasPage() {
           )}
         </section>
 
-        <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm print:rounded-none print:border-black print:p-3 print:shadow-none">
-          <h2 className="text-base font-black uppercase tracking-[0.08em] text-[#13233a] print:text-sm print:text-black">
+        <section className="rounded-xl border border-[#e8dccb] bg-white p-3 shadow-sm print:rounded-none print:border-black print:p-2 print:shadow-none">
+          <h2 className="text-sm font-black uppercase tracking-[0.08em] text-[#13233a] print:text-sm print:text-black">
             5. Movimentações do período
           </h2>
 
@@ -701,34 +752,34 @@ export default function DashboardPrestacaoContasPage() {
             </div>
           ) : (
             <div className="mt-3 overflow-hidden rounded-xl border border-[#e8dccb] print:rounded-none print:border-black">
-              <table className="w-full border-collapse text-left text-xs print:text-[9px]">
+              <table className="w-full border-collapse text-left text-[11px] print:text-[9px]">
                 <thead className="bg-[#f7f8fa] uppercase tracking-[0.08em] text-[#596579] print:bg-white print:text-black">
                   <tr>
-                    <th className="px-2 py-2 print:border-b print:border-black">Data</th>
-                    <th className="px-2 py-2 print:border-b print:border-black">Tipo</th>
-                    <th className="px-2 py-2 print:border-b print:border-black">Origem</th>
-                    <th className="px-2 py-2 print:border-b print:border-black">Descrição</th>
-                    <th className="px-2 py-2 print:border-b print:border-black">Pessoa</th>
-                    <th className="px-2 py-2 text-right print:border-b print:border-black">Valor</th>
+                    <th className="px-2 py-1.5 print:border-b print:border-black">Data</th>
+                    <th className="px-2 py-1.5 print:border-b print:border-black">Tipo</th>
+                    <th className="px-2 py-1.5 print:border-b print:border-black">Origem</th>
+                    <th className="px-2 py-1.5 print:border-b print:border-black">Descrição</th>
+                    <th className="px-2 py-1.5 print:border-b print:border-black">Pessoa</th>
+                    <th className="px-2 py-1.5 text-right print:border-b print:border-black">Valor</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {movements.map((movement) => (
                     <tr key={movement.id} className="border-t border-[#e8dccb] align-top print:border-black">
-                      <td className="px-2 py-2 font-bold text-[#13233a] print:text-black">
+                      <td className="px-2 py-1.5 font-bold text-[#13233a] print:text-black">
                         {formatDate(movement.date)}
                       </td>
 
-                      <td className="px-2 py-2 font-bold uppercase text-[#596579] print:text-black">
+                      <td className="px-2 py-1.5 font-bold uppercase text-[#596579] print:text-black">
                         {movement.type === "entrada" ? "Entrada" : "Saída"}
                       </td>
 
-                      <td className="px-2 py-2 font-bold text-[#596579] print:text-black">
+                      <td className="px-2 py-1.5 font-bold text-[#596579] print:text-black">
                         {movement.origin}
                       </td>
 
-                      <td className="px-2 py-2">
+                      <td className="px-2 py-1.5">
                         <p className="font-bold text-[#13233a] print:text-black">
                           {movement.description}
                         </p>
@@ -740,12 +791,12 @@ export default function DashboardPrestacaoContasPage() {
                         </p>
                       </td>
 
-                      <td className="px-2 py-2 font-bold text-[#596579] print:text-black">
+                      <td className="px-2 py-1.5 font-bold text-[#596579] print:text-black">
                         {movement.person}
                       </td>
 
                       <td
-                        className={`px-2 py-2 text-right font-black ${
+                        className={`px-2 py-1.5 text-right font-black ${
                           movement.type === "entrada"
                             ? "text-green-700 print:text-black"
                             : "text-red-700 print:text-black"
@@ -762,26 +813,75 @@ export default function DashboardPrestacaoContasPage() {
           )}
         </section>
 
-        <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm print:rounded-none print:border-black print:p-3 print:shadow-none">
-          <h2 className="text-base font-black uppercase tracking-[0.08em] text-[#13233a] print:text-sm print:text-black">
-            6. Validação
+        <section className="rounded-xl border border-[#e8dccb] bg-white p-3 shadow-sm print:rounded-none print:border-black print:p-2 print:shadow-none">
+          <h2 className="text-sm font-black uppercase tracking-[0.08em] text-[#13233a] print:text-sm print:text-black">
+            6. Conferência e validação
           </h2>
 
-          <p className="mt-2 text-sm font-bold leading-6 text-[#596579] print:text-[11px] print:text-black">
-            O presente demonstrativo foi gerado a partir dos registros financeiros lançados no Painel AAD Direito 2028, devendo ser conferido com extratos bancários, comprovantes e demais documentos de suporte.
+          <p className="mt-2 text-xs font-bold leading-5 text-[#596579] print:text-[11px] print:text-black">
+            O presente demonstrativo foi gerado a partir dos registros financeiros lançados no Painel AAD Direito 2028. A conferência deve considerar os extratos bancários, comprovantes de receitas, comprovantes de despesas e demais documentos de suporte.
           </p>
 
-          <div className="mt-10 grid gap-8 text-center text-xs md:grid-cols-3 print:grid-cols-3">
-            <div className="border-t border-[#13233a] pt-2 print:border-black">
-              Tesouraria
+          <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb] print:rounded-none print:border-black">
+            <table className="w-full border-collapse text-xs print:text-[10px]">
+              <tbody>
+                <tr className="border-b border-[#e8dccb] print:border-black">
+                  <td className="w-1/2 px-2 py-1.5 font-bold text-[#596579] print:text-black">
+                    Saldo final conferido com extrato bancário
+                  </td>
+                  <td className="px-2 py-1.5 font-bold text-[#13233a] print:text-black">
+                    ( &nbsp; ) Sim &nbsp;&nbsp;&nbsp; ( &nbsp; ) Não
+                  </td>
+                </tr>
+
+                <tr className="border-b border-[#e8dccb] print:border-black">
+                  <td className="px-2 py-1.5 font-bold text-[#596579] print:text-black">
+                    Há ressalvas, recomendações ou apontamentos
+                  </td>
+                  <td className="px-2 py-1.5 font-bold text-[#13233a] print:text-black">
+                    ( &nbsp; ) Sim &nbsp;&nbsp;&nbsp; ( &nbsp; ) Não
+                  </td>
+                </tr>
+
+                <tr>
+                  <td colSpan={2} className="px-2 py-1.5 font-bold text-[#596579] print:text-black">
+                    Observações da Comissão Fiscal:
+                    <div className="mt-8 border-b border-[#e8dccb] print:border-black" />
+                    <div className="mt-8 border-b border-[#e8dccb] print:border-black" />
+                    <div className="mt-8 border-b border-[#e8dccb] print:border-black" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p className="mt-4 text-xs font-bold leading-5 text-[#596579] print:text-[11px] print:text-black">
+            A assinatura da Tesouraria indica a elaboração/apresentação da prestação de contas. A assinatura da Presidência indica ciência. A assinatura dos membros da Comissão Fiscal indica ciência e conferência dos dados apresentados, sem prejuízo de eventuais ressalvas ou recomendações.
+          </p>
+
+          <div className="mt-8 space-y-8 text-center text-[11px] print:mt-6 print:space-y-6 print:text-[10px]">
+            <div className="grid gap-8 md:grid-cols-2 print:grid-cols-2">
+              <div className="border-t border-[#13233a] pt-1.5 print:border-black">
+                Tesouraria
+              </div>
+
+              <div className="border-t border-[#13233a] pt-1.5 print:border-black">
+                Presidência
+              </div>
             </div>
 
-            <div className="border-t border-[#13233a] pt-2 print:border-black">
-              Presidência
-            </div>
+            <div className="grid gap-6 md:grid-cols-3 print:grid-cols-3">
+              <div className="border-t border-[#13233a] pt-1.5 print:border-black">
+                Comissão Fiscal - Membro 1
+              </div>
 
-            <div className="border-t border-[#13233a] pt-2 print:border-black">
-              Comissão Fiscal
+              <div className="border-t border-[#13233a] pt-1.5 print:border-black">
+                Comissão Fiscal - Membro 2
+              </div>
+
+              <div className="border-t border-[#13233a] pt-1.5 print:border-black">
+                Comissão Fiscal - Membro 3
+              </div>
             </div>
           </div>
         </section>
