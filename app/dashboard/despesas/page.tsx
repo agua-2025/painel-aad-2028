@@ -518,47 +518,47 @@ export default function DashboardDespesasPage() {
 
   return (
     <ProtectedDashboard>
-      <div className="space-y-5">
-        <section className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10">
+      <div className="space-y-4">
+        <section className="rounded-2xl bg-[#13233a] p-5 text-white shadow-xl shadow-slate-900/10">
           <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
             Financeiro
           </p>
 
-          <h1 className="mt-3 text-3xl font-black tracking-[-0.04em] md:text-4xl">
+          <h1 className="mt-2 text-2xl font-black tracking-[-0.04em]">
             Despesas
           </h1>
 
-          <p className="mt-3 max-w-3xl leading-7 text-white/75">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
             Registre despesas, pagamentos e comprovantes vinculados às saídas da Associação.
           </p>
         </section>
 
-        <p className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
+        <p className="rounded-xl border border-[#e8dccb] bg-white px-3 py-2.5 text-sm font-bold text-[#596579]">
           Despesas pendentes não entram como saída no Movimento Financeiro. Apenas despesas pagas reduzem o saldo do caixa.
         </p>
 
         {success && (
-          <section className="rounded-2xl border border-green-200 bg-green-50 p-4 shadow-sm">
+          <section className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 shadow-sm">
             <p className="font-bold text-green-800">{success}</p>
           </section>
         )}
 
         {message && (
-          <section className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
+          <section className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 shadow-sm">
             <p className="font-bold text-red-700">{message}</p>
           </section>
         )}
 
         {summary.paidWithoutReceiptCount > 0 && (
-          <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+          <section className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 shadow-sm">
             <p className="font-bold text-amber-900">
               Atenção: há {summary.paidWithoutReceiptCount} despesa(s) paga(s) sem comprovante anexado no período filtrado.
             </p>
           </section>
         )}
 
-        <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
-          <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
+        <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+          <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
             Registrar despesa
           </h2>
 
@@ -579,7 +579,7 @@ export default function DashboardDespesasPage() {
                     }))
                   }
                   required
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                 />
               </label>
 
@@ -597,7 +597,7 @@ export default function DashboardDespesasPage() {
                       due_date: event.target.value,
                     }))
                   }
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                 />
               </label>
 
@@ -618,7 +618,7 @@ export default function DashboardDespesasPage() {
                   }
                   required
                   placeholder="0,00"
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                 />
               </label>
 
@@ -639,7 +639,7 @@ export default function DashboardDespesasPage() {
                           : "",
                     }))
                   }
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                 >
                   {statusOptions.map((status) => (
                     <option key={status.value} value={status.value}>
@@ -664,7 +664,7 @@ export default function DashboardDespesasPage() {
                       category: event.target.value,
                     }))
                   }
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                 >
                   {categories.map((category) => (
                     <option key={category.value} value={category.value}>
@@ -688,7 +688,7 @@ export default function DashboardDespesasPage() {
                     }))
                   }
                   placeholder="Ex.: Cartório, fornecedor, prestador de serviço"
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                 />
               </label>
             </div>
@@ -708,7 +708,7 @@ export default function DashboardDespesasPage() {
                 }
                 required
                 placeholder="Ex.: Pagamento de taxa de registro em cartório"
-                className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
               />
             </label>
 
@@ -729,7 +729,7 @@ export default function DashboardDespesasPage() {
                       }))
                     }
                     required
-                    className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                    className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                   />
                 </label>
 
@@ -746,7 +746,7 @@ export default function DashboardDespesasPage() {
                         payment_method: event.target.value,
                       }))
                     }
-                    className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                    className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                   >
                     <option value="pix">Pix</option>
                     <option value="dinheiro">Dinheiro</option>
@@ -771,7 +771,7 @@ export default function DashboardDespesasPage() {
                       }))
                     }
                     placeholder="Ex.: ID Pix, boleto, recibo"
-                    className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                    className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                   />
                 </label>
               </div>
@@ -790,7 +790,7 @@ export default function DashboardDespesasPage() {
                   const file = event.target.files?.[0] ?? null;
                   setReceiptFile(file);
                 }}
-                className="w-full rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#13233a] outline-none file:mr-4 file:rounded-full file:border-0 file:bg-[#13233a] file:px-4 file:py-2 file:text-sm file:font-black file:text-white"
+                className="w-full rounded-xl border border-[#e8dccb] bg-white px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none file:mr-4 file:rounded-full file:border-0 file:bg-[#13233a] file:px-3 file:py-1.5 file:text-sm file:font-black file:text-white"
               />
 
               <span className="text-xs font-bold text-[#596579]">
@@ -813,21 +813,21 @@ export default function DashboardDespesasPage() {
                   }))
                 }
                 placeholder="Informações adicionais sobre a despesa."
-                className="w-full resize-none rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                className="w-full resize-none rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
               />
             </label>
 
             <button
               type="submit"
               disabled={saving}
-              className="w-fit rounded-full bg-[#13233a] px-6 py-3 text-sm font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-fit rounded-full bg-[#13233a] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? "Salvando..." : "Registrar despesa"}
             </button>
           </form>
         </section>
 
-        <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+        <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
           <div className="grid gap-4 md:grid-cols-4">
             <label className="grid gap-2">
               <span className="text-sm font-bold text-[#13233a]">
@@ -843,7 +843,7 @@ export default function DashboardDespesasPage() {
                     month: event.target.value,
                   }))
                 }
-                className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
               />
             </label>
 
@@ -860,7 +860,7 @@ export default function DashboardDespesasPage() {
                     status: event.target.value,
                   }))
                 }
-                className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
               >
                 <option value="todos">Todos</option>
                 {statusOptions.map((status) => (
@@ -884,7 +884,7 @@ export default function DashboardDespesasPage() {
                     category: event.target.value,
                   }))
                 }
-                className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
               >
                 <option value="todas">Todas</option>
                 {categories.map((category) => (
@@ -908,12 +908,12 @@ export default function DashboardDespesasPage() {
         </section>
 
         <section className="grid gap-5 md:grid-cols-4">
-          <div className="rounded-2xl border border-green-200 bg-green-50 p-4 shadow-sm">
+          <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.06em] text-green-800">
               Pagas no período
             </p>
 
-            <p className="mt-1 text-2xl font-black tracking-[-0.05em] text-green-800">
+            <p className="mt-1 text-xl font-black tracking-[-0.04em] text-green-800">
               {formatCurrency(summary.paidTotal)}
             </p>
 
@@ -922,12 +922,12 @@ export default function DashboardDespesasPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.06em] text-amber-800">
               Pendentes
             </p>
 
-            <p className="mt-1 text-2xl font-black tracking-[-0.05em] text-amber-800">
+            <p className="mt-1 text-xl font-black tracking-[-0.04em] text-amber-800">
               {formatCurrency(summary.pendingTotal)}
             </p>
 
@@ -936,12 +936,12 @@ export default function DashboardDespesasPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.06em] text-red-800">
               Canceladas
             </p>
 
-            <p className="mt-1 text-2xl font-black tracking-[-0.05em] text-red-800">
+            <p className="mt-1 text-xl font-black tracking-[-0.04em] text-red-800">
               {formatCurrency(summary.canceledTotal)}
             </p>
 
@@ -950,12 +950,12 @@ export default function DashboardDespesasPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">
               Registros
             </p>
 
-            <p className="mt-1 text-2xl font-black tracking-[-0.05em] text-[#13233a]">
+            <p className="mt-1 text-xl font-black tracking-[-0.04em] text-[#13233a]">
               {summary.totalCount}
             </p>
 
@@ -966,159 +966,188 @@ export default function DashboardDespesasPage() {
         </section>
 
         <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
-          <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
-            Despesas registradas
-          </h2>
+          <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
+                Despesas registradas
+              </h2>
+
+              <p className="text-xs font-bold text-[#596579]">
+                Saídas e obrigações filtradas por mês, status e categoria.
+              </p>
+            </div>
+
+            <p className="text-xs font-bold text-[#596579]">
+              {filteredExpenses.length} registro(s)
+            </p>
+          </div>
 
           {loading ? (
-            <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-4 text-sm font-bold text-[#596579]">
+            <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-3 text-sm font-bold text-[#596579]">
               Carregando despesas...
             </div>
           ) : filteredExpenses.length === 0 ? (
-            <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-5">
-              <h3 className="text-xl font-black tracking-[-0.04em] text-[#13233a]">
+            <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-4">
+              <h3 className="text-base font-black tracking-[-0.03em] text-[#13233a]">
                 Nenhuma despesa encontrada
               </h3>
 
-              <p className="mt-2 leading-7 text-[#596579]">
+              <p className="mt-1 text-sm leading-6 text-[#596579]">
                 Não há despesas para os filtros selecionados.
               </p>
             </div>
           ) : (
-            <div className="mt-5 grid gap-3">
-              {filteredExpenses.map((expense) => (
-                <article
-                  key={expense.id}
-                  className="rounded-xl border border-[#e8dccb] px-4 py-3"
-                >
-                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
+            <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
+              <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#596579] md:grid">
+                <div className="col-span-2">Status/Categoria</div>
+                <div className="col-span-3">Descrição</div>
+                <div className="col-span-2">Favorecido</div>
+                <div className="col-span-2">Datas</div>
+                <div className="col-span-1 text-right">Valor</div>
+                <div className="col-span-2 text-right">Ações</div>
+              </div>
+
+              <div className="divide-y divide-[#eee7db]">
+                {filteredExpenses.map((expense) => (
+                  <article
+                    key={expense.id}
+                    className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-center"
+                  >
+                    <div className="md:col-span-2">
+                      <div className="flex flex-wrap items-center gap-1.5">
                         <span
-                          className={`rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] ${getStatusClass(
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] ${getStatusClass(
                             expense.status
                           )}`}
                         >
                           {getStatusLabel(expense.status)}
                         </span>
 
-                        <span className="rounded-full bg-[#f7f8fa] px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] text-[#13233a]">
+                        <span className="rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
                           {getCategoryLabel(expense.category)}
                         </span>
-
-                        {expense.receipt_path ? (
-                          <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] text-green-800">
-                            Comprovante anexado
-                          </span>
-                        ) : expense.status === "paga" ? (
-                          <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] text-amber-800">
-                            Sem comprovante
-                          </span>
-                        ) : null}
                       </div>
 
-                      <h3 className="mt-2 text-base font-black tracking-[-0.03em] text-[#13233a]">
-                        {expense.description}
-                      </h3>
-
-                      <p className="mt-0.5 text-xs font-bold text-[#596579]">
-                        Favorecido: {expense.payee_name || "Não informado"}
-                      </p>
-
-                      <p className="mt-0.5 text-xs font-bold text-[#596579]">
-                        Data da despesa: {formatDate(expense.expense_date)} · Vencimento: {formatDate(expense.due_date)}
-                      </p>
-
-                      {expense.status === "paga" && (
-                        <p className="mt-0.5 text-xs font-bold text-[#596579]">
-                          Pago em: {formatDate(expense.paid_at)} · Forma:{" "}
-                          {expense.payment_method
-                            ? paymentMethodLabels[expense.payment_method] ??
-                              expense.payment_method
-                            : "Não informado"}
+                      {expense.receipt_path ? (
+                        <p className="mt-1 text-[11px] font-bold text-green-700">
+                          Comprovante anexado
+                        </p>
+                      ) : expense.status === "paga" ? (
+                        <p className="mt-1 text-[11px] font-bold text-amber-700">
+                          Sem comprovante
+                        </p>
+                      ) : (
+                        <p className="mt-1 text-[11px] font-bold text-[#596579]">
+                          Comprovante opcional
                         </p>
                       )}
+                    </div>
+
+                    <div className="md:col-span-3">
+                      <p className="font-black text-[#13233a]">
+                        {expense.description}
+                      </p>
 
                       {expense.reference && (
                         <p className="mt-0.5 text-xs font-bold text-[#596579]">
-                          Referência: {expense.reference}
+                          Ref.: {expense.reference}
+                        </p>
+                      )}
+
+                      {expense.notes && (
+                        <p className="mt-1 text-xs font-bold leading-5 text-[#596579]">
+                          {expense.notes}
                         </p>
                       )}
 
                       {expense.receipt_path && (
-                        <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                        <p className="mt-1 text-[11px] font-bold text-[#596579]">
                           Arquivo: {expense.receipt_filename || "Comprovante"} · {formatFileSize(expense.receipt_size)}
                         </p>
                       )}
                     </div>
 
-                    <div className="md:text-right">
-                      <p className="text-lg font-black tracking-[-0.04em] text-red-700">
-                        {formatCurrency(expense.amount)}
+                    <div className="font-bold text-[#596579] md:col-span-2">
+                      {expense.payee_name || "Não informado"}
+                    </div>
+
+                    <div className="font-bold text-[#596579] md:col-span-2">
+                      <p>Despesa: {formatDate(expense.expense_date)}</p>
+
+                      <p className="text-xs">
+                        Venc.: {formatDate(expense.due_date)}
                       </p>
 
-                      <div className="mt-2 flex flex-wrap gap-2 md:justify-end">
-                        {expense.receipt_path && (
-                          <button
-                            type="button"
-                            onClick={() => openReceipt(expense)}
-                            className="rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.08em] text-[#13233a]"
-                          >
-                            Ver comprovante
-                          </button>
-                        )}
-
-                        {!expense.receipt_path && expense.status !== "cancelada" && (
-                          <label className="cursor-pointer rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.08em] text-[#13233a]">
-                            {saving ? "Enviando..." : "Anexar comprovante"}
-
-                            <input
-                              type="file"
-                              accept="application/pdf,image/jpeg,image/png,image/webp"
-                              className="hidden"
-                              onChange={(event) => {
-                                const file = event.target.files?.[0] ?? null;
-
-                                if (file) {
-                                  void handleAttachReceipt(expense, file);
-                                }
-
-                                event.currentTarget.value = "";
-                              }}
-                            />
-                          </label>
-                        )}
-
-                        {expense.status === "pendente" && (
-                          <button
-                            type="button"
-                            onClick={() => markAsPaid(expense)}
-                            className="rounded-full bg-green-700 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.08em] text-white"
-                          >
-                            Marcar como paga
-                          </button>
-                        )}
-
-                        {expense.status !== "cancelada" && (
-                          <button
-                            type="button"
-                            onClick={() => cancelExpense(expense)}
-                            className="rounded-full bg-red-700 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.08em] text-white"
-                          >
-                            Cancelar
-                          </button>
-                        )}
-                      </div>
+                      {expense.status === "paga" && (
+                        <p className="text-xs">
+                          Pago: {formatDate(expense.paid_at)} ·{" "}
+                          {expense.payment_method
+                            ? paymentMethodLabels[expense.payment_method] ??
+                              expense.payment_method
+                            : "Forma não informada"}
+                        </p>
+                      )}
                     </div>
-                  </div>
 
-                  {expense.notes && (
-                    <p className="mt-2 whitespace-pre-line rounded-xl bg-[#f7f8fa] px-3 py-2 text-xs leading-5 text-[#596579]">
-                      {expense.notes}
-                    </p>
-                  )}
-                </article>
-              ))}
+                    <div className="font-black text-red-700 md:col-span-1 md:text-right">
+                      {formatCurrency(expense.amount)}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 md:col-span-2 md:justify-end">
+                      {expense.receipt_path && (
+                        <button
+                          type="button"
+                          onClick={() => openReceipt(expense)}
+                          className="rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
+                        >
+                          Ver
+                        </button>
+                      )}
+
+                      {!expense.receipt_path && expense.status !== "cancelada" && (
+                        <label className="cursor-pointer rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]">
+                          {saving ? "Enviando..." : "Anexar"}
+
+                          <input
+                            type="file"
+                            accept="application/pdf,image/jpeg,image/png,image/webp"
+                            className="hidden"
+                            onChange={(event) => {
+                              const file = event.target.files?.[0] ?? null;
+
+                              if (file) {
+                                void handleAttachReceipt(expense, file);
+                              }
+
+                              event.currentTarget.value = "";
+                            }}
+                          />
+                        </label>
+                      )}
+
+                      {expense.status === "pendente" && (
+                        <button
+                          type="button"
+                          onClick={() => markAsPaid(expense)}
+                          className="rounded-full border border-green-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-green-700 hover:bg-green-50"
+                        >
+                          Pagar
+                        </button>
+                      )}
+
+                      {expense.status !== "cancelada" && (
+                        <button
+                          type="button"
+                          onClick={() => cancelExpense(expense)}
+                          className="rounded-full border border-red-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-red-700 hover:bg-red-50"
+                        >
+                          Cancelar
+                        </button>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
             </div>
           )}
         </section>
