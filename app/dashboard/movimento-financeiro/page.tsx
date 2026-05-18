@@ -66,15 +66,32 @@ type OtherRevenue = {
   created_at: string;
 };
 
+type Expense = {
+  id: string;
+  expense_date: string;
+  due_date: string | null;
+  paid_at: string | null;
+  amount: number;
+  category: string;
+  payee_name: string | null;
+  description: string;
+  payment_method: string | null;
+  reference: string | null;
+  notes: string | null;
+  status: string;
+  created_at: string;
+};
+
 type Movement = {
   id: string;
   date: string;
   created_at: string;
-  origin: "monthly" | "extra" | "other";
+  direction: "entrada" | "saida";
+  origin: "monthly" | "extra" | "other" | "expense";
   originBadge: string;
   title: string;
   amount: number;
-  payment_method: string;
+  payment_method: string | null;
   reference: string | null;
   notes: string | null;
   person: string;
@@ -113,6 +130,21 @@ const otherRevenueCategoryLabels: Record<string, string> = {
   evento: "Evento",
   venda: "Venda",
   rendimento: "Rendimento bancário",
+  reembolso: "Reembolso",
+  ajuste: "Ajuste",
+  outros: "Outros",
+};
+
+const expenseCategoryLabels: Record<string, string> = {
+  cartorio: "Cartório",
+  taxa_bancaria: "Taxa bancária",
+  fornecedor: "Fornecedor",
+  evento: "Evento",
+  material: "Material",
+  servico: "Serviço",
+  decoracao: "Decoração",
+  cerimonial: "Cerimonial",
+  locacao: "Locação",
   reembolso: "Reembolso",
   ajuste: "Ajuste",
   outros: "Outros",
@@ -215,6 +247,7 @@ function buildPaymentMovement(payment: Payment): Movement {
     id: `payment-${payment.id}`,
     date: payment.paid_at,
     created_at: payment.created_at,
+    direction: "entrada",
     origin,
     originBadge: origin === "monthly" ? "Mensalidade" : "Contribuição extra",
     title: getPaymentOriginLabel(payment),
@@ -233,6 +266,7 @@ function buildOtherRevenueMovement(revenue: OtherRevenue): Movement {
     id: `other-${revenue.id}`,
     date: revenue.received_at,
     created_at: revenue.created_at,
+    direction: "entrada",
     origin: "other",
     originBadge: "Receita avulsa",
     title: `${otherRevenueCategoryLabels[revenue.category] ?? revenue.category} - ${revenue.description}`,
@@ -246,9 +280,41 @@ function buildOtherRevenueMovement(revenue: OtherRevenue): Movement {
   };
 }
 
+function buildExpenseMovement(expense: Expense): Movement {
+  return {
+    id: `expense-${expense.id}`,
+    date: expense.paid_at ?? expense.expense_date,
+    created_at: expense.created_at,
+    direction: "saida",
+    origin: "expense",
+    originBadge: "Despesa",
+    title: `${expenseCategoryLabels[expense.category] ?? expense.category} - ${expense.description}`,
+    amount: Number(expense.amount ?? 0),
+    payment_method: expense.payment_method,
+    reference: expense.reference,
+    notes: expense.notes,
+    person: expense.payee_name || "Favorecido não informado",
+    personDetail: null,
+    status: expense.status,
+  };
+}
+
+function getAmountClass(direction: "entrada" | "saida") {
+  if (direction === "saida") {
+    return "text-red-700";
+  }
+
+  return "text-green-700";
+}
+
+function getDirectionLabel(direction: "entrada" | "saida") {
+  return direction === "entrada" ? "Entrada" : "Saída";
+}
+
 export default function DashboardMovimentoFinanceiroPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [otherRevenues, setOtherRevenues] = useState<OtherRevenue[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
@@ -264,14 +330,20 @@ export default function DashboardMovimentoFinanceiroPage() {
       .filter((revenue) => revenue.status === "confirmada")
       .map(buildOtherRevenueMovement);
 
-    return [...paymentMovements, ...otherRevenueMovements].sort((a, b) => {
-      const dateCompare = b.date.localeCompare(a.date);
+    const expenseMovements = expenses
+      .filter((expense) => expense.status === "paga" && expense.paid_at)
+      .map(buildExpenseMovement);
 
-      if (dateCompare !== 0) return dateCompare;
+    return [...paymentMovements, ...otherRevenueMovements, ...expenseMovements].sort(
+      (a, b) => {
+        const dateCompare = b.date.localeCompare(a.date);
 
-      return b.created_at.localeCompare(a.created_at);
-    });
-  }, [payments, otherRevenues]);
+        if (dateCompare !== 0) return dateCompare;
+
+        return b.created_at.localeCompare(a.created_at);
+      }
+    );
+  }, [payments, otherRevenues, expenses]);
 
   const filteredMovements = useMemo(() => {
     return movements.filter((movement) => {
@@ -285,7 +357,20 @@ export default function DashboardMovimentoFinanceiroPage() {
   }, [movements, filters.month, filters.origin]);
 
   const summary = useMemo(() => {
-    const totalReceived = filteredMovements.reduce(
+    const entries = filteredMovements.filter(
+      (movement) => movement.direction === "entrada"
+    );
+
+    const exits = filteredMovements.filter(
+      (movement) => movement.direction === "saida"
+    );
+
+    const totalEntries = entries.reduce(
+      (sum, movement) => sum + Number(movement.amount ?? 0),
+      0
+    );
+
+    const totalExits = exits.reduce(
       (sum, movement) => sum + Number(movement.amount ?? 0),
       0
     );
@@ -300,6 +385,10 @@ export default function DashboardMovimentoFinanceiroPage() {
 
     const otherMovements = filteredMovements.filter(
       (movement) => movement.origin === "other"
+    );
+
+    const expenseMovements = filteredMovements.filter(
+      (movement) => movement.origin === "expense"
     );
 
     const monthlyTotal = monthlyMovements.reduce(
@@ -317,15 +406,26 @@ export default function DashboardMovimentoFinanceiroPage() {
       0
     );
 
+    const expenseTotal = expenseMovements.reduce(
+      (sum, movement) => sum + Number(movement.amount ?? 0),
+      0
+    );
+
     return {
-      totalReceived,
+      totalEntries,
+      totalExits,
+      balance: Number((totalEntries - totalExits).toFixed(2)),
       monthlyTotal,
       extraTotal,
       otherTotal,
+      expenseTotal,
       totalCount: filteredMovements.length,
+      entriesCount: entries.length,
+      exitsCount: exits.length,
       monthlyCount: monthlyMovements.length,
       extraCount: extraMovements.length,
       otherCount: otherMovements.length,
+      expenseCount: expenseMovements.length,
     };
   }, [filteredMovements]);
 
@@ -368,8 +468,25 @@ export default function DashboardMovimentoFinanceiroPage() {
       return;
     }
 
+    const { data: expensesData, error: expensesError } = await supabase
+      .from("expenses")
+      .select(
+        "id, expense_date, due_date, paid_at, amount, category, payee_name, description, payment_method, reference, notes, status, created_at"
+      )
+      .eq("status", "paga")
+      .order("paid_at", { ascending: false })
+      .order("created_at", { ascending: false });
+
+    if (expensesError) {
+      console.error("Erro ao carregar despesas:", expensesError);
+      setMessage(expensesError.message || "Não foi possível carregar as despesas.");
+      setLoading(false);
+      return;
+    }
+
     setPayments((paymentsData as unknown as Payment[]) ?? []);
     setOtherRevenues((revenuesData as unknown as OtherRevenue[]) ?? []);
+    setExpenses((expensesData as unknown as Expense[]) ?? []);
     setLoading(false);
   }
 
@@ -379,7 +496,7 @@ export default function DashboardMovimentoFinanceiroPage() {
 
   return (
     <ProtectedDashboard>
-      <div className="space-y-6">
+      <div className="space-y-5">
         <section className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10">
           <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
             Caixa
@@ -390,19 +507,19 @@ export default function DashboardMovimentoFinanceiroPage() {
           </h1>
 
           <p className="mt-3 max-w-3xl leading-7 text-white/75">
-            Acompanhe as entradas financeiras já registradas pela Tesouraria e identifique a origem de cada recebimento.
+            Acompanhe entradas, saídas e saldo do período, com identificação da origem de cada movimentação.
           </p>
         </section>
 
         <p className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
-          Esta tela mostra entradas confirmadas: mensalidades, contribuições extras e receitas avulsas. Despesas e conciliação bancária serão tratadas em etapa própria.
+          Esta tela considera entradas confirmadas e despesas pagas. Despesas pendentes não reduzem o saldo até serem marcadas como pagas.
         </p>
 
-        <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+        <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
           <div className="grid gap-4 md:grid-cols-3">
             <label className="grid gap-2">
               <span className="text-sm font-bold text-[#13233a]">
-                Mês do recebimento
+                Mês do movimento
               </span>
 
               <input
@@ -433,10 +550,11 @@ export default function DashboardMovimentoFinanceiroPage() {
                 }
                 className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
               >
-                <option value="todos">Todas as origens</option>
+                <option value="todos">Todas as movimentações</option>
                 <option value="monthly">Mensalidades</option>
                 <option value="extra">Contribuições extras</option>
                 <option value="other">Receitas avulsas</option>
+                <option value="expense">Despesas</option>
               </select>
             </label>
 
@@ -452,71 +570,119 @@ export default function DashboardMovimentoFinanceiroPage() {
           </div>
         </section>
 
-        <section className="grid gap-5 md:grid-cols-4">
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm md:col-span-1">
-            <p className="text-sm font-bold text-[#596579]">
-              Total recebido
+        <section className="grid gap-5 md:grid-cols-3">
+          <div className="rounded-2xl border border-green-200 bg-green-50 p-4 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.06em] text-green-800">
+              Total de entradas
             </p>
 
-            <p className="mt-2 text-2xl font-black tracking-[-0.05em] text-[#13233a]">
-              {formatCurrency(summary.totalReceived)}
+            <p className="mt-1 text-2xl font-black tracking-[-0.05em] text-green-800">
+              {formatCurrency(summary.totalEntries)}
             </p>
 
-            <p className="mt-2 text-sm font-bold text-[#596579]">
-              {summary.totalCount} entrada(s)
-            </p>
-          </div>
-
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-            <p className="text-sm font-bold text-[#596579]">Mensalidades</p>
-
-            <p className="mt-2 text-2xl font-black tracking-[-0.05em] text-[#13233a]">
-              {formatCurrency(summary.monthlyTotal)}
-            </p>
-
-            <p className="mt-2 text-sm font-bold text-[#596579]">
-              {summary.monthlyCount} baixa(s)
+            <p className="mt-1 text-xs font-bold text-green-800/80">
+              {summary.entriesCount} entrada(s)
             </p>
           </div>
 
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-            <p className="text-sm font-bold text-[#596579]">
-              Contribuições extras
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.06em] text-red-800">
+              Total de saídas
             </p>
 
-            <p className="mt-2 text-2xl font-black tracking-[-0.05em] text-[#13233a]">
-              {formatCurrency(summary.extraTotal)}
+            <p className="mt-1 text-2xl font-black tracking-[-0.05em] text-red-800">
+              {formatCurrency(summary.totalExits)}
             </p>
 
-            <p className="mt-2 text-sm font-bold text-[#596579]">
-              {summary.extraCount} baixa(s)
+            <p className="mt-1 text-xs font-bold text-red-800/80">
+              {summary.exitsCount} saída(s)
             </p>
           </div>
 
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-            <p className="text-sm font-bold text-[#596579]">
-              Receitas avulsas
+          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">
+              Saldo do período
             </p>
 
-            <p className="mt-2 text-2xl font-black tracking-[-0.05em] text-[#13233a]">
-              {formatCurrency(summary.otherTotal)}
+            <p
+              className={`mt-1 text-2xl font-black tracking-[-0.05em] ${
+                summary.balance < 0 ? "text-red-700" : "text-[#13233a]"
+              }`}
+            >
+              {formatCurrency(summary.balance)}
             </p>
 
-            <p className="mt-2 text-sm font-bold text-[#596579]">
-              {summary.otherCount} registro(s)
+            <p className="mt-1 text-xs font-bold text-[#596579]">
+              Entradas menos saídas
             </p>
           </div>
         </section>
 
-        <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+        <section className="grid gap-5 md:grid-cols-4">
+          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">Mensalidades</p>
+
+            <p className="mt-1 text-xl font-black tracking-[-0.05em] text-[#13233a]">
+              {formatCurrency(summary.monthlyTotal)}
+            </p>
+
+            <p className="mt-1 text-xs font-bold text-[#596579]">
+              {summary.monthlyCount} baixa(s)
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">
+              Contribuições extras
+            </p>
+
+            <p className="mt-1 text-xl font-black tracking-[-0.05em] text-[#13233a]">
+              {formatCurrency(summary.extraTotal)}
+            </p>
+
+            <p className="mt-1 text-xs font-bold text-[#596579]">
+              {summary.extraCount} baixa(s)
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">
+              Receitas avulsas
+            </p>
+
+            <p className="mt-1 text-xl font-black tracking-[-0.05em] text-[#13233a]">
+              {formatCurrency(summary.otherTotal)}
+            </p>
+
+            <p className="mt-1 text-xs font-bold text-[#596579]">
+              {summary.otherCount} registro(s)
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">
+              Despesas pagas
+            </p>
+
+            <p className="mt-1 text-xl font-black tracking-[-0.05em] text-red-700">
+              {formatCurrency(summary.expenseTotal)}
+            </p>
+
+            <p className="mt-1 text-xs font-bold text-[#596579]">
+              {summary.expenseCount} saída(s)
+            </p>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
               <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
-                Entradas do período
+                Movimentações do período
               </h2>
 
               <p className="mt-2 text-sm font-medium text-[#596579]">
-                Cada registro abaixo representa dinheiro efetivamente registrado no sistema.
+                Cada registro abaixo representa entrada ou saída efetivamente registrada no sistema.
               </p>
             </div>
           </div>
@@ -532,11 +698,11 @@ export default function DashboardMovimentoFinanceiroPage() {
           ) : filteredMovements.length === 0 ? (
             <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-5">
               <h3 className="text-xl font-black tracking-[-0.04em] text-[#13233a]">
-                Nenhuma entrada neste período
+                Nenhuma movimentação neste período
               </h3>
 
               <p className="mt-2 leading-7 text-[#596579]">
-                Não há entradas confirmadas para o mês e origem selecionados.
+                Não há entradas ou saídas confirmadas para o mês e origem selecionados.
               </p>
             </div>
           ) : (
@@ -546,6 +712,7 @@ export default function DashboardMovimentoFinanceiroPage() {
                   <thead className="bg-[#f7f8fa] text-xs uppercase tracking-[0.08em] text-[#596579]">
                     <tr>
                       <th className="px-4 py-3">Data</th>
+                      <th className="px-4 py-3">Tipo</th>
                       <th className="px-4 py-3">Origem</th>
                       <th className="px-4 py-3">Descrição</th>
                       <th className="px-4 py-3">Pessoa</th>
@@ -562,6 +729,18 @@ export default function DashboardMovimentoFinanceiroPage() {
                       >
                         <td className="px-4 py-3 font-bold text-[#13233a]">
                           {formatDate(movement.date)}
+                        </td>
+
+                        <td className="px-4 py-3">
+                          <span
+                            className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] ${
+                              movement.direction === "saida"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-green-100 text-green-800"
+                            }`}
+                          >
+                            {getDirectionLabel(movement.direction)}
+                          </span>
                         </td>
 
                         <td className="px-4 py-3">
@@ -599,11 +778,18 @@ export default function DashboardMovimentoFinanceiroPage() {
                         </td>
 
                         <td className="px-4 py-3 font-bold text-[#596579]">
-                          {paymentMethodLabels[movement.payment_method] ??
-                            movement.payment_method}
+                          {movement.payment_method
+                            ? paymentMethodLabels[movement.payment_method] ??
+                              movement.payment_method
+                            : "Não informado"}
                         </td>
 
-                        <td className="px-4 py-3 text-right font-black text-[#13233a]">
+                        <td
+                          className={`px-4 py-3 text-right font-black ${getAmountClass(
+                            movement.direction
+                          )}`}
+                        >
+                          {movement.direction === "saida" ? "- " : "+ "}
                           {formatCurrency(movement.amount)}
                         </td>
                       </tr>
@@ -619,6 +805,16 @@ export default function DashboardMovimentoFinanceiroPage() {
                     className="rounded-2xl border border-[#e8dccb] p-4"
                   >
                     <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] ${
+                          movement.direction === "saida"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-green-100 text-green-800"
+                        }`}
+                      >
+                        {getDirectionLabel(movement.direction)}
+                      </span>
+
                       <span className="rounded-full bg-[#f7f8fa] px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#13233a]">
                         {movement.originBadge}
                       </span>
@@ -628,7 +824,12 @@ export default function DashboardMovimentoFinanceiroPage() {
                       </span>
                     </div>
 
-                    <h3 className="mt-3 text-lg font-black tracking-[-0.04em] text-[#13233a]">
+                    <h3
+                      className={`mt-3 text-lg font-black tracking-[-0.04em] ${getAmountClass(
+                        movement.direction
+                      )}`}
+                    >
+                      {movement.direction === "saida" ? "- " : "+ "}
                       {formatCurrency(movement.amount)}
                     </h3>
 
@@ -643,8 +844,10 @@ export default function DashboardMovimentoFinanceiroPage() {
                     <div className="mt-3 grid gap-2 text-sm text-[#596579]">
                       <p>
                         <strong>Forma:</strong>{" "}
-                        {paymentMethodLabels[movement.payment_method] ??
-                          movement.payment_method}
+                        {movement.payment_method
+                          ? paymentMethodLabels[movement.payment_method] ??
+                            movement.payment_method
+                          : "Não informado"}
                       </p>
 
                       <p>
