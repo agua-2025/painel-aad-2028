@@ -23,6 +23,7 @@ const menuItems = [
   { label: "Inadimplência", href: "/dashboard/inadimplencia", icon: "⚠️" },
   { label: "Movimento Financeiro", href: "/dashboard/movimento-financeiro", icon: "📒" },
   { label: "Saldos do Caixa", href: "/dashboard/saldos-caixa", icon: "🏦" },
+  { label: "Fechamento Mensal", href: "/dashboard/fechamento-mensal", icon: "🔒" },
   { label: "Receitas Avulsas", href: "/dashboard/receitas-avulsas", icon: "➕" },
   { label: "Despesas", href: "/dashboard/despesas", icon: "📤" },
   { label: "Prestação de Contas", href: "/dashboard/prestacao-contas", icon: "📑" },
