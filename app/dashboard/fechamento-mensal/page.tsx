@@ -31,6 +31,18 @@ type CashMonthlyBalance = {
   opening_balance: number;
 };
 
+type MonthlyClosingLog = {
+  id: string;
+  monthly_closing_id: string | null;
+  month_ref: string;
+  action: string;
+  previous_status: string | null;
+  new_status: string | null;
+  reason: string | null;
+  notes: string | null;
+  created_at: string;
+};
+
 type MonthlyClosing = {
   id: string;
   month_ref: string;
@@ -151,6 +163,20 @@ function getConciliationInfo(difference: number | null) {
   };
 }
 
+function getLogActionLabel(action: string) {
+  if (action === "fechamento") return "Fechamento registrado";
+  if (action === "atualizacao_fechamento") return "Fechamento atualizado";
+  if (action === "reabertura") return "Mês reaberto";
+  return action;
+}
+
+function formatStatus(status?: string | null) {
+  if (!status) return "—";
+  if (status === "fechado") return "Fechado";
+  if (status === "reaberto") return "Reaberto";
+  return status;
+}
+
 export default function DashboardFechamentoMensalPage() {
   const [month, setMonth] = useState(getCurrentMonth());
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -158,6 +184,7 @@ export default function DashboardFechamentoMensalPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [cashBalance, setCashBalance] = useState<CashMonthlyBalance | null>(null);
   const [closings, setClosings] = useState<MonthlyClosing[]>([]);
+  const [logs, setLogs] = useState<MonthlyClosingLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -173,6 +200,10 @@ export default function DashboardFechamentoMensalPage() {
   const selectedClosing = useMemo(() => {
     return closings.find((closing) => getMonthFromDate(closing.month_ref) === month) ?? null;
   }, [closings, month]);
+
+  const selectedMonthLogs = useMemo(() => {
+    return logs.filter((log) => getMonthFromDate(log.month_ref) === month);
+  }, [logs, month]);
 
   const summary = useMemo(() => {
     const monthPayments = payments.filter(
@@ -328,11 +359,25 @@ export default function DashboardFechamentoMensalPage() {
       return;
     }
 
+    const { data: logsData, error: logsError } = await supabase
+      .from("monthly_closing_logs")
+      .select(
+        "id, monthly_closing_id, month_ref, action, previous_status, new_status, reason, notes, created_at"
+      )
+      .order("created_at", { ascending: false });
+
+    if (logsError) {
+      setMessage(logsError.message || "Não foi possível carregar o histórico do fechamento.");
+      setLoading(false);
+      return;
+    }
+
     setPayments((paymentsData as unknown as Payment[]) ?? []);
     setRevenues((revenuesData as unknown as OtherRevenue[]) ?? []);
     setExpenses((expensesData as unknown as Expense[]) ?? []);
     setCashBalance((balanceData as unknown as CashMonthlyBalance) ?? null);
     setClosings((closingsData as unknown as MonthlyClosing[]) ?? []);
+    setLogs((logsData as unknown as MonthlyClosingLog[]) ?? []);
 
     setLoading(false);
   }
@@ -877,6 +922,87 @@ export default function DashboardFechamentoMensalPage() {
             </div>
           )}
         </section>
+        <section className="rounded-xl border border-[#e8dccb] bg-white px-4 py-3 shadow-sm">
+          <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 className="text-sm font-black tracking-[-0.02em] text-[#13233a]">
+                Histórico do mês selecionado
+              </h2>
+
+              <p className="text-[11px] font-bold text-[#596579]">
+                Registro técnico de alterações do fechamento.
+              </p>
+            </div>
+
+            <p className="text-[11px] font-bold text-[#596579]">
+              {selectedMonthLogs.length} ocorrência(s)
+            </p>
+          </div>
+
+          {selectedMonthLogs.length === 0 ? (
+            <p className="mt-3 rounded-xl bg-[#f7f8fa] px-4 py-3 text-xs font-bold text-[#596579]">
+              Nenhum histórico encontrado para este mês.
+            </p>
+          ) : (
+            <div className="mt-3 overflow-hidden rounded-lg border border-[#e8dccb]">
+              <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2 text-[10px] font-black uppercase tracking-[0.08em] text-[#596579] md:grid">
+                <div className="col-span-3">Ocorrência</div>
+                <div className="col-span-2">Data</div>
+                <div className="col-span-2">Status</div>
+                <div className="col-span-5">Justificativa/observações</div>
+              </div>
+
+              <div className="divide-y divide-[#eee7db]">
+                {selectedMonthLogs.map((log) => (
+                  <article
+                    key={log.id}
+                    className="grid gap-2 px-3 py-2 text-xs md:grid-cols-12 md:items-start"
+                  >
+                    <div className="md:col-span-3">
+                      <p className={`font-bold ${log.action === "reabertura" ? "text-amber-800" : "text-[#13233a]"}`}>
+                        {getLogActionLabel(log.action)}
+                      </p>
+
+                      <p className="text-[11px] font-bold text-[#596579]">
+                        {formatMonth(month)}
+                      </p>
+                    </div>
+
+                    <div className="font-bold text-[#596579] md:col-span-2">
+                      {formatDate(log.created_at)}
+                    </div>
+
+                    <div className="font-bold text-[#596579] md:col-span-2">
+                      {formatStatus(log.previous_status)} → {formatStatus(log.new_status)}
+                    </div>
+
+                    <div className="space-y-1 md:col-span-5">
+                      {log.reason && (
+                        <p className="font-bold text-[#13233a]">
+                          Motivo: {log.reason}
+                        </p>
+                      )}
+
+                      {log.notes && (
+                        <p className="text-[11px] font-bold leading-5 text-[#596579]">
+                          Observações: {log.notes}
+                        </p>
+                      )}
+
+                      {!log.reason && !log.notes && (
+                        <p className="text-[11px] font-bold text-[#596579]">
+                          Sem justificativa adicional.
+                        </p>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+
+
       </div>
     </ProtectedDashboard>
   );
