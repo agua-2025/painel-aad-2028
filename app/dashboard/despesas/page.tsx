@@ -17,25 +17,15 @@ type Expense = {
   reference: string | null;
   notes: string | null;
   status: string;
+  receipt_path: string | null;
+  receipt_filename: string | null;
+  receipt_mime_type: string | null;
+  receipt_size: number | null;
+  receipt_uploaded_at: string | null;
   created_at: string;
 };
 
-const categoryLabels: Record<string, string> = {
-  cartorio: "Cartório",
-  taxa_bancaria: "Taxa bancária",
-  fornecedor: "Fornecedor",
-  evento: "Evento",
-  material: "Material",
-  servico: "Serviço",
-  decoracao: "Decoração",
-  cerimonial: "Cerimonial",
-  locacao: "Locação",
-  reembolso: "Reembolso",
-  ajuste: "Ajuste",
-  outros: "Outros",
-};
-
-const categoryOptions = [
+const categories = [
   { value: "cartorio", label: "Cartório" },
   { value: "taxa_bancaria", label: "Taxa bancária" },
   { value: "fornecedor", label: "Fornecedor" },
@@ -50,6 +40,12 @@ const categoryOptions = [
   { value: "outros", label: "Outros" },
 ];
 
+const statusOptions = [
+  { value: "pendente", label: "Pendente" },
+  { value: "paga", label: "Paga" },
+  { value: "cancelada", label: "Cancelada" },
+];
+
 const paymentMethodLabels: Record<string, string> = {
   pix: "Pix",
   dinheiro: "Dinheiro",
@@ -59,20 +55,12 @@ const paymentMethodLabels: Record<string, string> = {
   outros: "Outros",
 };
 
-const paymentMethodOptions = [
-  { value: "pix", label: "Pix" },
-  { value: "dinheiro", label: "Dinheiro" },
-  { value: "transferencia", label: "Transferência" },
-  { value: "deposito", label: "Depósito" },
-  { value: "cartao", label: "Cartão" },
-  { value: "outros", label: "Outros" },
+const allowedReceiptTypes = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
 ];
-
-const statusLabels: Record<string, string> = {
-  pendente: "Pendente",
-  paga: "Paga",
-  cancelada: "Cancelada",
-};
 
 function formatCurrency(value: number | null | undefined) {
   return Number(value ?? 0).toLocaleString("pt-BR", {
@@ -98,7 +86,11 @@ function getCurrentMonth() {
   return new Date().toISOString().slice(0, 7);
 }
 
-function getMonthFromDate(value?: string | null) {
+function getToday() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getMonthFromDate(value: string) {
   return value ? value.slice(0, 7) : "";
 }
 
@@ -106,6 +98,14 @@ function getReferenceDate(expense: Expense) {
   return expense.status === "paga" && expense.paid_at
     ? expense.paid_at
     : expense.expense_date;
+}
+
+function getCategoryLabel(value: string) {
+  return categories.find((category) => category.value === value)?.label ?? value;
+}
+
+function getStatusLabel(value: string) {
+  return statusOptions.find((status) => status.value === value)?.label ?? value;
 }
 
 function getStatusClass(status: string) {
@@ -117,18 +117,36 @@ function getStatusClass(status: string) {
     return "bg-red-100 text-red-800";
   }
 
-  return "bg-amber-100 text-amber-900";
+  return "bg-amber-100 text-amber-800";
+}
+
+function sanitizeFileName(fileName: string) {
+  return fileName
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9._-]/g, "-")
+    .replace(/-+/g, "-")
+    .toLowerCase();
+}
+
+function formatFileSize(size?: number | null) {
+  if (!size) return "Tamanho não informado";
+
+  if (size < 1024 * 1024) {
+    return `${(size / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(size / (1024 * 1024)).toFixed(2)} MB`;
 }
 
 export default function DashboardDespesasPage() {
-  const today = new Date().toISOString().slice(0, 10);
-
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [processingId, setProcessingId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
 
   const [filters, setFilters] = useState({
     month: getCurrentMonth(),
@@ -137,59 +155,68 @@ export default function DashboardDespesasPage() {
   });
 
   const [form, setForm] = useState({
-    expense_date: today,
+    expense_date: getToday(),
     due_date: "",
-    paid_at: today,
+    paid_at: "",
     amount: "",
     category: "outros",
     payee_name: "",
     description: "",
+    status: "pendente",
     payment_method: "pix",
     reference: "",
     notes: "",
-    status: "paga",
   });
 
   const filteredExpenses = useMemo(() => {
     return expenses.filter((expense) => {
       const sameMonth = getMonthFromDate(getReferenceDate(expense)) === filters.month;
 
-      const sameStatus =
+      const statusMatches =
         filters.status === "todos" || expense.status === filters.status;
 
-      const sameCategory =
+      const categoryMatches =
         filters.category === "todas" || expense.category === filters.category;
 
-      return sameMonth && sameStatus && sameCategory;
+      return sameMonth && statusMatches && categoryMatches;
     });
-  }, [expenses, filters.month, filters.status, filters.category]);
+  }, [expenses, filters]);
 
   const summary = useMemo(() => {
-    const paid = filteredExpenses.filter((expense) => expense.status === "paga");
-    const pending = filteredExpenses.filter(
+    const paidExpenses = filteredExpenses.filter(
+      (expense) => expense.status === "paga"
+    );
+
+    const pendingExpenses = filteredExpenses.filter(
       (expense) => expense.status === "pendente"
     );
-    const canceled = filteredExpenses.filter(
+
+    const canceledExpenses = filteredExpenses.filter(
       (expense) => expense.status === "cancelada"
     );
 
-    const paidTotal = paid.reduce(
-      (sum, expense) => sum + Number(expense.amount ?? 0),
-      0
-    );
-
-    const pendingTotal = pending.reduce(
-      (sum, expense) => sum + Number(expense.amount ?? 0),
-      0
+    const paidWithoutReceipt = paidExpenses.filter(
+      (expense) => !expense.receipt_path
     );
 
     return {
-      paidTotal,
-      pendingTotal,
-      paidCount: paid.length,
-      pendingCount: pending.length,
-      canceledCount: canceled.length,
+      paidTotal: paidExpenses.reduce(
+        (sum, expense) => sum + Number(expense.amount ?? 0),
+        0
+      ),
+      pendingTotal: pendingExpenses.reduce(
+        (sum, expense) => sum + Number(expense.amount ?? 0),
+        0
+      ),
+      canceledTotal: canceledExpenses.reduce(
+        (sum, expense) => sum + Number(expense.amount ?? 0),
+        0
+      ),
       totalCount: filteredExpenses.length,
+      paidCount: paidExpenses.length,
+      pendingCount: pendingExpenses.length,
+      canceledCount: canceledExpenses.length,
+      paidWithoutReceiptCount: paidWithoutReceipt.length,
     };
   }, [filteredExpenses]);
 
@@ -212,17 +239,83 @@ export default function DashboardDespesasPage() {
     return profile?.id ?? null;
   }
 
+  async function uploadReceipt(expenseId: string, file: File) {
+    if (!allowedReceiptTypes.includes(file.type)) {
+      throw new Error("Formato de comprovante inválido. Use PDF, JPG, PNG ou WEBP.");
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error("O comprovante deve ter no máximo 10 MB.");
+    }
+
+    const supabase = createClient();
+    const safeFileName = sanitizeFileName(file.name);
+    const filePath = `expenses/${expenseId}/${Date.now()}-${safeFileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("expense-receipts")
+      .upload(filePath, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.type,
+      });
+
+    if (uploadError) {
+      throw new Error(uploadError.message || "Não foi possível enviar o comprovante.");
+    }
+
+    const { error: updateError } = await supabase
+      .from("expenses")
+      .update({
+        receipt_path: filePath,
+        receipt_filename: file.name,
+        receipt_mime_type: file.type,
+        receipt_size: file.size,
+        receipt_uploaded_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", expenseId);
+
+    if (updateError) {
+      throw new Error(
+        updateError.message || "O arquivo foi enviado, mas não foi vinculado à despesa."
+      );
+    }
+  }
+
+  async function openReceipt(expense: Expense) {
+    if (!expense.receipt_path) {
+      setMessage("Esta despesa não possui comprovante anexado.");
+      return;
+    }
+
+    setMessage("");
+
+    const supabase = createClient();
+
+    const { data, error } = await supabase.storage
+      .from("expense-receipts")
+      .createSignedUrl(expense.receipt_path, 60 * 5);
+
+    if (error || !data?.signedUrl) {
+      setMessage(error?.message || "Não foi possível abrir o comprovante.");
+      return;
+    }
+
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  }
+
   async function loadExpenses() {
     setLoading(true);
     setMessage("");
-    setSuccessMessage("");
+    setSuccess("");
 
     const supabase = createClient();
 
     const { data, error } = await supabase
       .from("expenses")
       .select(
-        "id, expense_date, due_date, paid_at, amount, category, payee_name, description, payment_method, reference, notes, status, created_at"
+        "id, expense_date, due_date, paid_at, amount, category, payee_name, description, payment_method, reference, notes, status, receipt_path, receipt_filename, receipt_mime_type, receipt_size, receipt_uploaded_at, created_at"
       )
       .order("expense_date", { ascending: false })
       .order("created_at", { ascending: false });
@@ -247,30 +340,36 @@ export default function DashboardDespesasPage() {
 
     setSaving(true);
     setMessage("");
-    setSuccessMessage("");
+    setSuccess("");
 
     const amount = Number(String(form.amount).replace(",", "."));
 
-    if (!form.expense_date) {
-      setMessage("Informe a data da despesa.");
-      setSaving(false);
-      return;
-    }
-
-    if (!amount || amount <= 0) {
-      setMessage("Informe um valor válido.");
-      setSaving(false);
-      return;
-    }
-
     if (!form.description.trim()) {
-      setMessage("Informe uma descrição para identificar a despesa.");
+      setMessage("Informe a descrição da despesa.");
+      setSaving(false);
+      return;
+    }
+
+    if (Number.isNaN(amount) || amount <= 0) {
+      setMessage("Informe um valor válido para a despesa.");
       setSaving(false);
       return;
     }
 
     if (form.status === "paga" && !form.paid_at) {
-      setMessage("Informe a data do pagamento da despesa.");
+      setMessage("Informe a data de pagamento da despesa paga.");
+      setSaving(false);
+      return;
+    }
+
+    if (receiptFile && !allowedReceiptTypes.includes(receiptFile.type)) {
+      setMessage("Formato de comprovante inválido. Use PDF, JPG, PNG ou WEBP.");
+      setSaving(false);
+      return;
+    }
+
+    if (receiptFile && receiptFile.size > 10 * 1024 * 1024) {
+      setMessage("O comprovante deve ter no máximo 10 MB.");
       setSaving(false);
       return;
     }
@@ -278,7 +377,7 @@ export default function DashboardDespesasPage() {
     const profileId = await getCurrentProfileId();
     const supabase = createClient();
 
-    const { error } = await supabase.from("expenses").insert({
+    const payload = {
       expense_date: form.expense_date,
       due_date: form.due_date || null,
       paid_at: form.status === "paga" ? form.paid_at : null,
@@ -291,44 +390,81 @@ export default function DashboardDespesasPage() {
       notes: form.notes.trim() || null,
       status: form.status,
       created_by: profileId,
-    });
+      updated_at: new Date().toISOString(),
+    };
 
-    if (error) {
-      setMessage(error.message || "Não foi possível registrar a despesa.");
+    const { data: insertedExpense, error } = await supabase
+      .from("expenses")
+      .insert(payload)
+      .select("id")
+      .single();
+
+    if (error || !insertedExpense?.id) {
+      setMessage(error?.message || "Não foi possível registrar a despesa.");
       setSaving(false);
       return;
     }
 
-    setSuccessMessage("Despesa registrada com sucesso.");
+    try {
+      if (receiptFile) {
+        await uploadReceipt(insertedExpense.id, receiptFile);
+      }
+
+      setSuccess("Despesa registrada com sucesso.");
+    } catch (receiptError) {
+      setMessage(
+        receiptError instanceof Error
+          ? `Despesa registrada, mas houve erro no comprovante: ${receiptError.message}`
+          : "Despesa registrada, mas houve erro ao enviar o comprovante."
+      );
+    }
 
     setForm({
-      expense_date: today,
+      expense_date: getToday(),
       due_date: "",
-      paid_at: today,
+      paid_at: "",
       amount: "",
       category: "outros",
       payee_name: "",
       description: "",
+      status: "pendente",
       payment_method: "pix",
       reference: "",
       notes: "",
-      status: "paga",
     });
+
+    setReceiptFile(null);
+
+    const input = document.getElementById("receipt_file") as HTMLInputElement | null;
+    if (input) input.value = "";
 
     setSaving(false);
     await loadExpenses();
   }
 
-  async function markAsPaid(expense: Expense) {
-    const confirmed = window.confirm(
-      "Confirmar o pagamento desta despesa com a data de hoje?"
-    );
-
-    if (!confirmed) return;
-
-    setProcessingId(expense.id);
+  async function handleAttachReceipt(expense: Expense, file: File) {
+    setSaving(true);
     setMessage("");
-    setSuccessMessage("");
+    setSuccess("");
+
+    try {
+      await uploadReceipt(expense.id, file);
+      setSuccess("Comprovante anexado com sucesso.");
+      await loadExpenses();
+    } catch (receiptError) {
+      setMessage(
+        receiptError instanceof Error
+          ? receiptError.message
+          : "Não foi possível anexar o comprovante."
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function markAsPaid(expense: Expense) {
+    setMessage("");
+    setSuccess("");
 
     const supabase = createClient();
 
@@ -336,33 +472,30 @@ export default function DashboardDespesasPage() {
       .from("expenses")
       .update({
         status: "paga",
-        paid_at: today,
-        payment_method: expense.payment_method || "pix",
+        paid_at: expense.paid_at ?? getToday(),
+        payment_method: expense.payment_method ?? "pix",
         updated_at: new Date().toISOString(),
       })
       .eq("id", expense.id);
 
     if (error) {
       setMessage(error.message || "Não foi possível marcar a despesa como paga.");
-      setProcessingId(null);
       return;
     }
 
-    setSuccessMessage("Despesa marcada como paga.");
-    setProcessingId(null);
+    setSuccess("Despesa marcada como paga.");
     await loadExpenses();
   }
 
   async function cancelExpense(expense: Expense) {
+    setMessage("");
+    setSuccess("");
+
     const confirmed = window.confirm(
-      "Tem certeza que deseja cancelar esta despesa? Ela continuará no histórico, mas não contará como saída paga."
+      "Deseja cancelar esta despesa? O registro ficará no histórico."
     );
 
     if (!confirmed) return;
-
-    setProcessingId(expense.id);
-    setMessage("");
-    setSuccessMessage("");
 
     const supabase = createClient();
 
@@ -376,21 +509,19 @@ export default function DashboardDespesasPage() {
 
     if (error) {
       setMessage(error.message || "Não foi possível cancelar a despesa.");
-      setProcessingId(null);
       return;
     }
 
-    setSuccessMessage("Despesa cancelada.");
-    setProcessingId(null);
+    setSuccess("Despesa cancelada.");
     await loadExpenses();
   }
 
   return (
     <ProtectedDashboard>
-      <div className="space-y-6">
+      <div className="space-y-5">
         <section className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10">
           <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
-            Saídas financeiras
+            Financeiro
           </p>
 
           <h1 className="mt-3 text-3xl font-black tracking-[-0.04em] md:text-4xl">
@@ -398,29 +529,37 @@ export default function DashboardDespesasPage() {
           </h1>
 
           <p className="mt-3 max-w-3xl leading-7 text-white/75">
-            Registre e acompanhe despesas da Associação, identificando favorecido, finalidade, valor, vencimento e pagamento.
+            Registre despesas, pagamentos e comprovantes vinculados às saídas da Associação.
           </p>
         </section>
 
         <p className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
-          Despesas pagas serão consideradas como saídas no Movimento Financeiro após a integração. Despesas pendentes servem para controle de obrigações futuras.
+          Despesas pendentes não entram como saída no Movimento Financeiro. Apenas despesas pagas reduzem o saldo do caixa.
         </p>
 
-        {successMessage && (
-          <section className="rounded-3xl border border-green-200 bg-green-50 p-5 shadow-sm">
-            <p className="font-bold text-green-800">{successMessage}</p>
+        {success && (
+          <section className="rounded-2xl border border-green-200 bg-green-50 p-4 shadow-sm">
+            <p className="font-bold text-green-800">{success}</p>
           </section>
         )}
 
         {message && (
-          <section className="rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm">
+          <section className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
             <p className="font-bold text-red-700">{message}</p>
           </section>
         )}
 
-        <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+        {summary.paidWithoutReceiptCount > 0 && (
+          <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+            <p className="font-bold text-amber-900">
+              Atenção: há {summary.paidWithoutReceiptCount} despesa(s) paga(s) sem comprovante anexado no período filtrado.
+            </p>
+          </section>
+        )}
+
+        <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
           <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
-            Nova despesa
+            Registrar despesa
           </h2>
 
           <form onSubmit={handleSubmit} className="mt-5 grid gap-4">
@@ -439,6 +578,7 @@ export default function DashboardDespesasPage() {
                       expense_date: event.target.value,
                     }))
                   }
+                  required
                   className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
                 />
               </label>
@@ -469,7 +609,6 @@ export default function DashboardDespesasPage() {
                 <input
                   type="number"
                   step="0.01"
-                  min="0"
                   value={form.amount}
                   onChange={(event) =>
                     setForm((previous) => ({
@@ -477,6 +616,7 @@ export default function DashboardDespesasPage() {
                       amount: event.target.value,
                     }))
                   }
+                  required
                   placeholder="0,00"
                   className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
                 />
@@ -493,36 +633,24 @@ export default function DashboardDespesasPage() {
                     setForm((previous) => ({
                       ...previous,
                       status: event.target.value,
+                      paid_at:
+                        event.target.value === "paga"
+                          ? previous.paid_at || getToday()
+                          : "",
                     }))
                   }
                   className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
                 >
-                  <option value="paga">Paga</option>
-                  <option value="pendente">Pendente</option>
+                  {statusOptions.map((status) => (
+                    <option key={status.value} value={status.value}>
+                      {status.label}
+                    </option>
+                  ))}
                 </select>
               </label>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-4">
-              <label className="grid gap-2">
-                <span className="text-sm font-bold text-[#13233a]">
-                  Data do pagamento
-                </span>
-
-                <input
-                  type="date"
-                  value={form.paid_at}
-                  disabled={form.status !== "paga"}
-                  onChange={(event) =>
-                    setForm((previous) => ({
-                      ...previous,
-                      paid_at: event.target.value,
-                    }))
-                  }
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none disabled:bg-slate-50"
-                />
-              </label>
-
+            <div className="grid gap-4 md:grid-cols-3">
               <label className="grid gap-2">
                 <span className="text-sm font-bold text-[#13233a]">
                   Categoria
@@ -538,7 +666,7 @@ export default function DashboardDespesasPage() {
                   }
                   className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
                 >
-                  {categoryOptions.map((category) => (
+                  {categories.map((category) => (
                     <option key={category.value} value={category.value}>
                       {category.label}
                     </option>
@@ -546,37 +674,12 @@ export default function DashboardDespesasPage() {
                 </select>
               </label>
 
-              <label className="grid gap-2">
-                <span className="text-sm font-bold text-[#13233a]">
-                  Forma
-                </span>
-
-                <select
-                  value={form.payment_method}
-                  disabled={form.status !== "paga"}
-                  onChange={(event) =>
-                    setForm((previous) => ({
-                      ...previous,
-                      payment_method: event.target.value,
-                    }))
-                  }
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none disabled:bg-slate-50"
-                >
-                  {paymentMethodOptions.map((method) => (
-                    <option key={method.value} value={method.value}>
-                      {method.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="grid gap-2">
+              <label className="grid gap-2 md:col-span-2">
                 <span className="text-sm font-bold text-[#13233a]">
                   Favorecido/fornecedor
                 </span>
 
                 <input
-                  type="text"
                   value={form.payee_name}
                   onChange={(event) =>
                     setForm((previous) => ({
@@ -584,7 +687,7 @@ export default function DashboardDespesasPage() {
                       payee_name: event.target.value,
                     }))
                   }
-                  placeholder="Ex.: Cartório, fornecedor, prestador..."
+                  placeholder="Ex.: Cartório, fornecedor, prestador de serviço"
                   className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
                 />
               </label>
@@ -592,11 +695,10 @@ export default function DashboardDespesasPage() {
 
             <label className="grid gap-2">
               <span className="text-sm font-bold text-[#13233a]">
-                Descrição/finalidade
+                Descrição
               </span>
 
               <input
-                type="text"
                 value={form.description}
                 onChange={(event) =>
                   setForm((previous) => ({
@@ -604,28 +706,96 @@ export default function DashboardDespesasPage() {
                     description: event.target.value,
                   }))
                 }
-                placeholder="Ex.: Pagamento de taxa de registro da Associação"
+                required
+                placeholder="Ex.: Pagamento de taxa de registro em cartório"
                 className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
               />
             </label>
 
+            {form.status === "paga" && (
+              <div className="grid gap-4 md:grid-cols-3">
+                <label className="grid gap-2">
+                  <span className="text-sm font-bold text-[#13233a]">
+                    Data do pagamento
+                  </span>
+
+                  <input
+                    type="date"
+                    value={form.paid_at}
+                    onChange={(event) =>
+                      setForm((previous) => ({
+                        ...previous,
+                        paid_at: event.target.value,
+                      }))
+                    }
+                    required
+                    className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  />
+                </label>
+
+                <label className="grid gap-2">
+                  <span className="text-sm font-bold text-[#13233a]">
+                    Forma de pagamento
+                  </span>
+
+                  <select
+                    value={form.payment_method}
+                    onChange={(event) =>
+                      setForm((previous) => ({
+                        ...previous,
+                        payment_method: event.target.value,
+                      }))
+                    }
+                    className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  >
+                    <option value="pix">Pix</option>
+                    <option value="dinheiro">Dinheiro</option>
+                    <option value="transferencia">Transferência</option>
+                    <option value="deposito">Depósito</option>
+                    <option value="cartao">Cartão</option>
+                    <option value="outros">Outros</option>
+                  </select>
+                </label>
+
+                <label className="grid gap-2">
+                  <span className="text-sm font-bold text-[#13233a]">
+                    Referência/comprovante
+                  </span>
+
+                  <input
+                    value={form.reference}
+                    onChange={(event) =>
+                      setForm((previous) => ({
+                        ...previous,
+                        reference: event.target.value,
+                      }))
+                    }
+                    placeholder="Ex.: ID Pix, boleto, recibo"
+                    className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  />
+                </label>
+              </div>
+            )}
+
             <label className="grid gap-2">
               <span className="text-sm font-bold text-[#13233a]">
-                Comprovante/Referência
+                Comprovante/documento
               </span>
 
               <input
-                type="text"
-                value={form.reference}
-                onChange={(event) =>
-                  setForm((previous) => ({
-                    ...previous,
-                    reference: event.target.value,
-                  }))
-                }
-                placeholder="Ex.: ID do Pix, número do recibo, comprovante, nota fiscal..."
-                className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                id="receipt_file"
+                type="file"
+                accept="application/pdf,image/jpeg,image/png,image/webp"
+                onChange={(event) => {
+                  const file = event.target.files?.[0] ?? null;
+                  setReceiptFile(file);
+                }}
+                className="w-full rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#13233a] outline-none file:mr-4 file:rounded-full file:border-0 file:bg-[#13233a] file:px-4 file:py-2 file:text-sm file:font-black file:text-white"
               />
+
+              <span className="text-xs font-bold text-[#596579]">
+                Aceita PDF, JPG, PNG e WEBP até 10 MB. Para despesa pendente é opcional; para despesa paga é recomendado.
+              </span>
             </label>
 
             <label className="grid gap-2">
@@ -657,43 +827,7 @@ export default function DashboardDespesasPage() {
           </form>
         </section>
 
-        <section className="grid gap-5 md:grid-cols-4">
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-            <p className="text-sm font-bold text-[#596579]">Pagas no período</p>
-            <p className="mt-2 text-2xl font-black tracking-[-0.05em] text-[#13233a]">
-              {formatCurrency(summary.paidTotal)}
-            </p>
-            <p className="mt-2 text-sm font-bold text-[#596579]">
-              {summary.paidCount} despesa(s)
-            </p>
-          </div>
-
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-            <p className="text-sm font-bold text-[#596579]">Pendentes</p>
-            <p className="mt-2 text-2xl font-black tracking-[-0.05em] text-[#13233a]">
-              {formatCurrency(summary.pendingTotal)}
-            </p>
-            <p className="mt-2 text-sm font-bold text-[#596579]">
-              {summary.pendingCount} despesa(s)
-            </p>
-          </div>
-
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-            <p className="text-sm font-bold text-[#596579]">Canceladas</p>
-            <p className="mt-2 text-2xl font-black tracking-[-0.05em] text-[#13233a]">
-              {summary.canceledCount}
-            </p>
-          </div>
-
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-            <p className="text-sm font-bold text-[#596579]">Registros</p>
-            <p className="mt-2 text-2xl font-black tracking-[-0.05em] text-[#13233a]">
-              {summary.totalCount}
-            </p>
-          </div>
-        </section>
-
-        <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+        <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
           <div className="grid gap-4 md:grid-cols-4">
             <label className="grid gap-2">
               <span className="text-sm font-bold text-[#13233a]">
@@ -729,9 +863,11 @@ export default function DashboardDespesasPage() {
                 className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
               >
                 <option value="todos">Todos</option>
-                <option value="paga">Pagas</option>
-                <option value="pendente">Pendentes</option>
-                <option value="cancelada">Canceladas</option>
+                {statusOptions.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
+                ))}
               </select>
             </label>
 
@@ -751,7 +887,7 @@ export default function DashboardDespesasPage() {
                 className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
               >
                 <option value="todas">Todas</option>
-                {categoryOptions.map((category) => (
+                {categories.map((category) => (
                   <option key={category.value} value={category.value}>
                     {category.label}
                   </option>
@@ -771,7 +907,65 @@ export default function DashboardDespesasPage() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+        <section className="grid gap-5 md:grid-cols-4">
+          <div className="rounded-2xl border border-green-200 bg-green-50 p-4 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.06em] text-green-800">
+              Pagas no período
+            </p>
+
+            <p className="mt-1 text-2xl font-black tracking-[-0.05em] text-green-800">
+              {formatCurrency(summary.paidTotal)}
+            </p>
+
+            <p className="mt-1 text-xs font-bold text-green-800/80">
+              {summary.paidCount} despesa(s)
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.06em] text-amber-800">
+              Pendentes
+            </p>
+
+            <p className="mt-1 text-2xl font-black tracking-[-0.05em] text-amber-800">
+              {formatCurrency(summary.pendingTotal)}
+            </p>
+
+            <p className="mt-1 text-xs font-bold text-amber-800/80">
+              {summary.pendingCount} despesa(s)
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.06em] text-red-800">
+              Canceladas
+            </p>
+
+            <p className="mt-1 text-2xl font-black tracking-[-0.05em] text-red-800">
+              {formatCurrency(summary.canceledTotal)}
+            </p>
+
+            <p className="mt-1 text-xs font-bold text-red-800/80">
+              {summary.canceledCount} despesa(s)
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">
+              Registros
+            </p>
+
+            <p className="mt-1 text-2xl font-black tracking-[-0.05em] text-[#13233a]">
+              {summary.totalCount}
+            </p>
+
+            <p className="mt-1 text-xs font-bold text-[#596579]">
+              No filtro atual
+            </p>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
           <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
             Despesas registradas
           </h2>
@@ -787,7 +981,7 @@ export default function DashboardDespesasPage() {
               </h3>
 
               <p className="mt-2 leading-7 text-[#596579]">
-                Não há despesas para o mês, status e categoria selecionados.
+                Não há despesas para os filtros selecionados.
               </p>
             </div>
           ) : (
@@ -795,98 +989,133 @@ export default function DashboardDespesasPage() {
               {filteredExpenses.map((expense) => (
                 <article
                   key={expense.id}
-                  className="rounded-3xl border border-[#e8dccb] p-4"
+                  className="rounded-xl border border-[#e8dccb] px-4 py-3"
                 >
-                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-xs font-black uppercase tracking-[0.2em] text-[#c7a56b]">
-                          {categoryLabels[expense.category] ?? expense.category}
-                        </p>
-
                         <span
-                          className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] ${getStatusClass(expense.status)}`}
+                          className={`rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] ${getStatusClass(
+                            expense.status
+                          )}`}
                         >
-                          {statusLabels[expense.status] ?? expense.status}
+                          {getStatusLabel(expense.status)}
                         </span>
+
+                        <span className="rounded-full bg-[#f7f8fa] px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] text-[#13233a]">
+                          {getCategoryLabel(expense.category)}
+                        </span>
+
+                        {expense.receipt_path ? (
+                          <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] text-green-800">
+                            Comprovante anexado
+                          </span>
+                        ) : expense.status === "paga" ? (
+                          <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] text-amber-800">
+                            Sem comprovante
+                          </span>
+                        ) : null}
                       </div>
 
-                      <h3 className="mt-2 text-xl font-black tracking-[-0.04em] text-[#13233a]">
-                        {formatCurrency(expense.amount)}
+                      <h3 className="mt-2 text-base font-black tracking-[-0.03em] text-[#13233a]">
+                        {expense.description}
                       </h3>
 
-                      <p className="mt-1 text-sm font-bold text-[#596579]">
-                        {expense.description}
+                      <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                        Favorecido: {expense.payee_name || "Não informado"}
                       </p>
+
+                      <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                        Data da despesa: {formatDate(expense.expense_date)} · Vencimento: {formatDate(expense.due_date)}
+                      </p>
+
+                      {expense.status === "paga" && (
+                        <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                          Pago em: {formatDate(expense.paid_at)} · Forma:{" "}
+                          {expense.payment_method
+                            ? paymentMethodLabels[expense.payment_method] ??
+                              expense.payment_method
+                            : "Não informado"}
+                        </p>
+                      )}
+
+                      {expense.reference && (
+                        <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                          Referência: {expense.reference}
+                        </p>
+                      )}
+
+                      {expense.receipt_path && (
+                        <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                          Arquivo: {expense.receipt_filename || "Comprovante"} · {formatFileSize(expense.receipt_size)}
+                        </p>
+                      )}
                     </div>
 
-                    <div className="text-left lg:text-right">
-                      <p className="text-sm font-black text-[#13233a]">
-                        {expense.status === "paga"
-                          ? formatDate(expense.paid_at)
-                          : formatDate(expense.expense_date)}
+                    <div className="md:text-right">
+                      <p className="text-lg font-black tracking-[-0.04em] text-red-700">
+                        {formatCurrency(expense.amount)}
                       </p>
 
-                      <p className="mt-1 text-sm font-bold text-[#596579]">
-                        {expense.status === "paga"
-                          ? paymentMethodLabels[expense.payment_method ?? ""] ??
-                            expense.payment_method ??
-                            "Forma não informada"
-                          : "Pendente"}
-                      </p>
+                      <div className="mt-2 flex flex-wrap gap-2 md:justify-end">
+                        {expense.receipt_path && (
+                          <button
+                            type="button"
+                            onClick={() => openReceipt(expense)}
+                            className="rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.08em] text-[#13233a]"
+                          >
+                            Ver comprovante
+                          </button>
+                        )}
+
+                        {!expense.receipt_path && expense.status !== "cancelada" && (
+                          <label className="cursor-pointer rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.08em] text-[#13233a]">
+                            {saving ? "Enviando..." : "Anexar comprovante"}
+
+                            <input
+                              type="file"
+                              accept="application/pdf,image/jpeg,image/png,image/webp"
+                              className="hidden"
+                              onChange={(event) => {
+                                const file = event.target.files?.[0] ?? null;
+
+                                if (file) {
+                                  void handleAttachReceipt(expense, file);
+                                }
+
+                                event.currentTarget.value = "";
+                              }}
+                            />
+                          </label>
+                        )}
+
+                        {expense.status === "pendente" && (
+                          <button
+                            type="button"
+                            onClick={() => markAsPaid(expense)}
+                            className="rounded-full bg-green-700 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.08em] text-white"
+                          >
+                            Marcar como paga
+                          </button>
+                        )}
+
+                        {expense.status !== "cancelada" && (
+                          <button
+                            type="button"
+                            onClick={() => cancelExpense(expense)}
+                            className="rounded-full bg-red-700 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.08em] text-white"
+                          >
+                            Cancelar
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="mt-3 grid gap-2 text-sm text-[#596579] md:grid-cols-2">
-                    <p>
-                      <strong>Favorecido/fornecedor:</strong>{" "}
-                      {expense.payee_name || "Não informado"}
-                    </p>
-
-                    <p>
-                      <strong>Vencimento:</strong>{" "}
-                      {formatDate(expense.due_date)}
-                    </p>
-
-                    <p>
-                      <strong>Referência:</strong>{" "}
-                      {expense.reference || "Não informado"}
-                    </p>
-
-                    <p>
-                      <strong>Registro:</strong>{" "}
-                      {formatDate(expense.created_at)}
-                    </p>
                   </div>
 
                   {expense.notes && (
-                    <p className="mt-3 whitespace-pre-line rounded-2xl bg-[#f7f8fa] p-3 text-sm leading-6 text-[#596579]">
+                    <p className="mt-2 whitespace-pre-line rounded-xl bg-[#f7f8fa] px-3 py-2 text-xs leading-5 text-[#596579]">
                       {expense.notes}
                     </p>
-                  )}
-
-                  {expense.status !== "cancelada" && (
-                    <div className="mt-4 flex flex-col gap-3 md:flex-row">
-                      {expense.status === "pendente" && (
-                        <button
-                          type="button"
-                          onClick={() => markAsPaid(expense)}
-                          disabled={processingId === expense.id}
-                          className="rounded-full bg-green-700 px-5 py-2.5 text-xs font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          Marcar como paga
-                        </button>
-                      )}
-
-                      <button
-                        type="button"
-                        onClick={() => cancelExpense(expense)}
-                        disabled={processingId === expense.id}
-                        className="rounded-full bg-red-700 px-5 py-2.5 text-xs font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        Cancelar despesa
-                      </button>
-                    </div>
                   )}
                 </article>
               ))}

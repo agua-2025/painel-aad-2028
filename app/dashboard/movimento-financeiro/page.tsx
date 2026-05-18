@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
 
@@ -80,6 +81,13 @@ type Expense = {
   notes: string | null;
   status: string;
   created_at: string;
+};
+
+type CashMonthlyBalance = {
+  id: string;
+  month_ref: string;
+  opening_balance: number;
+  notes: string | null;
 };
 
 type Movement = {
@@ -172,6 +180,10 @@ function formatDate(value?: string | null) {
 
 function getCurrentMonth() {
   return new Date().toISOString().slice(0, 7);
+}
+
+function monthToDate(month: string) {
+  return `${month}-01`;
 }
 
 function getMonthFromDate(value: string) {
@@ -300,11 +312,7 @@ function buildExpenseMovement(expense: Expense): Movement {
 }
 
 function getAmountClass(direction: "entrada" | "saida") {
-  if (direction === "saida") {
-    return "text-red-700";
-  }
-
-  return "text-green-700";
+  return direction === "saida" ? "text-red-700" : "text-green-700";
 }
 
 function getDirectionLabel(direction: "entrada" | "saida") {
@@ -315,6 +323,7 @@ export default function DashboardMovimentoFinanceiroPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [otherRevenues, setOtherRevenues] = useState<OtherRevenue[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [cashBalance, setCashBalance] = useState<CashMonthlyBalance | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
@@ -375,6 +384,10 @@ export default function DashboardMovimentoFinanceiroPage() {
       0
     );
 
+    const openingBalance = Number(cashBalance?.opening_balance ?? 0);
+    const periodBalance = Number((totalEntries - totalExits).toFixed(2));
+    const finalBalance = Number((openingBalance + periodBalance).toFixed(2));
+
     const monthlyMovements = filteredMovements.filter(
       (movement) => movement.origin === "monthly"
     );
@@ -412,9 +425,11 @@ export default function DashboardMovimentoFinanceiroPage() {
     );
 
     return {
+      openingBalance,
       totalEntries,
       totalExits,
-      balance: Number((totalEntries - totalExits).toFixed(2)),
+      periodBalance,
+      finalBalance,
       monthlyTotal,
       extraTotal,
       otherTotal,
@@ -427,7 +442,7 @@ export default function DashboardMovimentoFinanceiroPage() {
       otherCount: otherMovements.length,
       expenseCount: expenseMovements.length,
     };
-  }, [filteredMovements]);
+  }, [filteredMovements, cashBalance]);
 
   async function loadMovements() {
     setLoading(true);
@@ -484,15 +499,30 @@ export default function DashboardMovimentoFinanceiroPage() {
       return;
     }
 
+    const { data: balanceData, error: balanceError } = await supabase
+      .from("cash_monthly_balances")
+      .select("id, month_ref, opening_balance, notes")
+      .eq("month_ref", monthToDate(filters.month))
+      .maybeSingle();
+
+    if (balanceError) {
+      console.error("Erro ao carregar saldo inicial:", balanceError);
+      setMessage(balanceError.message || "Não foi possível carregar o saldo inicial.");
+      setLoading(false);
+      return;
+    }
+
     setPayments((paymentsData as unknown as Payment[]) ?? []);
     setOtherRevenues((revenuesData as unknown as OtherRevenue[]) ?? []);
     setExpenses((expensesData as unknown as Expense[]) ?? []);
+    setCashBalance((balanceData as unknown as CashMonthlyBalance) ?? null);
     setLoading(false);
   }
 
   useEffect(() => {
     loadMovements();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.month]);
 
   return (
     <ProtectedDashboard>
@@ -507,13 +537,24 @@ export default function DashboardMovimentoFinanceiroPage() {
           </h1>
 
           <p className="mt-3 max-w-3xl leading-7 text-white/75">
-            Acompanhe entradas, saídas e saldo do período, com identificação da origem de cada movimentação.
+            Acompanhe entradas, saídas, saldo inicial e saldo final do período.
           </p>
         </section>
 
-        <p className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
-          Esta tela considera entradas confirmadas e despesas pagas. Despesas pendentes não reduzem o saldo até serem marcadas como pagas.
-        </p>
+        {!cashBalance && (
+          <p className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-900">
+            Atenção: não há saldo inicial cadastrado para este mês. O saldo final será calculado considerando saldo inicial igual a R$ 0,00.{" "}
+            <Link href="/dashboard/saldos-caixa" className="underline">
+              Cadastrar saldo inicial
+            </Link>
+          </p>
+        )}
+
+        {cashBalance?.notes && (
+          <p className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
+            Observação do saldo inicial: {cashBalance.notes}
+          </p>
+        )}
 
         <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
           <div className="grid gap-4 md:grid-cols-3">
@@ -570,10 +611,24 @@ export default function DashboardMovimentoFinanceiroPage() {
           </div>
         </section>
 
-        <section className="grid gap-5 md:grid-cols-3">
+        <section className="grid gap-5 md:grid-cols-4">
+          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">
+              Saldo inicial
+            </p>
+
+            <p className="mt-1 text-2xl font-black tracking-[-0.05em] text-[#13233a]">
+              {formatCurrency(summary.openingBalance)}
+            </p>
+
+            <p className="mt-1 text-xs font-bold text-[#596579]">
+              {cashBalance ? "Cadastrado para o mês" : "Não cadastrado"}
+            </p>
+          </div>
+
           <div className="rounded-2xl border border-green-200 bg-green-50 p-4 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.06em] text-green-800">
-              Total de entradas
+              Entradas
             </p>
 
             <p className="mt-1 text-2xl font-black tracking-[-0.05em] text-green-800">
@@ -587,7 +642,7 @@ export default function DashboardMovimentoFinanceiroPage() {
 
           <div className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.06em] text-red-800">
-              Total de saídas
+              Saídas
             </p>
 
             <p className="mt-1 text-2xl font-black tracking-[-0.05em] text-red-800">
@@ -601,26 +656,46 @@ export default function DashboardMovimentoFinanceiroPage() {
 
           <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">
-              Saldo do período
+              Saldo final
             </p>
 
             <p
               className={`mt-1 text-2xl font-black tracking-[-0.05em] ${
-                summary.balance < 0 ? "text-red-700" : "text-[#13233a]"
+                summary.finalBalance < 0 ? "text-red-700" : "text-[#13233a]"
               }`}
             >
-              {formatCurrency(summary.balance)}
+              {formatCurrency(summary.finalBalance)}
             </p>
 
             <p className="mt-1 text-xs font-bold text-[#596579]">
-              Entradas menos saídas
+              Inicial + entradas - saídas
             </p>
           </div>
         </section>
 
-        <section className="grid gap-5 md:grid-cols-4">
+        <section className="grid gap-5 md:grid-cols-5">
           <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
-            <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">Mensalidades</p>
+            <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">
+              Resultado do mês
+            </p>
+
+            <p
+              className={`mt-1 text-xl font-black tracking-[-0.05em] ${
+                summary.periodBalance < 0 ? "text-red-700" : "text-[#13233a]"
+              }`}
+            >
+              {formatCurrency(summary.periodBalance)}
+            </p>
+
+            <p className="mt-1 text-xs font-bold text-[#596579]">
+              Entradas - saídas
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">
+              Mensalidades
+            </p>
 
             <p className="mt-1 text-xl font-black tracking-[-0.05em] text-[#13233a]">
               {formatCurrency(summary.monthlyTotal)}
