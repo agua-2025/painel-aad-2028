@@ -499,23 +499,23 @@ export default function DashboardMensalidadesPage() {
 
   return (
     <ProtectedDashboard>
-      <div className="space-y-6">
-        <section className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10">
+      <div className="space-y-4">
+        <section className="rounded-2xl bg-[#13233a] p-5 text-white shadow-xl shadow-slate-900/10">
           <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
             Gestão financeira
           </p>
 
-          <h1 className="mt-3 text-3xl font-black tracking-[-0.04em] md:text-4xl">
+          <h1 className="mt-2 text-lg font-black tracking-[-0.03em]">
             Mensalidades
           </h1>
 
-          <p className="mt-3 max-w-3xl leading-7 text-white/75">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
             Gere, acompanhe e registre pagamentos das mensalidades dos associados ativos.
           </p>
         </section>
 
-        <section className="grid gap-5 md:grid-cols-3">
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+        <section className="grid gap-3 md:grid-cols-3">
+          <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <p className="text-sm font-bold text-[#596579]">Regra ativa</p>
             <p className="mt-2 text-xl font-black tracking-[-0.04em]">
               {activeSetting ? activeSetting.title : "Nenhuma"}
@@ -528,29 +528,29 @@ export default function DashboardMensalidadesPage() {
             )}
           </div>
 
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+          <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <p className="text-sm font-bold text-[#596579]">Associados ativos</p>
-            <p className="mt-2 text-3xl font-black tracking-[-0.05em]">
+            <p className="mt-2 text-lg font-black tracking-[-0.03em]">
               {associates.length}
             </p>
           </div>
 
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+          <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <p className="text-sm font-bold text-[#596579]">Mensalidades no mês</p>
-            <p className="mt-2 text-3xl font-black tracking-[-0.05em]">
+            <p className="mt-2 text-lg font-black tracking-[-0.03em]">
               {fees.length}
             </p>
           </div>
         </section>
 
-        <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+        <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h2 className="text-2xl font-black tracking-[-0.04em]">
+              <h2 className="text-lg font-black tracking-[-0.03em]">
                 Gerar mensalidades
               </h2>
 
-              <p className="mt-2 text-sm font-medium text-[#596579]">
+              <p className="text-xs font-bold text-[#596579]">
                 Escolha o mês de referência. O sistema não gera duplicidade para associado que já possui mensalidade no mês.
               </p>
             </div>
@@ -562,7 +562,7 @@ export default function DashboardMensalidadesPage() {
                   type="number"
                   value={selectedYear}
                   onChange={(event) => setSelectedYear(event.target.value)}
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 outline-none transition focus:border-[#c7a56b]"
                 />
               </label>
 
@@ -571,7 +571,7 @@ export default function DashboardMensalidadesPage() {
                 <select
                   value={selectedMonth}
                   onChange={(event) => setSelectedMonth(event.target.value)}
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 outline-none transition focus:border-[#c7a56b]"
                 >
                   {monthNames.map((month, index) => (
                     <option key={month} value={index + 1}>
@@ -585,7 +585,7 @@ export default function DashboardMensalidadesPage() {
                 type="button"
                 onClick={generateMonthlyFees}
                 disabled={generating}
-                className="rounded-full bg-[#13233a] px-6 py-3 text-sm font-black uppercase tracking-[0.1em] text-white shadow-lg shadow-slate-900/10 disabled:cursor-not-allowed disabled:opacity-70 sm:self-end"
+                className="rounded-full bg-[#13233a] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.1em] text-white shadow-lg shadow-slate-900/10 disabled:cursor-not-allowed disabled:opacity-70 sm:self-end"
               >
                 {generating ? "Gerando..." : "Gerar"}
               </button>
@@ -593,25 +593,25 @@ export default function DashboardMensalidadesPage() {
           </div>
 
           {message && (
-            <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-4 text-sm font-bold text-[#596579]">
+            <div className="mt-5 rounded-xl bg-[#f7f8fa] px-4 py-3 text-sm font-bold text-[#596579]">
               {message}
             </div>
           )}
         </section>
 
         {selectedFee && (
-          <section className="rounded-3xl border border-[#c7a56b] bg-white p-5 shadow-sm">
+          <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-[#c7a56b]">
+                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#b28743]">
                   Baixa de pagamento
                 </p>
 
-                <h2 className="mt-2 text-2xl font-black tracking-[-0.04em]">
+                <h2 className="mt-2 text-lg font-black tracking-[-0.03em]">
                   Registrar pagamento
                 </h2>
 
-                <div className="mt-3 rounded-2xl bg-[#f7f8fa] p-4 text-sm font-bold leading-7 text-[#596579]">
+                <div className="mt-3 rounded-xl bg-[#f7f8fa] px-4 py-3 text-sm font-bold leading-7 text-[#596579]">
                   <p>
                     <strong>Associado:</strong> {getAssociateName(selectedFee)}
                   </p>
@@ -635,7 +635,7 @@ export default function DashboardMensalidadesPage() {
                   </p>
                 </div>
 
-                <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-bold leading-6 text-amber-900">
+                <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold leading-6 text-amber-900">
                   Antes de confirmar, confira se o pagamento pertence a esta mensalidade. Havendo meses anteriores em aberto, recomenda-se baixar primeiro a mensalidade mais antiga, salvo orientação expressa do associado.
                 </div>
               </div>
@@ -643,7 +643,7 @@ export default function DashboardMensalidadesPage() {
               <button
                 type="button"
                 onClick={closePaymentForm}
-                className="rounded-full border border-[#e8dccb] bg-white px-5 py-2 text-xs font-black uppercase tracking-[0.08em] text-[#13233a]"
+                className="rounded-full border border-[#e8dccb] bg-white px-4 py-2 text-[11px] font-black uppercase tracking-[0.08em] text-[#13233a]"
               >
                 Fechar
               </button>
@@ -661,7 +661,7 @@ export default function DashboardMensalidadesPage() {
                   step="0.01"
                   value={paymentForm.amount}
                   onChange={(event) => updatePaymentField("amount", event.target.value)}
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 outline-none transition focus:border-[#c7a56b]"
                 />
               </label>
 
@@ -671,7 +671,7 @@ export default function DashboardMensalidadesPage() {
                   type="date"
                   value={paymentForm.paid_at}
                   onChange={(event) => updatePaymentField("paid_at", event.target.value)}
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 outline-none transition focus:border-[#c7a56b]"
                 />
               </label>
 
@@ -682,7 +682,7 @@ export default function DashboardMensalidadesPage() {
                   onChange={(event) =>
                     updatePaymentField("payment_method", event.target.value)
                   }
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 outline-none transition focus:border-[#c7a56b]"
                 >
                   {Object.entries(paymentMethodLabels).map(([value, label]) => (
                     <option key={value} value={value}>
@@ -700,7 +700,7 @@ export default function DashboardMensalidadesPage() {
                   onChange={(event) =>
                     updatePaymentField("reference", event.target.value)
                   }
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 outline-none transition focus:border-[#c7a56b]"
                   placeholder="Ex.: Pix, recibo, comprovante"
                 />
               </label>
@@ -708,7 +708,7 @@ export default function DashboardMensalidadesPage() {
               <button
                 type="submit"
                 disabled={savingPayment}
-                className="rounded-full bg-[#13233a] px-6 py-3 text-sm font-black uppercase tracking-[0.1em] text-white shadow-lg shadow-slate-900/10 disabled:cursor-not-allowed disabled:opacity-70 md:self-end"
+                className="rounded-full bg-[#13233a] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.1em] text-white shadow-lg shadow-slate-900/10 disabled:cursor-not-allowed disabled:opacity-70 md:self-end"
               >
                 {savingPayment ? "Salvando..." : "Confirmar"}
               </button>
@@ -719,7 +719,7 @@ export default function DashboardMensalidadesPage() {
                   value={paymentForm.notes}
                   onChange={(event) => updatePaymentField("notes", event.target.value)}
                   rows={3}
-                  className="w-full resize-none rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  className="w-full resize-none rounded-xl border border-[#e8dccb] px-3 py-2.5 outline-none transition focus:border-[#c7a56b]"
                   placeholder="Observação interna sobre o pagamento, se necessário."
                 />
               </label>
@@ -727,93 +727,112 @@ export default function DashboardMensalidadesPage() {
           </section>
         )}
 
-        <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-          <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
             <div>
-              <h2 className="text-2xl font-black tracking-[-0.04em]">
+              <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
                 Mensalidades de {selectedLabel}
               </h2>
 
-              <p className="mt-2 text-sm font-medium text-[#596579]">
+              <p className="text-xs font-bold text-[#596579]">
                 Relação das mensalidades geradas para o período selecionado.
               </p>
             </div>
+
+            <p className="text-xs font-bold text-[#596579]">
+              {fees.length} registro(s)
+            </p>
           </div>
 
           {loading ? (
-            <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-4 text-sm font-bold text-[#596579]">
+            <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-3 text-sm font-bold text-[#596579]">
               Carregando mensalidades...
             </div>
           ) : fees.length === 0 ? (
-            <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-5">
-              <h3 className="text-xl font-black tracking-[-0.04em]">
+            <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-4">
+              <h3 className="text-base font-black tracking-[-0.03em] text-[#13233a]">
                 Nenhuma mensalidade gerada
               </h3>
-              <p className="mt-2 leading-7 text-[#596579]">
+
+              <p className="mt-1 text-sm leading-6 text-[#596579]">
                 Gere as mensalidades do mês usando o botão acima.
               </p>
             </div>
           ) : (
-            <div className="mt-5 overflow-hidden rounded-2xl border border-[#e8dccb]">
-              <div className="hidden bg-[#f7f8fa] px-5 py-3 text-xs font-black uppercase tracking-[0.12em] text-[#596579] md:grid md:grid-cols-[1.2fr_0.7fr_0.7fr_0.7fr_0.7fr_0.8fr]">
-                <span>Associado</span>
-                <span>Vencimento</span>
-                <span>Valor</span>
-                <span>Pago</span>
-                <span>Status</span>
-                <span>Ação</span>
+            <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
+              <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#596579] md:grid">
+                <div className="col-span-3">Associado</div>
+                <div className="col-span-2">Vencimento</div>
+                <div className="col-span-2 text-right">Valor</div>
+                <div className="col-span-2 text-right">Pago/Saldo</div>
+                <div className="col-span-1 text-center">Status</div>
+                <div className="col-span-2 text-right">Ação</div>
               </div>
 
-              <div className="divide-y divide-[#e8dccb]">
-                {fees.map((fee) => (
-                  <div
-                    key={fee.id}
-                    className="grid gap-4 px-5 py-5 md:grid-cols-[1.2fr_0.7fr_0.7fr_0.7fr_0.7fr_0.8fr] md:items-center"
-                  >
-                    <div>
-                      <p className="font-black text-[#13233a]">
-                        {getAssociateName(fee)}
-                      </p>
-                      <p className="mt-1 text-sm font-medium text-[#596579]">
-                        {getAssociateEmail(fee) || "E-mail não informado"}
-                      </p>
-                    </div>
+              <div className="divide-y divide-[#eee7db]">
+                {fees.map((fee) => {
+                  const remainingAmount = Math.max(
+                    Number(fee.total_amount ?? 0) - Number(fee.paid_amount ?? 0),
+                    0
+                  );
 
-                    <div className="text-sm font-bold text-[#596579]">
-                      {formatDate(fee.due_date)}
-                    </div>
+                  return (
+                    <article
+                      key={fee.id}
+                      className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-center"
+                    >
+                      <div className="md:col-span-3">
+                        <p className="font-black text-[#13233a]">
+                          {getAssociateName(fee)}
+                        </p>
 
-                    <div className="text-sm font-black text-[#13233a]">
-                      {formatCurrency(fee.total_amount)}
-                    </div>
+                        <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                          {getAssociateEmail(fee) || "E-mail não informado"}
+                        </p>
+                      </div>
 
-                    <div className="text-sm font-black text-[#13233a]">
-                      {formatCurrency(fee.paid_amount)}
-                    </div>
+                      <div className="font-bold text-[#596579] md:col-span-2">
+                        {formatDate(fee.due_date)}
+                      </div>
 
-                    <div>
-                      <span className="inline-flex rounded-full bg-[#f7f8fa] px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-[#13233a]">
-                        {statusLabels[fee.status] ?? fee.status}
-                      </span>
-                    </div>
+                      <div className="font-black text-[#13233a] md:col-span-2 md:text-right">
+                        {formatCurrency(fee.total_amount)}
+                      </div>
 
-                    <div>
-                      {fee.status === "paga" ? (
-                        <span className="text-xs font-black uppercase tracking-[0.08em] text-[#596579]">
-                          Quitada
+                      <div className="font-bold text-[#596579] md:col-span-2 md:text-right">
+                        <p className="font-black text-[#13233a]">
+                          {formatCurrency(fee.paid_amount)}
+                        </p>
+
+                        <p className="text-xs">
+                          Saldo: {formatCurrency(remainingAmount)}
+                        </p>
+                      </div>
+
+                      <div className="md:col-span-1 md:text-center">
+                        <span className="inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                          {statusLabels[fee.status] ?? fee.status}
                         </span>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => openPaymentForm(fee)}
-                          className="rounded-full bg-[#13233a] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white"
-                        >
-                          Registrar
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                      </div>
+
+                      <div className="md:col-span-2 md:text-right">
+                        {fee.status === "paga" ? (
+                          <span className="text-[11px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                            Quitada
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => openPaymentForm(fee)}
+                            className="rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
+                          >
+                            Registrar
+                          </button>
+                        )}
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
             </div>
           )}

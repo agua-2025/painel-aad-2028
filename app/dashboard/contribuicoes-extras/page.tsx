@@ -385,42 +385,42 @@ export default function DashboardContribuicoesExtrasPage() {
 
   return (
     <ProtectedDashboard>
-      <div className="space-y-6">
-        <section className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10">
+      <div className="space-y-4">
+        <section className="rounded-2xl bg-[#13233a] p-5 text-white shadow-xl shadow-slate-900/10">
           <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
             Financeiro
           </p>
 
-          <h1 className="mt-3 text-3xl font-black tracking-[-0.04em] md:text-4xl">
+          <h1 className="mt-2 text-2xl font-black tracking-[-0.04em]">
             Contribuições Extras
           </h1>
 
-          <p className="mt-3 max-w-3xl leading-7 text-white/75">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
             Crie cobranças pontuais e rateios extraordinários para os associados ativos.
           </p>
         </section>
 
-        <p className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
+        <p className="rounded-xl border border-[#e8dccb] bg-white px-3 py-2.5 text-sm font-bold text-[#596579]">
           Contribuições extras são cobranças pontuais. Elas só representam entrada no caixa quando forem efetivamente pagas e baixadas.
         </p>
 
-        <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-          <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
+        <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+          <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
             Nova contribuição extra
           </h2>
 
-          <p className="mt-2 text-sm font-medium text-[#596579]">
+          <p className="text-xs font-bold text-[#596579]">
             Nesta primeira versão, o rateio será feito entre todos os associados ativos.
           </p>
 
           {message && (
-            <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm font-bold text-red-700">
               {message}
             </div>
           )}
 
           {successMessage && (
-            <div className="mt-4 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm font-bold text-green-800">
+            <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-3 py-2.5 text-sm font-bold text-green-800">
               {successMessage}
             </div>
           )}
@@ -443,7 +443,7 @@ export default function DashboardContribuicoesExtrasPage() {
                     }))
                   }
                   placeholder="Ex.: Rateio de despesas cartorárias"
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                 />
               </label>
 
@@ -462,7 +462,7 @@ export default function DashboardContribuicoesExtrasPage() {
                       due_date: event.target.value,
                     }))
                   }
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                 />
               </label>
             </div>
@@ -483,7 +483,7 @@ export default function DashboardContribuicoesExtrasPage() {
                 }
                 rows={3}
                 placeholder="Explique de forma simples o que está sendo cobrado."
-                className="w-full resize-none rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                className="w-full resize-none rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
               />
             </label>
 
@@ -503,7 +503,7 @@ export default function DashboardContribuicoesExtrasPage() {
                 }
                 rows={3}
                 placeholder="Ex.: despesa aprovada para registro de documentos no cartório."
-                className="w-full resize-none rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                className="w-full resize-none rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
               />
             </label>
 
@@ -522,7 +522,7 @@ export default function DashboardContribuicoesExtrasPage() {
                       amount_mode: event.target.value,
                     }))
                   }
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                 >
                   <option value="rateio_total">Ratear valor total</option>
                   <option value="valor_individual">Valor individual fixo</option>
@@ -548,7 +548,7 @@ export default function DashboardContribuicoesExtrasPage() {
                       }))
                     }
                     placeholder="Ex.: 500.00"
-                    className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                    className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                   />
                 </label>
               ) : (
@@ -570,139 +570,172 @@ export default function DashboardContribuicoesExtrasPage() {
                       }))
                     }
                     placeholder="Ex.: 25.00"
-                    className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                    className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                   />
                 </label>
               )}
             </div>
 
-            <div className="rounded-2xl bg-[#f7f8fa] p-4">
-              <p className="text-sm font-bold text-[#596579]">Prévia do rateio</p>
+            <div className="rounded-xl border border-[#e8dccb] bg-[#fcfcfd] px-4 py-3">
+              <p className="text-xs font-black uppercase tracking-[0.08em] text-[#596579]">
+                Prévia do rateio
+              </p>
 
               <div className="mt-3 grid gap-3 text-sm text-[#596579] md:grid-cols-3">
-                <p>
-                  <strong>Associados ativos:</strong> {preview.count}
-                </p>
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[#596579]">
+                    Associados ativos
+                  </p>
+                  <p className="mt-1 font-black text-[#13233a]">{preview.count}</p>
+                </div>
 
-                <p>
-                  <strong>Total previsto:</strong> {formatCurrency(preview.total)}
-                </p>
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[#596579]">
+                    Total previsto
+                  </p>
+                  <p className="mt-1 font-black text-[#13233a]">
+                    {formatCurrency(preview.total)}
+                  </p>
+                </div>
 
-                <p>
-                  <strong>Valor médio individual:</strong>{" "}
-                  {formatCurrency(preview.individualAverage)}
-                </p>
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[#596579]">
+                    Valor médio individual
+                  </p>
+                  <p className="mt-1 font-black text-[#13233a]">
+                    {formatCurrency(preview.individualAverage)}
+                  </p>
+                </div>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={saving}
-              className="w-fit rounded-full bg-[#13233a] px-6 py-3 text-sm font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-fit rounded-full bg-[#13233a] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? "Gerando..." : "Criar e gerar rateio"}
             </button>
           </form>
         </section>
 
-        <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
             <div>
-              <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
+              <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
                 Contribuições criadas
               </h2>
 
-              <p className="mt-2 text-sm font-medium text-[#596579]">
-                Acompanhe os rateios e cobranças pontuais já gerados.
+              <p className="text-xs font-bold text-[#596579]">
+                Rateios e cobranças pontuais já gerados para os associados.
               </p>
             </div>
 
             <button
               type="button"
               onClick={loadData}
-              className="w-fit rounded-full border border-[#e8dccb] bg-white px-5 py-2 text-xs font-black uppercase tracking-[0.08em] text-[#13233a]"
+              className="w-fit rounded-full border border-[#e8dccb] bg-white px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#13233a] hover:bg-[#f7f8fa]"
             >
               Atualizar
             </button>
           </div>
 
           {loading ? (
-            <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-4 text-sm font-bold text-[#596579]">
+            <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-3 text-sm font-bold text-[#596579]">
               Carregando contribuições extras...
             </div>
           ) : contributions.length === 0 ? (
-            <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-5">
-              <h3 className="text-xl font-black tracking-[-0.04em] text-[#13233a]">
+            <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-4">
+              <h3 className="text-base font-black tracking-[-0.03em] text-[#13233a]">
                 Nenhuma contribuição extra criada
               </h3>
 
-              <p className="mt-2 leading-7 text-[#596579]">
+              <p className="mt-1 text-sm leading-6 text-[#596579]">
                 Quando a Tesouraria criar um rateio ou cobrança pontual, ele aparecerá nesta lista.
               </p>
             </div>
           ) : (
-            <div className="mt-5 grid gap-4">
-              {contributions.map((contribution) => {
-                const totals = getContributionTotals(contribution);
+            <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
+              <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#596579] md:grid">
+                <div className="col-span-3">Contribuição</div>
+                <div className="col-span-2">Vencimento/Status</div>
+                <div className="col-span-2 text-right">Itens</div>
+                <div className="col-span-2 text-right">Valores</div>
+                <div className="col-span-3">Descrição</div>
+              </div>
 
-                return (
-                  <article
-                    key={contribution.id}
-                    className="rounded-3xl border border-[#e8dccb] p-5"
-                  >
-                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-[0.2em] text-[#c7a56b]">
-                          Vencimento em {formatDate(contribution.due_date)}
+              <div className="divide-y divide-[#eee7db]">
+                {contributions.map((contribution) => {
+                  const totals = getContributionTotals(contribution);
+
+                  return (
+                    <article
+                      key={contribution.id}
+                      className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-start"
+                    >
+                      <div className="md:col-span-3">
+                        <p className="font-black text-[#13233a]">
+                          {contribution.title}
                         </p>
 
-                        <h3 className="mt-2 text-xl font-black tracking-[-0.04em] text-[#13233a]">
-                          {contribution.title}
-                        </h3>
+                        <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                          {contribution.amount_mode === "rateio_total"
+                            ? "Rateio de valor total"
+                            : "Valor individual fixo"}
+                        </p>
+                      </div>
 
-                        {contribution.description && (
-                          <p className="mt-2 text-sm leading-6 text-[#596579]">
+                      <div className="md:col-span-2">
+                        <p className="font-bold text-[#13233a]">
+                          {formatDate(contribution.due_date)}
+                        </p>
+
+                        <span className="mt-1 inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                          {statusLabels[contribution.status] ?? contribution.status}
+                        </span>
+                      </div>
+
+                      <div className="font-bold text-[#596579] md:col-span-2 md:text-right">
+                        <p>{totals.totalItems} gerado(s)</p>
+                        <p className="text-xs">{totals.pendingItems} pendente(s)</p>
+                        <p className="text-xs">{totals.paidItems} pago(s)</p>
+                      </div>
+
+                      <div className="font-bold text-[#596579] md:col-span-2 md:text-right">
+                        <p className="font-black text-[#13233a]">
+                          {formatCurrency(totals.totalGenerated)}
+                        </p>
+
+                        <p className="text-xs text-green-700">
+                          Pago: {formatCurrency(totals.totalPaid)}
+                        </p>
+
+                        <p className="text-xs text-red-700">
+                          Aberto: {formatCurrency(totals.pendingAmount)}
+                        </p>
+                      </div>
+
+                      <div className="md:col-span-3">
+                        {contribution.description ? (
+                          <p className="text-xs font-bold leading-5 text-[#596579]">
                             {contribution.description}
+                          </p>
+                        ) : (
+                          <p className="text-xs font-bold text-[#596579]">
+                            Sem descrição informada.
+                          </p>
+                        )}
+
+                        {contribution.reason && (
+                          <p className="mt-1 text-xs font-bold leading-5 text-[#596579]">
+                            Motivo: {contribution.reason}
                           </p>
                         )}
                       </div>
-
-                      <span className="w-fit rounded-full bg-[#f7f8fa] px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-[#13233a]">
-                        {statusLabels[contribution.status] ?? contribution.status}
-                      </span>
-                    </div>
-
-                    <div className="mt-4 grid gap-3 text-sm text-[#596579] md:grid-cols-3">
-                      <p>
-                        <strong>Itens gerados:</strong> {totals.totalItems}
-                      </p>
-
-                      <p>
-                        <strong>Pendentes:</strong> {totals.pendingItems}
-                      </p>
-
-                      <p>
-                        <strong>Pagos:</strong> {totals.paidItems}
-                      </p>
-
-                      <p>
-                        <strong>Total lançado:</strong>{" "}
-                        {formatCurrency(totals.totalGenerated)}
-                      </p>
-
-                      <p>
-                        <strong>Total pago:</strong>{" "}
-                        {formatCurrency(totals.totalPaid)}
-                      </p>
-
-                      <p>
-                        <strong>Total em aberto:</strong>{" "}
-                        {formatCurrency(totals.pendingAmount)}
-                      </p>
-                    </div>
-                  </article>
-                );
-              })}
+                    </article>
+                  );
+                })}
+              </div>
             </div>
           )}
         </section>
