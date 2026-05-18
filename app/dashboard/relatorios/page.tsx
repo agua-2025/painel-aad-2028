@@ -89,6 +89,7 @@ const reportOptions = [
   { value: "associados", label: "Associados" },
   { value: "financeiro", label: "Financeiro mensal" },
   { value: "inadimplencia", label: "Inadimplência" },
+  { value: "receitas", label: "Receitas avulsas" },
   { value: "despesas", label: "Despesas" },
 ];
 
@@ -114,12 +115,33 @@ function getCurrentMonth() {
   return new Date().toISOString().slice(0, 7);
 }
 
+function getToday() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getFirstDayOfCurrentMonth() {
+  return `${getCurrentMonth()}-01`;
+}
+
 function monthToDate(month: string) {
   return `${month}-01`;
 }
 
 function getMonthFromDate(value?: string | null) {
   return value ? value.slice(0, 7) : "";
+}
+
+function getDateOnly(value?: string | null) {
+  if (!value) return "";
+  return value.slice(0, 10);
+}
+
+function isDateInPeriod(value: string | null | undefined, startDate: string, endDate: string) {
+  const date = getDateOnly(value);
+
+  if (!date) return false;
+
+  return date >= startDate && date <= endDate;
 }
 
 function getMonthParts(month: string) {
@@ -135,6 +157,10 @@ function formatMonth(month: string) {
   const { year, month: monthNumber } = getMonthParts(month);
 
   return `${monthNames[monthNumber - 1] ?? monthNumber} de ${year}`;
+}
+
+function formatPeriod(startDate: string, endDate: string) {
+  return `${formatDate(startDate)} a ${formatDate(endDate)}`;
 }
 
 function getAssociate(fee: MonthlyFee) {
@@ -188,7 +214,9 @@ function downloadCsv(filename: string, rows: Record<string, string | number | nu
 
 export default function DashboardRelatoriosPage() {
   const [activeReport, setActiveReport] = useState("associados");
-  const [month, setMonth] = useState(getCurrentMonth());
+  const [startDate, setStartDate] = useState(getFirstDayOfCurrentMonth());
+  const [endDate, setEndDate] = useState(getToday());
+  const [associateFilter, setAssociateFilter] = useState("todos");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
@@ -199,40 +227,67 @@ export default function DashboardRelatoriosPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [cashBalance, setCashBalance] = useState<CashMonthlyBalance | null>(null);
 
-  const { year, month: monthNumber } = getMonthParts(month);
+  const startMonth = getMonthFromDate(startDate);
+
+  const reportAssociates = useMemo(() => {
+    if (associateFilter === "todos") {
+      return associates;
+    }
+
+    return associates.filter((associate) => associate.id === associateFilter);
+  }, [associates, associateFilter]);
 
   const filteredPayments = useMemo(() => {
-    return payments.filter((payment) => getMonthFromDate(payment.paid_at) === month);
-  }, [payments, month]);
+    return payments.filter((payment) => {
+      const inPeriod = isDateInPeriod(payment.paid_at, startDate, endDate);
+      const sameAssociate =
+        associateFilter === "todos" || payment.associate_id === associateFilter;
+
+      return inPeriod && sameAssociate;
+    });
+  }, [payments, startDate, endDate, associateFilter]);
 
   const filteredRevenues = useMemo(() => {
     return revenues.filter(
       (revenue) =>
         revenue.status === "confirmada" &&
-        getMonthFromDate(revenue.received_at) === month
+        isDateInPeriod(revenue.received_at, startDate, endDate)
     );
-  }, [revenues, month]);
+  }, [revenues, startDate, endDate]);
 
   const filteredExpenses = useMemo(() => {
     return expenses.filter(
       (expense) =>
         expense.status === "paga" &&
         expense.paid_at &&
-        getMonthFromDate(expense.paid_at) === month
+        isDateInPeriod(expense.paid_at, startDate, endDate)
     );
-  }, [expenses, month]);
+  }, [expenses, startDate, endDate]);
 
-  const monthFees = useMemo(() => {
-    return monthlyFees.filter(
-      (fee) => fee.year === year && fee.month === monthNumber
-    );
-  }, [monthlyFees, year, monthNumber]);
+  const periodFees = useMemo(() => {
+    return monthlyFees.filter((fee) => {
+      const dueInPeriod = isDateInPeriod(fee.due_date, startDate, endDate);
+      const sameAssociate =
+        associateFilter === "todos" || fee.associate_id === associateFilter;
+
+      return dueInPeriod && sameAssociate;
+    });
+  }, [monthlyFees, startDate, endDate, associateFilter]);
 
   const openFees = useMemo(() => {
-    return monthlyFees.filter((fee) =>
-      ["pendente", "parcialmente_paga", "atrasada"].includes(fee.status)
-    );
-  }, [monthlyFees]);
+    return monthlyFees.filter((fee) => {
+      const isOpen = ["pendente", "parcialmente_paga", "atrasada"].includes(
+        fee.status
+      );
+
+      const dueInPeriod = isDateInPeriod(fee.due_date, startDate, endDate);
+
+      const sameAssociate =
+        associateFilter === "todos" || fee.associate_id === associateFilter;
+
+      return isOpen && dueInPeriod && sameAssociate;
+    });
+  }, [monthlyFees, startDate, endDate, associateFilter]);
 
   const overdueFees = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -287,22 +342,22 @@ export default function DashboardRelatoriosPage() {
   }, [filteredPayments, filteredRevenues, filteredExpenses, cashBalance]);
 
   const associatesSummary = useMemo(() => {
-    const active = associates.filter((associate) => associate.status === "ativo");
-    const inactive = associates.filter((associate) => associate.status !== "ativo");
+    const active = reportAssociates.filter((associate) => associate.status === "ativo");
+    const inactive = reportAssociates.filter((associate) => associate.status !== "ativo");
 
-    const financialStatus = associates.reduce<Record<string, number>>((acc, associate) => {
+    const financialStatus = reportAssociates.reduce<Record<string, number>>((acc, associate) => {
       const key = normalizeStatus(associate.financial_status);
       acc[key] = Number(acc[key] ?? 0) + 1;
       return acc;
     }, {});
 
     return {
-      total: associates.length,
+      total: reportAssociates.length,
       active: active.length,
       inactive: inactive.length,
       financialStatus,
     };
-  }, [associates]);
+  }, [reportAssociates]);
 
   const inadimplenciaSummary = useMemo(() => {
     const totalOpen = openFees.reduce((sum, fee) => {
@@ -324,6 +379,26 @@ export default function DashboardRelatoriosPage() {
       totalOverdue,
     };
   }, [openFees, overdueFees]);
+
+  const revenuesSummary = useMemo(() => {
+    const byCategory = filteredRevenues.reduce<Record<string, number>>(
+      (acc, revenue) => {
+        const key = normalizeStatus(revenue.category);
+        acc[key] = Number((Number(acc[key] ?? 0) + Number(revenue.amount ?? 0)).toFixed(2));
+        return acc;
+      },
+      {}
+    );
+
+    return {
+      total: filteredRevenues.reduce(
+        (sum, revenue) => sum + Number(revenue.amount ?? 0),
+        0
+      ),
+      count: filteredRevenues.length,
+      byCategory,
+    };
+  }, [filteredRevenues]);
 
   const expensesSummary = useMemo(() => {
     const paidWithoutReceipt = filteredExpenses.filter(
@@ -417,7 +492,7 @@ export default function DashboardRelatoriosPage() {
     const { data: balanceData, error: balanceError } = await supabase
       .from("cash_monthly_balances")
       .select("id, month_ref, opening_balance")
-      .eq("month_ref", monthToDate(month))
+      .eq("month_ref", monthToDate(startMonth))
       .maybeSingle();
 
     if (balanceError) {
@@ -439,12 +514,12 @@ export default function DashboardRelatoriosPage() {
   useEffect(() => {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [month]);
+  }, [startDate, endDate]);
 
   function exportAssociates() {
     downloadCsv(
       `associados-${new Date().toISOString().slice(0, 10)}.csv`,
-      associates.map((associate) => ({
+      reportAssociates.map((associate) => ({
         Nome: associate.full_name,
         Email: associate.email,
         Telefone: associate.phone,
@@ -456,7 +531,7 @@ export default function DashboardRelatoriosPage() {
   }
 
   function exportFinanceiro() {
-    downloadCsv(`financeiro-${month}.csv`, [
+    downloadCsv(`financeiro-${startDate}-a-${endDate}.csv`, [
       { Item: "Saldo inicial", Valor: financeSummary.openingBalance },
       { Item: "Mensalidades", Valor: financeSummary.monthlyTotal },
       { Item: "Contribuições extras", Valor: financeSummary.extraTotal },
@@ -491,9 +566,22 @@ export default function DashboardRelatoriosPage() {
     );
   }
 
+  function exportReceitas() {
+    downloadCsv(
+      `receitas-avulsas-${startDate}-a-${endDate}.csv`,
+      filteredRevenues.map((revenue) => ({
+        Data: formatDate(revenue.received_at),
+        Categoria: normalizeStatus(revenue.category),
+        Descrição: revenue.description,
+        Valor: Number(revenue.amount ?? 0),
+        Status: normalizeStatus(revenue.status),
+      }))
+    );
+  }
+
   function exportDespesas() {
     downloadCsv(
-      `despesas-${month}.csv`,
+      `despesas-${startDate}-a-${endDate}.csv`,
       filteredExpenses.map((expense) => ({
         Data: formatDate(expense.paid_at),
         Categoria: normalizeStatus(expense.category),
@@ -522,7 +610,7 @@ export default function DashboardRelatoriosPage() {
         </section>
 
         <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-5">
             <label className="grid gap-2 md:col-span-2">
               <span className="text-sm font-bold text-[#13233a]">
                 Relatório
@@ -543,15 +631,43 @@ export default function DashboardRelatoriosPage() {
 
             <label className="grid gap-2">
               <span className="text-sm font-bold text-[#13233a]">
-                Mês de referência
+                Período
               </span>
 
-              <input
-                type="month"
-                value={month}
-                onChange={(event) => setMonth(event.target.value)}
+              <div className="grid gap-2 md:grid-cols-2">
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(event) => setStartDate(event.target.value)}
+                  className="w-full rounded-xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                />
+
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(event) => setEndDate(event.target.value)}
+                  className="w-full rounded-xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                />
+              </div>
+            </label>
+
+            <label className="grid gap-2">
+              <span className="text-sm font-bold text-[#13233a]">
+                Associado
+              </span>
+
+              <select
+                value={associateFilter}
+                onChange={(event) => setAssociateFilter(event.target.value)}
                 className="w-full rounded-xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
-              />
+              >
+                <option value="todos">Todos</option>
+                {reportAssociates.map((associate) => (
+                  <option key={associate.id} value={associate.id}>
+                    {associate.full_name}
+                  </option>
+                ))}
+              </select>
             </label>
 
             <div className="flex items-end">
@@ -638,7 +754,7 @@ export default function DashboardRelatoriosPage() {
                       </thead>
 
                       <tbody>
-                        {associates.map((associate) => (
+                        {reportAssociates.map((associate) => (
                           <tr key={associate.id} className="border-t border-[#e8dccb]">
                             <td className="px-3 py-3 font-bold text-[#13233a]">
                               {associate.full_name}
@@ -668,10 +784,10 @@ export default function DashboardRelatoriosPage() {
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
                       <h2 className="text-xl font-black tracking-[-0.04em] text-[#13233a]">
-                        Financeiro mensal - {formatMonth(month)}
+                        Financeiro do período - {formatPeriod(startDate, endDate)}
                       </h2>
                       <p className="mt-1 text-sm font-bold text-[#596579]">
-                        Resumo de entradas, saídas e saldo.
+                        Resumo de entradas, saídas e saldo. O saldo inicial considerado é o saldo cadastrado para o mês da data inicial do período.
                       </p>
                     </div>
 
@@ -810,6 +926,78 @@ export default function DashboardRelatoriosPage() {
               </section>
             )}
 
+            {activeReport === "receitas" && (
+              <section className="space-y-5">
+                <div className="grid gap-4 md:grid-cols-4">
+                  <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+                    <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#596579]">
+                      Receitas confirmadas
+                    </p>
+                    <p className="mt-1 text-2xl font-black text-[#13233a]">
+                      {revenuesSummary.count}
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-green-200 bg-green-50 p-4 shadow-sm">
+                    <p className="text-xs font-bold uppercase tracking-[0.06em] text-green-800">
+                      Total
+                    </p>
+                    <p className="mt-1 text-2xl font-black text-green-800">
+                      {formatCurrency(revenuesSummary.total)}
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm md:col-span-2">
+                    <button
+                      type="button"
+                      onClick={exportReceitas}
+                      className="w-fit rounded-full bg-[#13233a] px-4 py-3 text-xs font-black uppercase tracking-[0.08em] text-white"
+                    >
+                      Exportar CSV
+                    </button>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+                  <h2 className="text-xl font-black tracking-[-0.04em] text-[#13233a]">
+                    Receitas avulsas - {formatPeriod(startDate, endDate)}
+                  </h2>
+
+                  <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
+                    <table className="w-full border-collapse text-left text-sm">
+                      <thead className="bg-[#f7f8fa] text-xs uppercase tracking-[0.08em] text-[#596579]">
+                        <tr>
+                          <th className="px-3 py-3">Data</th>
+                          <th className="px-3 py-3">Categoria</th>
+                          <th className="px-3 py-3">Descrição</th>
+                          <th className="px-3 py-3 text-right">Valor</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {filteredRevenues.map((revenue) => (
+                          <tr key={revenue.id} className="border-t border-[#e8dccb]">
+                            <td className="px-3 py-3 font-bold text-[#596579]">
+                              {formatDate(revenue.received_at)}
+                            </td>
+                            <td className="px-3 py-3 font-bold text-[#596579]">
+                              {normalizeStatus(revenue.category)}
+                            </td>
+                            <td className="px-3 py-3 font-bold text-[#13233a]">
+                              {revenue.description}
+                            </td>
+                            <td className="px-3 py-3 text-right font-black text-green-700">
+                              {formatCurrency(revenue.amount)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </section>
+            )}
+
             {activeReport === "despesas" && (
               <section className="space-y-5">
                 <div className="grid gap-4 md:grid-cols-4">
@@ -853,7 +1041,7 @@ export default function DashboardRelatoriosPage() {
 
                 <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
                   <h2 className="text-xl font-black tracking-[-0.04em] text-[#13233a]">
-                    Despesas pagas - {formatMonth(month)}
+                    Despesas pagas - {formatPeriod(startDate, endDate)}
                   </h2>
 
                   <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
