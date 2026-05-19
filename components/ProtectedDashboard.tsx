@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { canAccessDashboardPath, hasDashboardAccess } from "@/lib/permissions";
 
 type Profile = {
   id: string;
@@ -28,16 +30,8 @@ type ProtectedDashboardProps = {
   children: React.ReactNode;
 };
 
-const allowedDashboardRoles = [
-  "administrador",
-  "presidente",
-  "vice_presidente",
-  "secretaria",
-  "tesoureira",
-  "comissao_fiscal",
-];
-
 export function ProtectedDashboard({ children }: ProtectedDashboardProps) {
+  const pathname = usePathname();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<string[]>([]);
@@ -91,12 +85,15 @@ export function ProtectedDashboard({ children }: ProtectedDashboardProps) {
           })
           .filter((name): name is string => Boolean(name)) ?? [];
 
-      const canAccessDashboard = roleNames.some((role) =>
-        allowedDashboardRoles.includes(role)
-      );
+      const canAccessDashboard = hasDashboardAccess(roleNames);
 
       if (!canAccessDashboard) {
         window.location.href = "/area";
+        return;
+      }
+
+      if (!canAccessDashboardPath(roleNames, pathname)) {
+        window.location.href = "/dashboard";
         return;
       }
 
@@ -106,7 +103,7 @@ export function ProtectedDashboard({ children }: ProtectedDashboardProps) {
     }
 
     loadUserData();
-  }, []);
+  }, [pathname]);
 
   if (loading) {
     return (

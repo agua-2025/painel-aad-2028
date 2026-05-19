@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
+import { useDashboardPermissions } from "@/lib/useDashboardPermissions";
 
 type AssociateData = {
   full_name: string;
@@ -315,6 +316,7 @@ function getReportBadgeClass(status: string) {
 }
 
 export default function DashboardPagamentosPage() {
+  const permissions = useDashboardPermissions("pagamentos");
   const [reports, setReports] = useState<PaymentReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -551,6 +553,11 @@ export default function DashboardPagamentosPage() {
   }
 
   async function approveReport(report: PaymentReport) {
+    if (!permissions.canApprove) {
+      setMessage("Seu perfil não tem permissão para aprovar informes de pagamento.");
+      return;
+    }
+
     if (report.status !== "pendente") {
       setMessage("Este informe já foi analisado.");
       return;
@@ -570,6 +577,11 @@ export default function DashboardPagamentosPage() {
   }
 
   async function rejectReport(report: PaymentReport) {
+    if (!permissions.canApprove) {
+      setMessage("Seu perfil não tem permissão para rejeitar informes de pagamento.");
+      return;
+    }
+
     if (report.status !== "pendente") {
       setMessage("Este informe já foi analisado.");
       return;
@@ -641,9 +653,17 @@ export default function DashboardPagamentosPage() {
           </div>
         </section>
 
-        <p className="rounded-xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
-          Conferência: antes de aprovar, verifique extrato, comprovante, valor, data efetiva e referência.
-        </p>
+        <div className="rounded-xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
+          <p>
+            Conferência: antes de aprovar, verifique extrato, comprovante, valor, data efetiva e referência.
+          </p>
+
+          {permissions.isReadOnly && !permissions.loadingPermissions && (
+            <p className="mt-1 text-amber-700">
+              Seu perfil pode consultar os informes, mas não pode aprovar ou rejeitar pagamentos.
+            </p>
+          )}
+        </div>
 
         <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
           <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
@@ -804,7 +824,9 @@ export default function DashboardPagamentosPage() {
                             value={forms[report.id]?.review_notes ?? ""}
                             disabled={
                               report.status !== "pendente" ||
-                              processingId === report.id
+                              processingId === report.id ||
+                              permissions.loadingPermissions ||
+                              !permissions.canApprove
                             }
                             onChange={(event) =>
                               updateReviewNotes(report.id, event.target.value)
@@ -821,18 +843,28 @@ export default function DashboardPagamentosPage() {
                             <button
                               type="button"
                               onClick={() => approveReport(report)}
-                              disabled={processingId === report.id}
+                              disabled={
+                                processingId === report.id ||
+                                permissions.loadingPermissions ||
+                                !permissions.canApprove
+                              }
                               className="rounded-full border border-green-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               {processingId === report.id
                                 ? "Processando..."
-                                : "Aprovar"}
+                                : permissions.canApprove
+                                  ? "Aprovar"
+                                  : "Somente leitura"}
                             </button>
 
                             <button
                               type="button"
                               onClick={() => rejectReport(report)}
-                              disabled={processingId === report.id}
+                              disabled={
+                                processingId === report.id ||
+                                permissions.loadingPermissions ||
+                                !permissions.canApprove
+                              }
                               className="rounded-full border border-red-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               Rejeitar

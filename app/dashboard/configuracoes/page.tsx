@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
+import { useDashboardPermissions } from "@/lib/useDashboardPermissions";
 
 type Associate = {
   id: string;
@@ -75,6 +76,7 @@ function formatRole(value: string) {
 }
 
 export default function ConfiguracoesPage() {
+  const permissions = useDashboardPermissions("configuracoes");
   const [loading, setLoading] = useState(true);
   const [savingProfileId, setSavingProfileId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
@@ -229,6 +231,11 @@ export default function ConfiguracoesPage() {
   }
 
   async function updateAdministrativeRole(profile: Profile, newRoleName: string) {
+    if (!permissions.canUpdate) {
+      setMessage("Seu perfil não tem permissão para alterar permissões de acesso.");
+      return;
+    }
+
     setSavingProfileId(profile.id);
     setMessage("Atualizando permissão...");
 
@@ -318,6 +325,12 @@ export default function ConfiguracoesPage() {
             </button>
           </div>
 
+          {permissions.isReadOnly && !permissions.loadingPermissions && (
+            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">
+              Seu perfil pode visualizar esta tela, mas não pode alterar permissões de acesso.
+            </div>
+          )}
+
           {message && (
             <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-3 text-sm font-bold text-[#596579]">
               {message}
@@ -383,7 +396,12 @@ export default function ConfiguracoesPage() {
                     <div className="xl:col-span-3">
                       <select
                         value={row.administrativeRole}
-                        disabled={!row.profile || savingProfileId === row.profile.id}
+                        disabled={
+                          !row.profile ||
+                          savingProfileId === row.profile.id ||
+                          permissions.loadingPermissions ||
+                          !permissions.canUpdate
+                        }
                         onChange={(event) => {
                           if (!row.profile) return;
                           updateAdministrativeRole(row.profile, event.target.value);

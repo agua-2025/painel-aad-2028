@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
+import { useDashboardPermissions } from "@/lib/useDashboardPermissions";
 
 type FinancialSetting = {
   id: string;
@@ -177,6 +178,7 @@ function calculateAmountDueAtDate(fee: MonthlyFee, paymentDateValue: string) {
 }
 
 export default function DashboardMensalidadesPage() {
+  const permissions = useDashboardPermissions("mensalidades");
   const today = new Date();
 
   const [selectedYear, setSelectedYear] = useState(String(today.getFullYear()));
@@ -213,6 +215,11 @@ export default function DashboardMensalidadesPage() {
   }
 
   function openPaymentForm(fee: MonthlyFee) {
+    if (!permissions.canUpdate) {
+      setMessage("Seu perfil pode consultar as mensalidades, mas não pode registrar baixa de pagamento.");
+      return;
+    }
+
     const remainingAmount = Math.max(
       Number(fee.total_amount ?? 0) - Number(fee.paid_amount ?? 0),
       0
@@ -311,6 +318,11 @@ export default function DashboardMensalidadesPage() {
   }, [selectedYear, selectedMonth]);
 
   async function generateMonthlyFees() {
+    if (!permissions.canCreate) {
+      setMessage("Seu perfil pode consultar as mensalidades, mas não pode gerar novas cobranças.");
+      return;
+    }
+
     if (!activeSetting) {
       setMessage("Não existe regra financeira ativa. Cadastre uma regra financeira antes de gerar mensalidades.");
       return;
@@ -380,7 +392,7 @@ export default function DashboardMensalidadesPage() {
 
     if (insertError) {
       console.error("Erro ao gerar mensalidades:", insertError);
-      setMessage(insertError.message || "Não foi possível gerar as mensalidades.");
+      setMessage("Não foi possível gerar as mensalidades. Verifique se seu perfil tem permissão para essa ação.");
       setGenerating(false);
       return;
     }
@@ -392,6 +404,11 @@ export default function DashboardMensalidadesPage() {
 
   async function registerPayment(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (!permissions.canUpdate) {
+      setMessage("Seu perfil pode consultar as mensalidades, mas não pode registrar baixa de pagamento.");
+      return;
+    }
 
     if (!selectedFee) {
       setMessage("Selecione uma mensalidade para registrar o pagamento.");
@@ -463,7 +480,7 @@ export default function DashboardMensalidadesPage() {
 
     if (paymentError) {
       console.error("Erro ao registrar pagamento:", paymentError);
-      setMessage(paymentError.message || "Não foi possível registrar o pagamento.");
+      setMessage("Não foi possível registrar o pagamento. Verifique se seu perfil tem permissão para essa ação.");
       setSavingPayment(false);
       return;
     }
@@ -543,6 +560,12 @@ export default function DashboardMensalidadesPage() {
           </div>
         </section>
 
+        {permissions.isReadOnly && !permissions.loadingPermissions && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">
+            Seu perfil pode consultar as mensalidades, mas não pode gerar cobranças ou registrar pagamentos.
+          </div>
+        )}
+
         <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
@@ -584,10 +607,14 @@ export default function DashboardMensalidadesPage() {
               <button
                 type="button"
                 onClick={generateMonthlyFees}
-                disabled={generating}
+                disabled={generating || permissions.loadingPermissions || !permissions.canCreate}
                 className="rounded-full bg-[#13233a] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.1em] text-white shadow-lg shadow-slate-900/10 disabled:cursor-not-allowed disabled:opacity-70 sm:self-end"
               >
-                {generating ? "Gerando..." : "Gerar"}
+                {generating
+                  ? "Gerando..."
+                  : permissions.canCreate
+                    ? "Gerar"
+                    : "Somente leitura"}
               </button>
             </div>
           </div>
@@ -660,6 +687,7 @@ export default function DashboardMensalidadesPage() {
                   min="0"
                   step="0.01"
                   value={paymentForm.amount}
+                  disabled={savingPayment || permissions.loadingPermissions || !permissions.canUpdate}
                   onChange={(event) => updatePaymentField("amount", event.target.value)}
                   className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 outline-none transition focus:border-[#c7a56b]"
                 />
@@ -670,6 +698,7 @@ export default function DashboardMensalidadesPage() {
                 <input
                   type="date"
                   value={paymentForm.paid_at}
+                  disabled={savingPayment || permissions.loadingPermissions || !permissions.canUpdate}
                   onChange={(event) => updatePaymentField("paid_at", event.target.value)}
                   className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 outline-none transition focus:border-[#c7a56b]"
                 />
@@ -679,6 +708,7 @@ export default function DashboardMensalidadesPage() {
                 <span className="text-sm font-bold text-[#596579]">Forma</span>
                 <select
                   value={paymentForm.payment_method}
+                  disabled={savingPayment || permissions.loadingPermissions || !permissions.canUpdate}
                   onChange={(event) =>
                     updatePaymentField("payment_method", event.target.value)
                   }
@@ -697,6 +727,7 @@ export default function DashboardMensalidadesPage() {
                 <input
                   type="text"
                   value={paymentForm.reference}
+                  disabled={savingPayment || permissions.loadingPermissions || !permissions.canUpdate}
                   onChange={(event) =>
                     updatePaymentField("reference", event.target.value)
                   }
@@ -707,16 +738,21 @@ export default function DashboardMensalidadesPage() {
 
               <button
                 type="submit"
-                disabled={savingPayment}
+                disabled={savingPayment || permissions.loadingPermissions || !permissions.canUpdate}
                 className="rounded-full bg-[#13233a] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.1em] text-white shadow-lg shadow-slate-900/10 disabled:cursor-not-allowed disabled:opacity-70 md:self-end"
               >
-                {savingPayment ? "Salvando..." : "Confirmar"}
+                {savingPayment
+                  ? "Salvando..."
+                  : permissions.canUpdate
+                    ? "Confirmar"
+                    : "Somente leitura"}
               </button>
 
               <label className="grid gap-2 md:col-span-2 xl:col-span-5">
                 <span className="text-sm font-bold text-[#596579]">Observação</span>
                 <textarea
                   value={paymentForm.notes}
+                  disabled={savingPayment || permissions.loadingPermissions || !permissions.canUpdate}
                   onChange={(event) => updatePaymentField("notes", event.target.value)}
                   rows={3}
                   className="w-full resize-none rounded-xl border border-[#e8dccb] px-3 py-2.5 outline-none transition focus:border-[#c7a56b]"
@@ -824,9 +860,10 @@ export default function DashboardMensalidadesPage() {
                           <button
                             type="button"
                             onClick={() => openPaymentForm(fee)}
-                            className="rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
+                            disabled={permissions.loadingPermissions || !permissions.canUpdate}
+                            className="rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa] disabled:cursor-not-allowed disabled:opacity-50"
                           >
-                            Registrar
+                            {permissions.canUpdate ? "Registrar" : "Somente leitura"}
                           </button>
                         )}
                       </div>

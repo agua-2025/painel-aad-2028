@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { getAllowedDashboardHrefs } from "@/lib/permissions";
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
@@ -39,6 +40,11 @@ export function DashboardLayout({
   roles = [],
 }: DashboardLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const allowedHrefs = new Set(getAllowedDashboardHrefs(roles));
+  const visibleMenuItems = menuItems.filter(
+    (item) => item.href === "/dashboard" || allowedHrefs.has(item.href)
+  );
 
   async function handleLogout() {
     const supabase = createClient();
@@ -78,7 +84,7 @@ export function DashboardLayout({
         {mobileMenuOpen && (
           <div className="border-t border-[#e8dccb] bg-white px-5 py-4">
             <nav className="grid gap-2">
-              {menuItems.map((item) => (
+              {visibleMenuItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -150,7 +156,7 @@ export function DashboardLayout({
           </Link>
 
           <nav className="mt-4 flex-1 space-y-1 overflow-y-auto pr-1 pb-3">
-            {menuItems.map((item) => (
+            {visibleMenuItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}

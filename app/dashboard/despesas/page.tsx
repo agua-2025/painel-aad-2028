@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
+import { useDashboardPermissions } from "@/lib/useDashboardPermissions";
 
 type Expense = {
   id: string;
@@ -140,6 +141,7 @@ function formatFileSize(size?: number | null) {
 }
 
 export default function DashboardDespesasPage() {
+  const permissions = useDashboardPermissions("despesas");
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -240,6 +242,10 @@ export default function DashboardDespesasPage() {
   }
 
   async function uploadReceipt(expenseId: string, file: File) {
+    if (!permissions.canUpdate) {
+      throw new Error("Seu perfil pode consultar despesas, mas não pode anexar comprovantes.");
+    }
+
     if (!allowedReceiptTypes.includes(file.type)) {
       throw new Error("Formato de comprovante inválido. Use PDF, JPG, PNG ou WEBP.");
     }
@@ -338,9 +344,15 @@ export default function DashboardDespesasPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    setSaving(true);
     setMessage("");
     setSuccess("");
+
+    if (!permissions.canCreate) {
+      setMessage("Seu perfil pode consultar despesas, mas não pode registrar nova despesa.");
+      return;
+    }
+
+    setSaving(true);
 
     const amount = Number(String(form.amount).replace(",", "."));
 
@@ -400,7 +412,12 @@ export default function DashboardDespesasPage() {
       .single();
 
     if (error || !insertedExpense?.id) {
-      setMessage(error?.message || "Não foi possível registrar a despesa.");
+      console.error("Erro ao registrar despesa:", error);
+      setMessage(
+        error?.message?.includes("mês já está fechado") || error?.message?.includes("mes ja esta fechado")
+          ? error.message
+          : "Não foi possível registrar a despesa. Verifique se seu perfil tem permissão para essa ação."
+      );
       setSaving(false);
       return;
     }
@@ -443,9 +460,15 @@ export default function DashboardDespesasPage() {
   }
 
   async function handleAttachReceipt(expense: Expense, file: File) {
-    setSaving(true);
     setMessage("");
     setSuccess("");
+
+    if (!permissions.canUpdate) {
+      setMessage("Seu perfil pode consultar despesas, mas não pode anexar comprovantes.");
+      return;
+    }
+
+    setSaving(true);
 
     try {
       await uploadReceipt(expense.id, file);
@@ -466,6 +489,11 @@ export default function DashboardDespesasPage() {
     setMessage("");
     setSuccess("");
 
+    if (!permissions.canUpdate) {
+      setMessage("Seu perfil pode consultar despesas, mas não pode marcar despesas como pagas.");
+      return;
+    }
+
     const supabase = createClient();
 
     const { error } = await supabase
@@ -479,7 +507,12 @@ export default function DashboardDespesasPage() {
       .eq("id", expense.id);
 
     if (error) {
-      setMessage(error.message || "Não foi possível marcar a despesa como paga.");
+      console.error("Erro ao marcar despesa como paga:", error);
+      setMessage(
+        error.message?.includes("mês já está fechado") || error.message?.includes("mes ja esta fechado")
+          ? error.message
+          : "Não foi possível marcar a despesa como paga. Verifique se seu perfil tem permissão para essa ação."
+      );
       return;
     }
 
@@ -490,6 +523,11 @@ export default function DashboardDespesasPage() {
   async function cancelExpense(expense: Expense) {
     setMessage("");
     setSuccess("");
+
+    if (!permissions.canUpdate) {
+      setMessage("Seu perfil pode consultar despesas, mas não pode cancelar despesas.");
+      return;
+    }
 
     const confirmed = window.confirm(
       "Deseja cancelar esta despesa? O registro ficará no histórico."
@@ -508,7 +546,12 @@ export default function DashboardDespesasPage() {
       .eq("id", expense.id);
 
     if (error) {
-      setMessage(error.message || "Não foi possível cancelar a despesa.");
+      console.error("Erro ao cancelar despesa:", error);
+      setMessage(
+        error.message?.includes("mês já está fechado") || error.message?.includes("mes ja esta fechado")
+          ? error.message
+          : "Não foi possível cancelar a despesa. Verifique se seu perfil tem permissão para essa ação."
+      );
       return;
     }
 
@@ -549,6 +592,12 @@ export default function DashboardDespesasPage() {
           </section>
         )}
 
+        {permissions.isReadOnly && !permissions.loadingPermissions && (
+          <section className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800 shadow-sm">
+            Seu perfil pode consultar despesas, mas não pode registrar, pagar, cancelar ou anexar comprovantes.
+          </section>
+        )}
+
         {summary.paidWithoutReceiptCount > 0 && (
           <section className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 shadow-sm">
             <p className="font-bold text-amber-900">
@@ -572,6 +621,7 @@ export default function DashboardDespesasPage() {
                 <input
                   type="date"
                   value={form.expense_date}
+                  disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                   onChange={(event) =>
                     setForm((previous) => ({
                       ...previous,
@@ -591,6 +641,7 @@ export default function DashboardDespesasPage() {
                 <input
                   type="date"
                   value={form.due_date}
+                  disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                   onChange={(event) =>
                     setForm((previous) => ({
                       ...previous,
@@ -610,6 +661,7 @@ export default function DashboardDespesasPage() {
                   type="number"
                   step="0.01"
                   value={form.amount}
+                  disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                   onChange={(event) =>
                     setForm((previous) => ({
                       ...previous,
@@ -629,6 +681,7 @@ export default function DashboardDespesasPage() {
 
                 <select
                   value={form.status}
+                  disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                   onChange={(event) =>
                     setForm((previous) => ({
                       ...previous,
@@ -658,6 +711,7 @@ export default function DashboardDespesasPage() {
 
                 <select
                   value={form.category}
+                  disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                   onChange={(event) =>
                     setForm((previous) => ({
                       ...previous,
@@ -681,6 +735,7 @@ export default function DashboardDespesasPage() {
 
                 <input
                   value={form.payee_name}
+                  disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                   onChange={(event) =>
                     setForm((previous) => ({
                       ...previous,
@@ -785,6 +840,7 @@ export default function DashboardDespesasPage() {
               <input
                 id="receipt_file"
                 type="file"
+                disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                 accept="application/pdf,image/jpeg,image/png,image/webp"
                 onChange={(event) => {
                   const file = event.target.files?.[0] ?? null;
@@ -806,6 +862,7 @@ export default function DashboardDespesasPage() {
               <textarea
                 rows={3}
                 value={form.notes}
+                disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                 onChange={(event) =>
                   setForm((previous) => ({
                     ...previous,
@@ -819,10 +876,14 @@ export default function DashboardDespesasPage() {
 
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
               className="w-fit rounded-full bg-[#13233a] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {saving ? "Salvando..." : "Registrar despesa"}
+              {saving
+                ? "Salvando..."
+                : permissions.canCreate
+                  ? "Registrar despesa"
+                  : "Somente leitura"}
             </button>
           </form>
         </section>
@@ -1105,11 +1166,18 @@ export default function DashboardDespesasPage() {
                       )}
 
                       {!expense.receipt_path && expense.status !== "cancelada" && (
-                        <label className="cursor-pointer rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]">
-                          {saving ? "Enviando..." : "Anexar"}
+                        <label className={`rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa] ${
+                          permissions.canUpdate ? "cursor-pointer" : "cursor-not-allowed opacity-50"
+                        }`}>
+                          {saving
+                            ? "Enviando..."
+                            : permissions.canUpdate
+                              ? "Anexar"
+                              : "Somente leitura"}
 
                           <input
                             type="file"
+                            disabled={saving || permissions.loadingPermissions || !permissions.canUpdate}
                             accept="application/pdf,image/jpeg,image/png,image/webp"
                             className="hidden"
                             onChange={(event) => {
@@ -1129,9 +1197,10 @@ export default function DashboardDespesasPage() {
                         <button
                           type="button"
                           onClick={() => markAsPaid(expense)}
-                          className="rounded-full border border-green-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-green-700 hover:bg-green-50"
+                          disabled={permissions.loadingPermissions || !permissions.canUpdate}
+                          className="rounded-full border border-green-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                          Pagar
+                          {permissions.canUpdate ? "Pagar" : "Somente leitura"}
                         </button>
                       )}
 
@@ -1139,9 +1208,10 @@ export default function DashboardDespesasPage() {
                         <button
                           type="button"
                           onClick={() => cancelExpense(expense)}
-                          className="rounded-full border border-red-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-red-700 hover:bg-red-50"
+                          disabled={permissions.loadingPermissions || !permissions.canUpdate}
+                          className="rounded-full border border-red-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                          Cancelar
+                          {permissions.canUpdate ? "Cancelar" : "Somente leitura"}
                         </button>
                       )}
                     </div>

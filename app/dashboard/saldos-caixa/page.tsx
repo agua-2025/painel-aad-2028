@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
+import { useDashboardPermissions } from "@/lib/useDashboardPermissions";
 
 type CashMonthlyBalance = {
   id: string;
@@ -68,6 +69,7 @@ function formatMonth(value: string) {
 }
 
 export default function DashboardSaldosCaixaPage() {
+  const permissions = useDashboardPermissions("saldos_caixa");
   const [balances, setBalances] = useState<CashMonthlyBalance[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -151,9 +153,15 @@ export default function DashboardSaldosCaixaPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    setSaving(true);
     setMessage("");
     setSuccessMessage("");
+
+    if (!permissions.canUpdate) {
+      setMessage("Seu perfil pode consultar os saldos do caixa, mas não pode salvar ou atualizar saldo inicial.");
+      return;
+    }
+
+    setSaving(true);
 
     if (!form.month) {
       setMessage("Informe o mês do saldo.");
@@ -185,7 +193,8 @@ export default function DashboardSaldosCaixaPage() {
       .upsert(payload, { onConflict: "month_ref" });
 
     if (error) {
-      setMessage(error.message || "Não foi possível salvar o saldo inicial.");
+      console.error("Erro ao salvar saldo inicial:", error);
+      setMessage("Não foi possível salvar o saldo inicial. Verifique se seu perfil tem permissão para essa ação.");
       setSaving(false);
       return;
     }
@@ -228,6 +237,12 @@ export default function DashboardSaldosCaixaPage() {
           </section>
         )}
 
+        {permissions.isReadOnly && !permissions.loadingPermissions && (
+          <section className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">
+            Seu perfil pode consultar os saldos do caixa, mas não pode cadastrar ou alterar saldo inicial.
+          </section>
+        )}
+
         <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
           <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
             <div>
@@ -257,6 +272,7 @@ export default function DashboardSaldosCaixaPage() {
                 <input
                   type="month"
                   value={form.month}
+                  disabled={saving || permissions.loadingPermissions || !permissions.canUpdate}
                   onChange={(event) =>
                     setForm((previous) => ({
                       ...previous,
@@ -276,6 +292,7 @@ export default function DashboardSaldosCaixaPage() {
                   type="number"
                   step="0.01"
                   value={form.opening_balance}
+                  disabled={saving || permissions.loadingPermissions || !permissions.canUpdate}
                   onChange={(event) =>
                     setForm((previous) => ({
                       ...previous,
@@ -296,6 +313,7 @@ export default function DashboardSaldosCaixaPage() {
               <textarea
                 rows={3}
                 value={form.notes}
+                disabled={saving || permissions.loadingPermissions || !permissions.canUpdate}
                 onChange={(event) =>
                   setForm((previous) => ({
                     ...previous,
@@ -310,10 +328,16 @@ export default function DashboardSaldosCaixaPage() {
             <div className="flex flex-col gap-2 md:flex-row md:items-center">
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || permissions.loadingPermissions || !permissions.canUpdate}
                 className="w-fit rounded-full bg-[#13233a] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {saving ? "Salvando..." : selectedBalance ? "Atualizar saldo" : "Salvar saldo"}
+                {saving
+                  ? "Salvando..."
+                  : permissions.canUpdate
+                    ? selectedBalance
+                      ? "Atualizar saldo"
+                      : "Salvar saldo"
+                    : "Somente leitura"}
               </button>
 
               <p className="text-xs font-bold text-[#596579]">

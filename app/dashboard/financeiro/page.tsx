@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
+import { useDashboardPermissions } from "@/lib/useDashboardPermissions";
 
 type FinancialSetting = {
   id: string;
@@ -36,6 +37,7 @@ function formatCurrency(value: number | null | undefined) {
 }
 
 export default function DashboardFinanceiroPage() {
+  const permissions = useDashboardPermissions("financeiro");
   const [settings, setSettings] = useState<FinancialSetting[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -89,6 +91,11 @@ export default function DashboardFinanceiroPage() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (!permissions.canCreate) {
+      setMessage("Seu perfil não tem permissão para criar ou ativar regra financeira.");
+      return;
+    }
 
     if (!form.title.trim()) {
       setMessage("Informe o título da regra financeira.");
@@ -371,10 +378,10 @@ export default function DashboardFinanceiroPage() {
             <div className="flex justify-end">
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                 className="rounded-full bg-[#13233a] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.1em] text-white shadow-lg shadow-slate-900/10 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {saving ? "Salvando..." : "Ativar regra"}
+                {saving ? "Salvando..." : permissions.canCreate ? "Ativar regra" : "Somente leitura"}
               </button>
             </div>
           </form>

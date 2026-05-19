@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
+import { useDashboardPermissions } from "@/lib/useDashboardPermissions";
 
 type Associate = {
   id: string;
@@ -93,6 +94,7 @@ function distributeTotalAmount(totalAmount: number, associates: Associate[]) {
 }
 
 export default function DashboardContribuicoesExtrasPage() {
+  const permissions = useDashboardPermissions("contribuicoes_extras");
   const today = new Date().toISOString().slice(0, 10);
 
   const [associates, setAssociates] = useState<Associate[]>([]);
@@ -210,9 +212,15 @@ export default function DashboardContribuicoesExtrasPage() {
   async function handleCreateContribution(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    setSaving(true);
     setMessage("");
     setSuccessMessage("");
+
+    if (!permissions.canCreate) {
+      setMessage("Seu perfil pode consultar as contribuições extras, mas não pode criar nova cobrança.");
+      return;
+    }
+
+    setSaving(true);
 
     const activeAssociates = associates.filter(
       (associate) => associate.status === "ativo"
@@ -273,10 +281,7 @@ export default function DashboardContribuicoesExtrasPage() {
       .single();
 
     if (contributionError || !contributionData) {
-      setMessage(
-        contributionError?.message ||
-          "Não foi possível criar a contribuição extra."
-      );
+      setMessage("Não foi possível criar a contribuição extra. Verifique se seu perfil tem permissão para essa ação.");
       setSaving(false);
       return;
     }
@@ -413,6 +418,12 @@ export default function DashboardContribuicoesExtrasPage() {
             Nesta primeira versão, o rateio será feito entre todos os associados ativos.
           </p>
 
+          {permissions.isReadOnly && !permissions.loadingPermissions && (
+            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm font-bold text-amber-800">
+              Seu perfil pode consultar as contribuições extras, mas não pode criar ou gerar rateios.
+            </div>
+          )}
+
           {message && (
             <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm font-bold text-red-700">
               {message}
@@ -435,7 +446,7 @@ export default function DashboardContribuicoesExtrasPage() {
                 <input
                   type="text"
                   value={form.title}
-                  disabled={saving}
+                  disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                   onChange={(event) =>
                     setForm((previous) => ({
                       ...previous,
@@ -455,7 +466,7 @@ export default function DashboardContribuicoesExtrasPage() {
                 <input
                   type="date"
                   value={form.due_date}
-                  disabled={saving}
+                  disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                   onChange={(event) =>
                     setForm((previous) => ({
                       ...previous,
@@ -474,7 +485,7 @@ export default function DashboardContribuicoesExtrasPage() {
 
               <textarea
                 value={form.description}
-                disabled={saving}
+                disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                 onChange={(event) =>
                   setForm((previous) => ({
                     ...previous,
@@ -494,7 +505,7 @@ export default function DashboardContribuicoesExtrasPage() {
 
               <textarea
                 value={form.reason}
-                disabled={saving}
+                disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                 onChange={(event) =>
                   setForm((previous) => ({
                     ...previous,
@@ -515,7 +526,7 @@ export default function DashboardContribuicoesExtrasPage() {
 
                 <select
                   value={form.amount_mode}
-                  disabled={saving}
+                  disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                   onChange={(event) =>
                     setForm((previous) => ({
                       ...previous,
@@ -540,7 +551,7 @@ export default function DashboardContribuicoesExtrasPage() {
                     step="0.01"
                     min="0"
                     value={form.total_amount}
-                    disabled={saving}
+                    disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                     onChange={(event) =>
                       setForm((previous) => ({
                         ...previous,
@@ -562,7 +573,7 @@ export default function DashboardContribuicoesExtrasPage() {
                     step="0.01"
                     min="0"
                     value={form.individual_amount}
-                    disabled={saving}
+                    disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                     onChange={(event) =>
                       setForm((previous) => ({
                         ...previous,
@@ -611,7 +622,7 @@ export default function DashboardContribuicoesExtrasPage() {
 
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
               className="w-fit rounded-full bg-[#13233a] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? "Gerando..." : "Criar e gerar rateio"}

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
+import { useDashboardPermissions } from "@/lib/useDashboardPermissions";
 
 type OtherRevenue = {
   id: string;
@@ -94,6 +95,7 @@ function getMonthFromDate(value: string) {
 }
 
 export default function DashboardReceitasAvulsasPage() {
+  const permissions = useDashboardPermissions("receitas_avulsas");
   const today = new Date().toISOString().slice(0, 10);
 
   const [revenues, setRevenues] = useState<OtherRevenue[]>([]);
@@ -202,9 +204,15 @@ export default function DashboardReceitasAvulsasPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    setSaving(true);
     setMessage("");
     setSuccessMessage("");
+
+    if (!permissions.canCreate) {
+      setMessage("Seu perfil pode consultar as receitas avulsas, mas não pode registrar nova receita.");
+      return;
+    }
+
+    setSaving(true);
 
     const amount = Number(String(form.amount).replace(",", "."));
 
@@ -243,7 +251,8 @@ export default function DashboardReceitasAvulsasPage() {
     });
 
     if (error) {
-      setMessage(error.message || "Não foi possível registrar a receita avulsa.");
+      console.error("Erro ao registrar receita avulsa:", error);
+      setMessage("Não foi possível registrar a receita avulsa. Verifique se seu perfil tem permissão para essa ação.");
       setSaving(false);
       return;
     }
@@ -266,6 +275,11 @@ export default function DashboardReceitasAvulsasPage() {
   }
 
   async function cancelRevenue(revenue: OtherRevenue) {
+    if (!permissions.canUpdate) {
+      setMessage("Seu perfil pode consultar as receitas avulsas, mas não pode cancelar receitas.");
+      return;
+    }
+
     const confirmed = window.confirm(
       "Tem certeza que deseja cancelar esta receita avulsa? Ela continuará no histórico, mas não contará como entrada confirmada."
     );
@@ -286,7 +300,8 @@ export default function DashboardReceitasAvulsasPage() {
       .eq("id", revenue.id);
 
     if (error) {
-      setMessage(error.message || "Não foi possível cancelar a receita avulsa.");
+      console.error("Erro ao cancelar receita avulsa:", error);
+      setMessage("Não foi possível cancelar a receita avulsa. Verifique se seu perfil tem permissão para essa ação.");
       return;
     }
 
@@ -327,6 +342,12 @@ export default function DashboardReceitasAvulsasPage() {
           </section>
         )}
 
+        {permissions.isReadOnly && !permissions.loadingPermissions && (
+          <section className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">
+            Seu perfil pode consultar as receitas avulsas, mas não pode registrar ou cancelar receitas.
+          </section>
+        )}
+
         <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
           <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
             Nova receita avulsa
@@ -342,6 +363,7 @@ export default function DashboardReceitasAvulsasPage() {
                 <input
                   type="date"
                   value={form.received_at}
+                  disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                   onChange={(event) =>
                     setForm((previous) => ({
                       ...previous,
@@ -362,6 +384,7 @@ export default function DashboardReceitasAvulsasPage() {
                   step="0.01"
                   min="0"
                   value={form.amount}
+                  disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                   onChange={(event) =>
                     setForm((previous) => ({
                       ...previous,
@@ -380,6 +403,7 @@ export default function DashboardReceitasAvulsasPage() {
 
                 <select
                   value={form.category}
+                  disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                   onChange={(event) =>
                     setForm((previous) => ({
                       ...previous,
@@ -403,6 +427,7 @@ export default function DashboardReceitasAvulsasPage() {
 
                 <select
                   value={form.payment_method}
+                  disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                   onChange={(event) =>
                     setForm((previous) => ({
                       ...previous,
@@ -429,6 +454,7 @@ export default function DashboardReceitasAvulsasPage() {
                 <input
                   type="text"
                   value={form.payer_name}
+                  disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                   onChange={(event) =>
                     setForm((previous) => ({
                       ...previous,
@@ -448,6 +474,7 @@ export default function DashboardReceitasAvulsasPage() {
                 <input
                   type="text"
                   value={form.reference}
+                  disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                   onChange={(event) =>
                     setForm((previous) => ({
                       ...previous,
@@ -468,6 +495,7 @@ export default function DashboardReceitasAvulsasPage() {
               <input
                 type="text"
                 value={form.description}
+                disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                 onChange={(event) =>
                   setForm((previous) => ({
                     ...previous,
@@ -487,6 +515,7 @@ export default function DashboardReceitasAvulsasPage() {
               <textarea
                 rows={3}
                 value={form.notes}
+                disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
                 onChange={(event) =>
                   setForm((previous) => ({
                     ...previous,
@@ -500,10 +529,14 @@ export default function DashboardReceitasAvulsasPage() {
 
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || permissions.loadingPermissions || !permissions.canCreate}
               className="w-fit rounded-full bg-[#13233a] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {saving ? "Salvando..." : "Registrar receita"}
+              {saving
+                ? "Salvando..."
+                : permissions.canCreate
+                  ? "Registrar receita"
+                  : "Somente leitura"}
             </button>
           </form>
         </section>
@@ -685,9 +718,10 @@ export default function DashboardReceitasAvulsasPage() {
                         <button
                           type="button"
                           onClick={() => cancelRevenue(revenue)}
-                          className="rounded-full border border-red-200 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.06em] text-red-700 hover:bg-red-50"
+                          disabled={permissions.loadingPermissions || !permissions.canUpdate}
+                          className="rounded-full border border-red-200 bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.06em] text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                          Cancelar
+                          {permissions.canUpdate ? "Cancelar" : "Somente leitura"}
                         </button>
                       ) : (
                         <span className="text-xs font-bold text-[#596579]">
