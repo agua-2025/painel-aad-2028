@@ -36,6 +36,17 @@ function formatStatus(value: string) {
   return labels[value] || value.replaceAll("_", " ");
 }
 
+function statusStyle(value: string) {
+  const styles: Record<string, string> = {
+    pendente: "border-amber-200 bg-amber-50 text-amber-700",
+    com_pendencia: "border-orange-200 bg-orange-50 text-orange-700",
+    aprovada: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    rejeitada: "border-red-200 bg-red-50 text-red-700",
+  };
+
+  return styles[value] || "border-slate-200 bg-slate-50 text-slate-600";
+}
+
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
@@ -253,136 +264,271 @@ export default function SolicitacoesPage() {
 
   return (
     <ProtectedDashboard>
-      <div className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10 md:p-8">
-        <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
-          Associados
-        </p>
-
-        <h1 className="mt-4 text-3xl font-black tracking-[-0.05em] md:text-5xl">
-          Solicitações de associação
-        </h1>
-
-        <p className="mt-4 max-w-3xl leading-7 text-white/75">
-          Pedidos enviados pelos acadêmicos interessados em ingressar na AAD
-          Direito 2028.
-        </p>
-      </div>
-
-      {errorMessage && (
-        <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 font-bold text-red-700">
-          {errorMessage}
-        </div>
-      )}
-
-      {successMessage && (
-        <div className="mt-6 rounded-2xl border border-green-200 bg-green-50 p-5 font-bold text-green-700">
-          {successMessage}
-        </div>
-      )}
-
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-          <p className="text-sm font-bold text-[#596579]">Total</p>
-          <p className="mt-2 text-3xl font-black tracking-[-0.05em]">
-            {requests.length}
+      <div className="space-y-4">
+        <section className="rounded-2xl bg-[#13233a] p-5 text-white shadow-xl shadow-slate-900/10">
+          <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
+            Associados
           </p>
-        </div>
 
-        <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-          <p className="text-sm font-bold text-[#596579]">Pendentes</p>
-          <p className="mt-2 text-3xl font-black tracking-[-0.05em]">
-            {pendingCount}
-          </p>
-        </div>
+          <div className="mt-2 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h1 className="text-2xl font-black tracking-[-0.04em]">
+                Solicitações de associação
+              </h1>
 
-        <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-          <p className="text-sm font-bold text-[#596579]">Com pendência</p>
-          <p className="mt-2 text-3xl font-black tracking-[-0.05em]">
-            {issueCount}
-          </p>
-        </div>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
+                Acompanhe os pedidos enviados pelos acadêmicos interessados em ingressar na AAD Direito 2028.
+              </p>
+            </div>
 
-        <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-          <p className="text-sm font-bold text-[#596579]">Aprovadas</p>
-          <p className="mt-2 text-3xl font-black tracking-[-0.05em]">
-            {approvedCount}
-          </p>
-        </div>
+            <div className="w-fit rounded-xl bg-white/10 px-4 py-2.5">
+              <p className="text-[11px] font-black uppercase tracking-[0.08em] text-white/60">
+                Total de pedidos
+              </p>
 
-        <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-          <p className="text-sm font-bold text-[#596579]">Rejeitadas</p>
-          <p className="mt-2 text-3xl font-black tracking-[-0.05em]">
-            {rejectedCount}
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-8 rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm md:p-6">
-        <h2 className="text-2xl font-black tracking-[-0.04em]">
-          Pedidos recebidos
-        </h2>
-
-        <p className="mt-2 text-sm font-medium text-[#596579]">
-          Analise os pedidos enviados pelo formulário público de associação.
-        </p>
-
-        {loading ? (
-          <div className="mt-6 rounded-2xl bg-[#f7f8fa] p-5 font-bold text-[#596579]">
-            Carregando solicitações...
+              <p className="text-lg font-black text-white">
+                {requests.length}
+              </p>
+            </div>
           </div>
-        ) : requests.length === 0 ? (
-          <div className="mt-6 rounded-2xl bg-[#f7f8fa] p-6">
-            <h3 className="text-xl font-black tracking-[-0.04em]">
-              Nenhuma solicitação encontrada
-            </h3>
+        </section>
 
-            <p className="mt-3 leading-7 text-[#596579]">
-              Quando alguém preencher o formulário público de associação, o
-              pedido aparecerá aqui para análise.
+        {errorMessage && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+            {errorMessage}
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700">
+            {successMessage}
+          </div>
+        )}
+
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          <div className="rounded-xl border border-[#e8dccb] bg-white px-4 py-3 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#596579]">
+              Total
+            </p>
+            <p className="mt-2 text-2xl font-black text-[#13233a]">{requests.length}</p>
+          </div>
+
+          <div className="rounded-xl border border-[#e8dccb] bg-white px-4 py-3 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#596579]">
+              Pendentes
+            </p>
+            <p className="mt-2 text-2xl font-black text-[#13233a]">{pendingCount}</p>
+          </div>
+
+          <div className="rounded-xl border border-[#e8dccb] bg-white px-4 py-3 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#596579]">
+              Com pendência
+            </p>
+            <p className="mt-2 text-2xl font-black text-[#13233a]">{issueCount}</p>
+          </div>
+
+          <div className="rounded-xl border border-[#e8dccb] bg-white px-4 py-3 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#596579]">
+              Aprovadas
+            </p>
+            <p className="mt-2 text-2xl font-black text-[#13233a]">{approvedCount}</p>
+          </div>
+
+          <div className="rounded-xl border border-[#e8dccb] bg-white px-4 py-3 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#596579]">
+              Rejeitadas
+            </p>
+            <p className="mt-2 text-2xl font-black text-[#13233a]">{rejectedCount}</p>
+          </div>
+        </section>
+
+        <section className="overflow-hidden rounded-2xl border border-[#e8dccb] bg-white shadow-sm">
+          <div className="border-b border-[#e8dccb] px-4 py-3">
+            <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
+              Pedidos recebidos
+            </h2>
+
+            <p className="mt-1 text-xs font-bold leading-6 text-[#596579]">
+              Revise os dados do interessado antes de aprovar, marcar pendência ou rejeitar.
             </p>
           </div>
-        ) : (
-          <div className="mt-6 grid gap-4">
-            {requests.map((request) => {
-              const canAnalyze =
-                request.status === "pendente" ||
-                request.status === "com_pendencia";
 
-              const isProcessing = processingId === request.id;
+          {loading ? (
+            <div className="p-5 md:p-6">
+              <div className="rounded-2xl bg-[#f7f8fa] p-4 text-sm font-bold text-[#596579]">
+                Carregando solicitações...
+              </div>
+            </div>
+          ) : requests.length === 0 ? (
+            <div className="p-5 md:p-6">
+              <div className="rounded-2xl bg-[#f7f8fa] p-5">
+                <h3 className="font-black text-[#13233a]">
+                  Nenhuma solicitação encontrada
+                </h3>
 
-              return (
-                <article
-                  key={request.id}
-                  className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm"
-                >
-                  <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-xl font-black tracking-[-0.04em]">
-                          {request.full_name}
-                        </h3>
+                <p className="mt-1 text-xs font-bold leading-6 text-[#596579]">
+                  Quando alguém preencher o formulário público de associação, o pedido aparecerá aqui.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="hidden overflow-x-auto xl:block">
+                <table className="min-w-full text-left text-sm">
+                  <thead className="bg-[#f7f8fa] text-xs font-black uppercase tracking-[0.12em] text-[#596579]">
+                    <tr>
+                      <th className="px-4 py-2.5">Interessado</th>
+                      <th className="px-4 py-2.5">Contato</th>
+                      <th className="px-4 py-2.5">Dados</th>
+                      <th className="px-4 py-2.5">Situação</th>
+                      <th className="px-4 py-2.5 text-right">Ação</th>
+                    </tr>
+                  </thead>
 
-                        <span className="rounded-full bg-[#f7f8fa] px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-[#13233a]">
+                  <tbody className="divide-y divide-[#eef0f3]">
+                    {requests.map((request) => {
+                      const canAnalyze =
+                        request.status === "pendente" ||
+                        request.status === "com_pendencia";
+
+                      const isProcessing = processingId === request.id;
+
+                      return (
+                        <tr key={request.id} className="align-top">
+                          <td className="px-4 py-3">
+                            <p className="font-black text-[#13233a]">
+                              {request.full_name}
+                            </p>
+
+                            <p className="mt-0.5 text-xs font-medium text-[#596579]">
+                              CPF: {request.cpf || "Não informado"}
+                            </p>
+
+                            {request.message && (
+                              <p className="mt-2 max-w-md rounded-lg bg-[#f7f8fa] px-3 py-2 text-xs leading-5 text-[#596579]">
+                                {request.message}
+                              </p>
+                            )}
+
+                            {request.review_notes && (
+                              <p className="mt-2 max-w-md rounded-lg border border-[#e8dccb] bg-[#fffaf1] px-3 py-2 text-xs leading-5 text-[#596579]">
+                                <strong className="text-[#13233a]">Análise:</strong>{" "}
+                                {request.review_notes}
+                              </p>
+                            )}
+                          </td>
+
+                          <td className="px-4 py-3">
+                            <p className="font-medium text-[#13233a]">{request.email}</p>
+                            <p className="mt-0.5 text-xs font-medium text-[#596579]">
+                              {request.phone || "Telefone não informado"}
+                            </p>
+                          </td>
+
+                          <td className="px-4 py-3 text-xs font-bold leading-5 text-[#596579]">
+                            <p>
+                              {[request.city, request.state].filter(Boolean).join(" / ") ||
+                                "Localidade não informada"}
+                            </p>
+
+                            <p>Semestre: {request.semester || "Não informado"}</p>
+                            <p>Enviado em: {formatDate(request.created_at)}</p>
+                          </td>
+
+                          <td className="px-4 py-3">
+                            <span
+                              className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] ${statusStyle(
+                                request.status
+                              )}`}
+                            >
+                              {formatStatus(request.status)}
+                            </span>
+                          </td>
+
+                          <td className="px-4 py-3">
+                            <div className="flex justify-end gap-1.5">
+                              {canAnalyze ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => approveRequest(request)}
+                                    disabled={isProcessing}
+                                    className="rounded-full border border-green-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                  >
+                                    {isProcessing ? "..." : "Aprovar"}
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => markAsPending(request)}
+                                    disabled={isProcessing}
+                                    className="rounded-full border border-amber-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-amber-800 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                  >
+                                    Pendência
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => rejectRequest(request)}
+                                    disabled={isProcessing}
+                                    className="rounded-full border border-red-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                  >
+                                    Rejeitar
+                                  </button>
+                                </>
+                              ) : (
+                                <span className="rounded-full bg-[#f7f8fa] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                                  Analisada
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="grid gap-3 p-5 xl:hidden">
+                {requests.map((request) => {
+                  const canAnalyze =
+                    request.status === "pendente" ||
+                    request.status === "com_pendencia";
+
+                  const isProcessing = processingId === request.id;
+
+                  return (
+                    <article
+                      key={request.id}
+                      className="rounded-2xl border border-[#e8dccb] bg-white p-4"
+                    >
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <h3 className="font-black text-[#13233a]">
+                            {request.full_name}
+                          </h3>
+
+                          <p className="mt-1 text-sm text-[#596579]">
+                            {request.email}
+                          </p>
+
+                          <p className="mt-1 text-xs font-medium text-[#596579]">
+                            {request.phone || "Telefone não informado"} •{" "}
+                            {request.cpf || "CPF não informado"}
+                          </p>
+                        </div>
+
+                        <span
+                          className={`w-fit rounded-full border px-3 py-1 text-xs font-black uppercase tracking-[0.08em] ${statusStyle(
+                            request.status
+                          )}`}
+                        >
                           {formatStatus(request.status)}
                         </span>
                       </div>
 
-                      <div className="mt-4 grid gap-3 text-sm font-medium text-[#596579] md:grid-cols-2 xl:grid-cols-3">
-                        <p>
-                          <strong className="text-[#13233a]">E-mail:</strong>{" "}
-                          {request.email}
-                        </p>
-
-                        <p>
-                          <strong className="text-[#13233a]">Telefone:</strong>{" "}
-                          {request.phone || "Não informado"}
-                        </p>
-
-                        <p>
-                          <strong className="text-[#13233a]">CPF:</strong>{" "}
-                          {request.cpf || "Não informado"}
-                        </p>
-
+                      <div className="mt-4 grid gap-2 text-sm text-[#596579] sm:grid-cols-2">
                         <p>
                           <strong className="text-[#13233a]">Cidade:</strong>{" "}
                           {[request.city, request.state].filter(Boolean).join(" / ") ||
@@ -401,66 +547,62 @@ export default function SolicitacoesPage() {
                       </div>
 
                       {request.message && (
-                        <div className="mt-4 rounded-2xl bg-[#f7f8fa] p-4 text-sm leading-6 text-[#596579]">
-                          <strong className="text-[#13233a]">
-                            Observação do solicitante:
-                          </strong>{" "}
+                        <div className="mt-4 rounded-xl bg-[#f7f8fa] p-3 text-sm leading-6 text-[#596579]">
+                          <strong className="text-[#13233a]">Observação:</strong>{" "}
                           {request.message}
                         </div>
                       )}
 
                       {request.review_notes && (
-                        <div className="mt-4 rounded-2xl border border-[#e8dccb] bg-[#fffaf1] p-4 text-sm leading-6 text-[#596579]">
-                          <strong className="text-[#13233a]">
-                            Análise da Associação:
-                          </strong>{" "}
+                        <div className="mt-3 rounded-xl border border-[#e8dccb] bg-[#fffaf1] p-3 text-sm leading-6 text-[#596579]">
+                          <strong className="text-[#13233a]">Análise:</strong>{" "}
                           {request.review_notes}
                         </div>
                       )}
-                    </div>
 
-                    <div className="flex shrink-0 flex-col gap-2 sm:flex-row xl:flex-col">
-                      {canAnalyze ? (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => approveRequest(request)}
-                            disabled={isProcessing}
-                            className="rounded-full bg-[#13233a] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            {isProcessing ? "Processando..." : "Aprovar"}
-                          </button>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {canAnalyze ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => approveRequest(request)}
+                              disabled={isProcessing}
+                              className="rounded-full bg-[#13233a] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {isProcessing ? "Processando..." : "Aprovar"}
+                            </button>
 
-                          <button
-                            type="button"
-                            onClick={() => markAsPending(request)}
-                            disabled={isProcessing}
-                            className="rounded-full border border-[#e8dccb] bg-[#fffaf1] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-[#8a5a00] disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            Pendência
-                          </button>
+                            <button
+                              type="button"
+                              onClick={() => markAsPending(request)}
+                              disabled={isProcessing}
+                              className="rounded-full border border-[#e8dccb] bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-[#8a5a00] disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              Pendência
+                            </button>
 
-                          <button
-                            type="button"
-                            onClick={() => rejectRequest(request)}
-                            disabled={isProcessing}
-                            className="rounded-full border border-red-200 bg-red-50 px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            Rejeitar
-                          </button>
-                        </>
-                      ) : (
-                        <span className="rounded-full bg-[#f7f8fa] px-5 py-3 text-center text-xs font-black uppercase tracking-[0.08em] text-[#596579]">
-                          Já analisada
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        )}
+                            <button
+                              type="button"
+                              onClick={() => rejectRequest(request)}
+                              disabled={isProcessing}
+                              className="rounded-full border border-red-200 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              Rejeitar
+                            </button>
+                          </>
+                        ) : (
+                          <span className="rounded-full bg-[#f7f8fa] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-[#596579]">
+                            Já analisada
+                          </span>
+                        )}
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </section>
       </div>
     </ProtectedDashboard>
   );
