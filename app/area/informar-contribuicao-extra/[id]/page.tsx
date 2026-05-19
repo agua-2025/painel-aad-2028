@@ -282,29 +282,29 @@ export default function InformarContribuicaoExtraPage() {
 
   return (
     <ProtectedArea>
-      <div className="space-y-6">
-        <section className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10">
+      <div className="space-y-4">
+        <section className="rounded-2xl bg-[#13233a] p-5 text-white shadow-xl shadow-slate-900/10">
           <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
             Minha área
           </p>
 
-          <h1 className="mt-3 text-3xl font-black tracking-[-0.04em] md:text-4xl">
+          <h1 className="mt-2 text-2xl font-black tracking-[-0.04em]">
             Informar pagamento
           </h1>
 
-          <p className="mt-3 max-w-3xl leading-7 text-white/75">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
             Informe à Tesouraria que você realizou o pagamento de uma contribuição extra.
           </p>
         </section>
 
         {loading ? (
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+          <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <p className="font-bold text-[#596579]">
               Carregando contribuição extra...
             </p>
           </div>
         ) : message && !item ? (
-          <div className="rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm">
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
             <p className="font-bold text-red-700">{message}</p>
 
             <Link
@@ -316,12 +316,12 @@ export default function InformarContribuicaoExtraPage() {
           </div>
         ) : item ? (
           <>
-            <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+            <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
               <p className="text-xs font-black uppercase tracking-[0.2em] text-[#c7a56b]">
                 Vencimento em {formatDate(item.due_date)}
               </p>
 
-              <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[#13233a]">
+              <h2 className="mt-2 text-lg font-black tracking-[-0.03em] text-[#13233a]">
                 {contribution?.title ?? "Contribuição extra"}
               </h2>
 
@@ -330,7 +330,7 @@ export default function InformarContribuicaoExtraPage() {
               </p>
 
               {contribution?.description && (
-                <p className="mt-4 leading-7 text-[#596579]">
+                <p className="mt-3 text-sm leading-6 text-[#596579]">
                   {contribution.description}
                 </p>
               )}
@@ -351,41 +351,41 @@ export default function InformarContribuicaoExtraPage() {
               </div>
 
               {contribution?.reason && (
-                <p className="mt-4 rounded-2xl bg-[#f7f8fa] p-4 text-sm leading-6 text-[#596579]">
+                <p className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-3 text-sm leading-6 text-[#596579]">
                   <strong>Motivo:</strong> {contribution.reason}
                 </p>
               )}
             </section>
 
             {pendingReport && (
-              <p className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
+              <p className="rounded-xl border border-[#e8dccb] bg-white px-3 py-2.5 text-sm font-bold text-[#596579]">
                 Já existe um informe pendente de análise para esta contribuição extra.
               </p>
             )}
 
             {successMessage && (
-              <section className="rounded-3xl border border-green-200 bg-green-50 p-5 shadow-sm">
+              <section className="rounded-2xl border border-green-200 bg-green-50 p-4 shadow-sm">
                 <p className="font-bold text-green-800">{successMessage}</p>
               </section>
             )}
 
             {message && (
-              <section className="rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm">
+              <section className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
                 <p className="font-bold text-red-700">{message}</p>
               </section>
             )}
 
-            <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-              <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
+            <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+              <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
                 Dados do pagamento
               </h2>
 
-              <p className="mt-2 text-sm leading-6 text-[#596579]">
+              <p className="mt-1 text-xs font-bold leading-6 text-[#596579]">
                 Este envio não quita automaticamente a contribuição. A baixa depende de conferência da Tesouraria.
               </p>
 
-              <form onSubmit={handleSubmit} className="mt-5 grid gap-4">
-                <div className="grid gap-4 md:grid-cols-3">
+              <form onSubmit={handleSubmit} className="mt-4 grid gap-3">
+                <div className="grid gap-3 md:grid-cols-3">
                   <label className="grid gap-2">
                     <span className="text-sm font-bold text-[#13233a]">
                       Valor pago
@@ -403,7 +403,7 @@ export default function InformarContribuicaoExtraPage() {
                           amount: event.target.value,
                         }))
                       }
-                      className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                      className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                     />
                   </label>
 
@@ -422,7 +422,7 @@ export default function InformarContribuicaoExtraPage() {
                           paid_at: event.target.value,
                         }))
                       }
-                      className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                      className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                     />
                   </label>
 
@@ -440,7 +440,7 @@ export default function InformarContribuicaoExtraPage() {
                           payment_method: event.target.value,
                         }))
                       }
-                      className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                      className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                     >
                       {paymentMethodLabels.map((method) => (
                         <option key={method.value} value={method.value}>
@@ -467,7 +467,7 @@ export default function InformarContribuicaoExtraPage() {
                       }))
                     }
                     placeholder="Ex.: ID do Pix, nome usado no Pix, número do comprovante..."
-                    className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                    className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                   />
                 </label>
 
@@ -487,11 +487,11 @@ export default function InformarContribuicaoExtraPage() {
                     }
                     rows={4}
                     placeholder="Ex.: pagamento feito por terceiro, valor complementar ou observação sobre o comprovante..."
-                    className="w-full resize-none rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                    className="w-full resize-none rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                   />
                 </label>
 
-                <div className="flex flex-col gap-3 md:flex-row">
+                <div className="flex flex-col gap-2 md:flex-row">
                   <button
                     type="submit"
                     disabled={
@@ -500,7 +500,7 @@ export default function InformarContribuicaoExtraPage() {
                       !isOpenItem(item.status) ||
                       balance <= 0
                     }
-                    className="rounded-full bg-[#13233a] px-6 py-3 text-sm font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-full bg-[#13233a] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {saving ? "Enviando..." : "Enviar informe"}
                   </button>
@@ -516,50 +516,58 @@ export default function InformarContribuicaoExtraPage() {
             </section>
 
             {reports.length > 0 && (
-              <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-                <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
+              <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+                <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
                   Informes enviados
                 </h2>
 
-                <div className="mt-5 grid gap-3">
-                  {reports.map((report) => (
-                    <article
-                      key={report.id}
-                      className="rounded-2xl border border-[#e8dccb] p-4"
-                    >
-                      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-                        <div>
+                <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
+                  <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#596579] md:grid">
+                    <div className="col-span-3">Pagamento</div>
+                    <div className="col-span-2">Forma</div>
+                    <div className="col-span-3">Referência</div>
+                    <div className="col-span-2 text-center">Status</div>
+                    <div className="col-span-2">Tesouraria</div>
+                  </div>
+
+                  <div className="divide-y divide-[#eee7db]">
+                    {reports.map((report) => (
+                      <article
+                        key={report.id}
+                        className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-start"
+                      >
+                        <div className="md:col-span-3">
                           <p className="font-black text-[#13233a]">
-                            {formatCurrency(report.amount)} em{" "}
-                            {formatDate(report.paid_at)}
+                            {formatCurrency(report.amount)}
                           </p>
 
-                          <p className="mt-1 text-sm font-bold text-[#596579]">
-                            {paymentMethodLabels.find(
-                              (method) => method.value === report.payment_method
-                            )?.label ?? report.payment_method}
+                          <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                            {formatDate(report.paid_at)}
                           </p>
                         </div>
 
-                        <span className="w-fit rounded-full bg-[#f7f8fa] px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-[#13233a]">
-                          {statusLabels[report.status] ?? report.status}
-                        </span>
-                      </div>
+                        <div className="font-bold text-[#596579] md:col-span-2">
+                          {paymentMethodLabels.find(
+                            (method) => method.value === report.payment_method
+                          )?.label ?? report.payment_method}
+                        </div>
 
-                      {report.reference && (
-                        <p className="mt-3 text-sm text-[#596579]">
-                          <strong>Referência:</strong> {report.reference}
-                        </p>
-                      )}
+                        <div className="text-xs font-bold leading-5 text-[#596579] md:col-span-3">
+                          {report.reference || "Não informada"}
+                        </div>
 
-                      {report.review_notes && (
-                        <p className="mt-3 rounded-2xl bg-[#f7f8fa] p-3 text-sm text-[#596579]">
-                          <strong>Observação da Tesouraria:</strong>{" "}
-                          {report.review_notes}
-                        </p>
-                      )}
-                    </article>
-                  ))}
+                        <div className="md:col-span-2 md:text-center">
+                          <span className="inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                            {statusLabels[report.status] ?? report.status}
+                          </span>
+                        </div>
+
+                        <div className="text-xs font-bold leading-5 text-[#596579] md:col-span-2">
+                          {report.review_notes || "Sem observação."}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
                 </div>
               </section>
             )}

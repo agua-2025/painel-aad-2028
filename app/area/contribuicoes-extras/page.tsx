@@ -182,33 +182,33 @@ export default function AreaContribuicoesExtrasPage() {
 
   return (
     <ProtectedArea>
-      <div className="space-y-6">
-        <section className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10">
+      <div className="space-y-4">
+        <section className="rounded-2xl bg-[#13233a] p-5 text-white shadow-xl shadow-slate-900/10">
           <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
             Minha área
           </p>
 
-          <h1 className="mt-3 text-3xl font-black tracking-[-0.04em] md:text-4xl">
+          <h1 className="mt-2 text-2xl font-black tracking-[-0.04em]">
             Contribuições Extras
           </h1>
 
-          <p className="mt-3 max-w-3xl leading-7 text-white/75">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
             Consulte rateios e cobranças pontuais lançados pela Associação.
           </p>
         </section>
 
         {loading ? (
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <p className="font-bold text-[#596579]">
               Carregando contribuições extras...
             </p>
           </div>
         ) : message ? (
-          <div className="rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm">
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
             <p className="font-bold text-red-700">{message}</p>
           </div>
         ) : !associate ? (
-          <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <h2 className="text-xl font-black text-[#13233a]">
               Área indisponível
             </h2>
@@ -219,10 +219,10 @@ export default function AreaContribuicoesExtrasPage() {
           </div>
         ) : (
           <>
-            <section className="grid gap-5 md:grid-cols-3">
-              <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm md:col-span-2">
+            <section className="grid gap-3 md:grid-cols-3">
+              <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm md:col-span-2">
                 <p className="text-sm font-bold text-[#596579]">Associado</p>
-                <p className="mt-2 text-2xl font-black tracking-[-0.05em] text-[#13233a]">
+                <p className="mt-2 text-base font-black tracking-[-0.03em] text-[#13233a]">
                   {associate.full_name}
                 </p>
                 <p className="mt-2 text-sm font-bold text-[#596579]">
@@ -230,150 +230,193 @@ export default function AreaContribuicoesExtrasPage() {
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+              <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
                 <p className="text-sm font-bold text-[#596579]">
                   Total em aberto
                 </p>
-                <p className="mt-2 text-3xl font-black tracking-[-0.05em] text-[#13233a]">
+                <p className="mt-2 text-lg font-black tracking-[-0.03em] text-[#13233a]">
                   {formatCurrency(summary.totalOpen)}
                 </p>
               </div>
             </section>
 
-            <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-              <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
-                Contribuições extras em aberto
-              </h2>
+            <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+              <div>
+                <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
+                  Contribuições extras em aberto
+                </h2>
 
-              <p className="mt-2 text-sm font-medium text-[#596579]">
-                São cobranças pontuais ou rateios lançados pela Associação, diferentes da mensalidade ordinária.
-              </p>
+                <p className="text-xs font-bold text-[#596579]">
+                  Cobranças pontuais ou rateios lançados pela Associação, diferentes da mensalidade ordinária.
+                </p>
+              </div>
 
               {summary.openItems.length === 0 ? (
-                <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-5">
-                  <h3 className="text-xl font-black tracking-[-0.04em] text-[#13233a]">
+                <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-4">
+                  <h3 className="text-base font-black tracking-[-0.03em] text-[#13233a]">
                     Nenhuma contribuição extra em aberto
                   </h3>
 
-                  <p className="mt-2 leading-7 text-[#596579]">
+                  <p className="mt-1 text-sm leading-6 text-[#596579]">
                     Não há rateios ou cobranças pontuais pendentes no momento.
                   </p>
                 </div>
               ) : (
-                <div className="mt-5 grid gap-4">
-                  {summary.openItems.map((item) => {
-                    const contribution = getContribution(item);
-                    const balance = Math.max(
-                      Number(item.amount ?? 0) - Number(item.paid_amount ?? 0),
-                      0
-                    );
+                <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
+                  <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#596579] md:grid">
+                    <div className="col-span-4">Contribuição</div>
+                    <div className="col-span-2">Vencimento</div>
+                    <div className="col-span-2 text-right">Valor/Pago</div>
+                    <div className="col-span-2 text-right">Saldo</div>
+                    <div className="col-span-1 text-center">Status</div>
+                    <div className="col-span-1 text-right">Ação</div>
+                  </div>
 
-                    return (
-                      <article
-                        key={item.id}
-                        className="rounded-3xl border border-[#e8dccb] p-5"
-                      >
-                        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                          <div>
-                            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#c7a56b]">
-                              Vencimento em {formatDate(item.due_date)}
+                  <div className="divide-y divide-[#eee7db]">
+                    {summary.openItems.map((item) => {
+                      const contribution = getContribution(item);
+                      const balance = Math.max(
+                        Number(item.amount ?? 0) - Number(item.paid_amount ?? 0),
+                        0
+                      );
+
+                      return (
+                        <article
+                          key={item.id}
+                          className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-center"
+                        >
+                          <div className="md:col-span-4">
+                            <p className="font-black text-[#13233a]">
+                              {contribution?.title ?? "Contribuição extra"}
                             </p>
 
-                            <h3 className="mt-2 text-xl font-black tracking-[-0.04em] text-[#13233a]">
-                              {contribution?.title ?? "Contribuição extra"}
-                            </h3>
-
                             {contribution?.description && (
-                              <p className="mt-2 text-sm leading-6 text-[#596579]">
+                              <p className="mt-0.5 text-xs font-bold leading-5 text-[#596579]">
                                 {contribution.description}
+                              </p>
+                            )}
+
+                            {contribution?.reason && (
+                              <p className="mt-1 text-xs font-bold leading-5 text-[#596579]">
+                                Motivo: {contribution.reason}
                               </p>
                             )}
                           </div>
 
-                          <span className="w-fit rounded-full bg-[#f7f8fa] px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-[#13233a]">
-                            {statusLabels[item.status] ?? item.status}
-                          </span>
-                        </div>
+                          <div className="font-bold text-[#596579] md:col-span-2">
+                            {formatDate(item.due_date)}
+                          </div>
 
-                        <div className="mt-4 grid gap-3 text-sm text-[#596579] md:grid-cols-3">
-                          <p>
-                            <strong>Valor:</strong> {formatCurrency(item.amount)}
-                          </p>
+                          <div className="font-bold text-[#596579] md:col-span-2 md:text-right">
+                            <p className="font-black text-[#13233a]">
+                              {formatCurrency(item.amount)}
+                            </p>
 
-                          <p>
-                            <strong>Pago:</strong>{" "}
-                            {formatCurrency(item.paid_amount)}
-                          </p>
+                            <p className="text-xs">
+                              Pago: {formatCurrency(item.paid_amount)}
+                            </p>
+                          </div>
 
-                          <p>
-                            <strong>Saldo:</strong> {formatCurrency(balance)}
-                          </p>
-                        </div>
+                          <div className="font-black text-[#13233a] md:col-span-2 md:text-right">
+                            {formatCurrency(balance)}
+                          </div>
 
-                        {contribution?.reason && (
-                          <p className="mt-4 rounded-2xl bg-[#f7f8fa] p-4 text-sm leading-6 text-[#596579]">
-                            <strong>Motivo:</strong> {contribution.reason}
-                          </p>
-                        )}
+                          <div className="md:col-span-1 md:text-center">
+                            <span className="inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                              {statusLabels[item.status] ?? item.status}
+                            </span>
+                          </div>
 
-                        <a
-                          href={`/area/informar-contribuicao-extra/${item.id}`}
-                          className="mt-4 inline-flex w-fit rounded-full bg-[#13233a] px-5 py-2 text-xs font-black uppercase tracking-[0.08em] text-white"
-                        >
-                          Informar pagamento
-                        </a>
-                      </article>
-                    );
-                  })}
+                          <div className="md:col-span-1 md:text-right">
+                            <a
+                              href={`/area/informar-contribuicao-extra/${item.id}`}
+                              className="inline-flex rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
+                            >
+                              Informar
+                            </a>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </section>
 
-            <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-              <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
-                Histórico de contribuições extras
-              </h2>
+            <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+              <div>
+                <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
+                  Histórico de contribuições extras
+                </h2>
+
+                <p className="text-xs font-bold text-[#596579]">
+                  Rateios e cobranças pontuais lançados em seu nome.
+                </p>
+              </div>
 
               {items.length === 0 ? (
-                <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-5">
+                <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-4">
                   <p className="font-bold text-[#596579]">
                     Nenhuma contribuição extra lançada até o momento.
                   </p>
                 </div>
               ) : (
-                <div className="mt-5 grid gap-3">
-                  {items.map((item) => {
-                    const contribution = getContribution(item);
-                    const balance = Math.max(
-                      Number(item.amount ?? 0) - Number(item.paid_amount ?? 0),
-                      0
-                    );
+                <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
+                  <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#596579] md:grid">
+                    <div className="col-span-4">Contribuição</div>
+                    <div className="col-span-2">Vencimento</div>
+                    <div className="col-span-2 text-right">Valor</div>
+                    <div className="col-span-2 text-right">Pago/Saldo</div>
+                    <div className="col-span-2 text-center">Status</div>
+                  </div>
 
-                    return (
-                      <article
-                        key={item.id}
-                        className="rounded-2xl border border-[#e8dccb] p-4"
-                      >
-                        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-                          <div>
-                            <h3 className="font-black text-[#13233a]">
+                  <div className="divide-y divide-[#eee7db]">
+                    {items.map((item) => {
+                      const contribution = getContribution(item);
+                      const balance = Math.max(
+                        Number(item.amount ?? 0) - Number(item.paid_amount ?? 0),
+                        0
+                      );
+
+                      return (
+                        <article
+                          key={item.id}
+                          className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-center"
+                        >
+                          <div className="md:col-span-4">
+                            <p className="font-black text-[#13233a]">
                               {contribution?.title ?? "Contribuição extra"}
-                            </h3>
-
-                            <p className="mt-1 text-sm font-bold text-[#596579]">
-                              Vencimento: {formatDate(item.due_date)} · Valor:{" "}
-                              {formatCurrency(item.amount)} · Saldo:{" "}
-                              {formatCurrency(balance)}
                             </p>
+
+                            {contribution?.description && (
+                              <p className="mt-0.5 text-xs font-bold leading-5 text-[#596579]">
+                                {contribution.description}
+                              </p>
+                            )}
                           </div>
 
-                          <span className="w-fit rounded-full bg-[#f7f8fa] px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-[#13233a]">
-                            {statusLabels[item.status] ?? item.status}
-                          </span>
-                        </div>
-                      </article>
-                    );
-                  })}
+                          <div className="font-bold text-[#596579] md:col-span-2">
+                            {formatDate(item.due_date)}
+                          </div>
+
+                          <div className="font-black text-[#13233a] md:col-span-2 md:text-right">
+                            {formatCurrency(item.amount)}
+                          </div>
+
+                          <div className="font-bold text-[#596579] md:col-span-2 md:text-right">
+                            <p>Pago: {formatCurrency(item.paid_amount)}</p>
+                            <p className="text-xs">Saldo: {formatCurrency(balance)}</p>
+                          </div>
+
+                          <div className="md:col-span-2 md:text-center">
+                            <span className="inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                              {statusLabels[item.status] ?? item.status}
+                            </span>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </section>
