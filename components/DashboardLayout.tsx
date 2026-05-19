@@ -82,9 +82,11 @@ export function DashboardLayout({
         </div>
 
         {mobileMenuOpen && (
-          <div className="border-t border-[#e8dccb] bg-white px-5 py-4">
-            <nav className="grid gap-2">
-              {visibleMenuItems.map((item) => (
+        <div className="border-t border-[#e8dccb] bg-white px-5 py-4">
+          <nav className="grid gap-2">
+            <div className="my-2 border-t border-[#e8dccb]" />
+
+            {visibleMenuItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
