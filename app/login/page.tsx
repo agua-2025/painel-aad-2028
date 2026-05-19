@@ -5,7 +5,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("vivendamirassol@gmail.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,60 +34,80 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f8fa] px-6 py-10 text-[#13233a]">
-      <section className="mx-auto flex min-h-[calc(100vh-80px)] max-w-5xl items-center justify-center">
-        <div className="grid w-full overflow-hidden rounded-[2rem] border border-[#e8dccb] bg-white shadow-xl shadow-slate-900/8 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="bg-[#13233a] p-10 text-white">
-            <Link
-              href="/"
-              className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#c7a56b] text-sm font-black text-[#13233a]"
-            >
-              AAD
-            </Link>
+    <main className="min-h-screen bg-[#f8f7f4] text-[#13233a]">
+      <section className="mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-center px-5 py-8 md:px-8">
+        <div className="border-b border-[#e6ded2] pb-5">
+          <Link
+            href="/"
+            className="text-[11px] font-black uppercase tracking-[0.28em] text-[#a98246] transition hover:text-[#13233a]"
+          >
+            AAD Direito 2028
+          </Link>
+        </div>
 
-            <h1 className="mt-10 text-4xl font-black tracking-[-0.05em]">
-              Painel AAD 2028
+        <div className="grid gap-10 py-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+          <section>
+            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#a98246]">
+              Acesso restrito
+            </p>
+
+            <h1 className="mt-5 max-w-xl text-5xl font-black leading-[0.95] tracking-[-0.07em] text-[#13233a] md:text-6xl">
+              Entrar no painel
             </h1>
 
-            <p className="mt-5 leading-7 text-white/75">
-              Acesso restrito aos usuários autorizados da Associação.
+            <p className="mt-6 max-w-md text-base font-medium leading-8 text-[#596579]">
+              Informe suas credenciais para acessar o ambiente administrativo da
+              Associação.
             </p>
 
-            <div className="mt-10 rounded-2xl border border-white/10 bg-white/8 p-5 text-sm leading-6 text-white/75">
-              Use o e-mail e a senha cadastrados no Supabase Auth.
+            <p className="mt-6 max-w-md border-l-2 border-[#c7a56b] pl-4 text-sm font-medium leading-7 text-[#596579]">
+              O acesso é permitido apenas aos usuários autorizados conforme o
+              perfil definido no sistema.
+            </p>
+          </section>
+
+          <section className="rounded-[1.75rem] border border-[#e6ded2] bg-white p-5 shadow-xl shadow-slate-900/8 md:p-7">
+            <div className="flex items-center justify-between gap-4 border-b border-[#eee7db] pb-5">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#a98246]">
+                  Login
+                </p>
+
+                <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[#13233a]">
+                  Dados de acesso
+                </h2>
+              </div>
+
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#f1eadf] text-xs font-black text-[#a98246]">
+                AAD
+              </div>
             </div>
-          </div>
 
-          <div className="p-8 md:p-10">
-            <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
-              Entrar no sistema
-            </p>
-
-            <h2 className="mt-3 text-3xl font-black tracking-[-0.04em]">
-              Informe seus dados de acesso
-            </h2>
-
-            <form onSubmit={handleLogin} className="mt-8 grid gap-5">
+            <form onSubmit={handleLogin} className="mt-6 grid gap-4">
               <label className="grid gap-2">
                 <span className="text-sm font-bold text-[#596579]">E-mail</span>
+
                 <input
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   required
-                  className="rounded-2xl border border-[#e8dccb] bg-white px-5 py-4 outline-none transition focus:border-[#c7a56b]"
+                  autoComplete="email"
+                  className="w-full rounded-xl border border-[#e6ded2] bg-[#fcfcfd] px-4 py-3 text-sm font-bold text-[#13233a] outline-none transition focus:border-[#c7a56b] focus:bg-white"
                   placeholder="seuemail@exemplo.com"
                 />
               </label>
 
               <label className="grid gap-2">
                 <span className="text-sm font-bold text-[#596579]">Senha</span>
+
                 <input
                   type="password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   required
-                  className="rounded-2xl border border-[#e8dccb] bg-white px-5 py-4 outline-none transition focus:border-[#c7a56b]"
+                  autoComplete="current-password"
+                  className="w-full rounded-xl border border-[#e6ded2] bg-[#fcfcfd] px-4 py-3 text-sm font-bold text-[#13233a] outline-none transition focus:border-[#c7a56b] focus:bg-white"
                   placeholder="Digite sua senha"
                 />
               </label>
@@ -95,19 +115,35 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="rounded-full bg-[#13233a] px-8 py-4 text-sm font-black uppercase tracking-[0.12em] text-white shadow-lg shadow-slate-900/15 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
+                className="mt-2 rounded-xl bg-[#13233a] px-6 py-3 text-[12px] font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-slate-900/12 transition hover:bg-[#0d1a2d] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loading ? "Entrando..." : "Entrar"}
               </button>
 
               {status && (
-                <div className="rounded-2xl bg-[#f7f8fa] p-4 text-sm font-bold text-[#596579]">
+                <div className="rounded-xl border border-[#e6ded2] bg-[#f8f7f4] px-4 py-3 text-sm font-bold leading-6 text-[#596579]">
                   {status}
                 </div>
               )}
             </form>
-          </div>
+
+            <div className="mt-6 border-t border-[#eee7db] pt-4">
+              <Link
+                href="/"
+                className="text-xs font-black uppercase tracking-[0.14em] text-[#596579] underline decoration-[#d8cbb7] decoration-2 underline-offset-8 transition hover:text-[#13233a]"
+              >
+                Voltar para a página inicial
+              </Link>
+            </div>
+          </section>
         </div>
+
+        <footer className="border-t border-[#e6ded2] pt-5">
+          <div className="flex flex-col gap-2 text-xs font-bold text-[#596579] md:flex-row md:items-center md:justify-between">
+            <p>AAD Direito 2028 · Ambiente administrativo.</p>
+            <p>Acesso restrito aos perfis autorizados.</p>
+          </div>
+        </footer>
       </section>
     </main>
   );
