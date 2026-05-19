@@ -23,15 +23,38 @@ type Associate = {
   status: string;
 };
 
+type RoleRow = {
+  roles:
+    | {
+        name: string;
+        description: string | null;
+      }
+    | {
+        name: string;
+        description: string | null;
+      }[]
+    | null;
+};
+
 type ProtectedAreaProps = {
   children: React.ReactNode;
 };
+
+const allowedDashboardRoles = [
+  "administrador",
+  "presidente",
+  "vice_presidente",
+  "secretaria",
+  "tesoureira",
+  "comissao_fiscal",
+];
 
 export function ProtectedArea({ children }: ProtectedAreaProps) {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [request, setRequest] = useState<MembershipRequest | null>(null);
   const [associate, setAssociate] = useState<Associate | null>(null);
+  const [roles, setRoles] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
@@ -84,6 +107,24 @@ export function ProtectedArea({ children }: ProtectedAreaProps) {
 
       setProfile(profileData);
 
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("roles(name, description)")
+        .eq("profile_id", profileData.id);
+
+      const roleNames =
+        ((roleData as unknown as RoleRow[] | null) ?? [])
+          .map((item) => {
+            if (Array.isArray(item.roles)) {
+              return item.roles[0]?.name;
+            }
+
+            return item.roles?.name;
+          })
+          .filter((name): name is string => Boolean(name)) ?? [];
+
+      setRoles(roleNames);
+
       const { data: requestData } = await supabase
         .from("membership_requests")
         .select("id, status, review_notes, created_at")
@@ -118,10 +159,11 @@ export function ProtectedArea({ children }: ProtectedAreaProps) {
     );
   }
 
-  const isApprovedRequest = request?.status === "aprovada";
-  const hasNoRequest = !request;
-  const isActiveAssociate =
-    associate?.status === "ativo" && (isApprovedRequest || hasNoRequest);
+  const canAccessDashboard = roles.some((role) =>
+    allowedDashboardRoles.includes(role)
+  );
+
+  const isActiveAssociate = associate?.status === "ativo";
 
   return (
     <AreaLayout
@@ -129,6 +171,7 @@ export function ProtectedArea({ children }: ProtectedAreaProps) {
       userEmail={profile?.email}
       requestStatus={request?.status}
       isAssociate={isActiveAssociate}
+      canAccessDashboard={canAccessDashboard}
     >
       {errorMessage && (
         <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-5 font-bold text-red-700">

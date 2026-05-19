@@ -10,6 +10,7 @@ type AreaLayoutProps = {
   userEmail?: string;
   requestStatus?: string | null;
   isAssociate?: boolean;
+  canAccessDashboard?: boolean;
 };
 
 const baseMenuItems = [
@@ -46,6 +47,7 @@ export function AreaLayout({
   userEmail,
   requestStatus,
   isAssociate = false,
+  canAccessDashboard = false,
 }: AreaLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -103,6 +105,17 @@ export function AreaLayout({
                 </Link>
               ))}
 
+              {canAccessDashboard && (
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 font-black text-[#13233a]"
+                >
+                  <span>🧭</span>
+                  <span>Painel Administrativo</span>
+                </Link>
+              )}
+
               <div className="mt-3 rounded-2xl border border-[#e8dccb] bg-[#f7f8fa] p-4">
                 <p className="text-sm font-black">{userName || "Usuário"}</p>
                 <p className="mt-1 truncate text-xs font-bold text-[#596579]">
@@ -157,6 +170,15 @@ export function AreaLayout({
                 <span>{item.label}</span>
               </Link>
             ))}
+            {canAccessDashboard && (
+              <Link
+                href="/dashboard"
+                className="mt-2 flex items-center gap-3 rounded-2xl border border-[#e8dccb] bg-white px-3 py-2 text-[14px] font-black text-[#13233a] transition hover:bg-[#f7f8fa]"
+              >
+                <span className="w-5 text-center text-sm">🧭</span>
+                <span>Painel Administrativo</span>
+              </Link>
+            )}
           </nav>
 
           <div className="mt-auto rounded-3xl border border-[#e8dccb] bg-[#f7f8fa] p-3">
