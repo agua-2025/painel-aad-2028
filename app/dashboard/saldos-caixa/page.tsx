@@ -197,44 +197,58 @@ export default function DashboardSaldosCaixaPage() {
 
   return (
     <ProtectedDashboard>
-      <div className="space-y-6">
-        <section className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10">
+      <div className="space-y-4">
+        <section className="rounded-2xl bg-[#13233a] p-5 text-white shadow-xl shadow-slate-900/10">
           <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
             Caixa
           </p>
 
-          <h1 className="mt-3 text-3xl font-black tracking-[-0.04em] md:text-4xl">
+          <h1 className="mt-2 text-2xl font-black tracking-[-0.04em]">
             Saldos do Caixa
           </h1>
 
-          <p className="mt-3 max-w-3xl leading-7 text-white/75">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
             Cadastre o saldo inicial de cada mês para que o Movimento Financeiro calcule o saldo final com mais precisão.
           </p>
         </section>
 
-        <p className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
+        <p className="rounded-xl border border-[#e8dccb] bg-white px-3 py-2.5 text-sm font-bold text-[#596579]">
           O saldo inicial representa o valor disponível no caixa/banco no primeiro dia do mês, antes das entradas e saídas daquele período.
         </p>
 
         {successMessage && (
-          <section className="rounded-3xl border border-green-200 bg-green-50 p-5 shadow-sm">
+          <section className="rounded-2xl border border-green-200 bg-green-50 p-4 shadow-sm">
             <p className="font-bold text-green-800">{successMessage}</p>
           </section>
         )}
 
         {message && (
-          <section className="rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm">
+          <section className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
             <p className="font-bold text-red-700">{message}</p>
           </section>
         )}
 
-        <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-          <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
-            Definir saldo inicial
-          </h2>
+        <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
+                Definir saldo inicial
+              </h2>
 
-          <form onSubmit={handleSubmit} className="mt-5 grid gap-4">
-            <div className="grid gap-4 md:grid-cols-3">
+              <p className="text-xs font-bold text-[#596579]">
+                Informe o saldo existente no caixa/banco no primeiro dia do mês.
+              </p>
+            </div>
+
+            {selectedBalance && (
+              <span className="w-fit rounded-full bg-[#f7f8fa] px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#596579]">
+                Atualizando saldo existente
+              </span>
+            )}
+          </div>
+
+          <form onSubmit={handleSubmit} className="mt-4 grid gap-3">
+            <div className="grid gap-3 md:grid-cols-3">
               <label className="grid gap-2">
                 <span className="text-sm font-bold text-[#13233a]">
                   Mês
@@ -249,7 +263,7 @@ export default function DashboardSaldosCaixaPage() {
                       month: event.target.value,
                     }))
                   }
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                 />
               </label>
 
@@ -269,7 +283,7 @@ export default function DashboardSaldosCaixaPage() {
                     }))
                   }
                   placeholder="0,00"
-                  className="w-full rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                  className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
                 />
               </label>
             </div>
@@ -289,75 +303,90 @@ export default function DashboardSaldosCaixaPage() {
                   }))
                 }
                 placeholder="Ex.: saldo conforme extrato bancário no início do mês."
-                className="w-full resize-none rounded-2xl border border-[#e8dccb] px-4 py-3 text-sm font-bold text-[#13233a] outline-none"
+                className="w-full resize-none rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
               />
             </label>
 
-            <button
-              type="submit"
-              disabled={saving}
-              className="w-fit rounded-full bg-[#13233a] px-6 py-3 text-sm font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {saving ? "Salvando..." : selectedBalance ? "Atualizar saldo" : "Salvar saldo"}
-            </button>
+            <div className="flex flex-col gap-2 md:flex-row md:items-center">
+              <button
+                type="submit"
+                disabled={saving}
+                className="w-fit rounded-full bg-[#13233a] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {saving ? "Salvando..." : selectedBalance ? "Atualizar saldo" : "Salvar saldo"}
+              </button>
+
+              <p className="text-xs font-bold text-[#596579]">
+                O mês só pode ter um saldo inicial cadastrado.
+              </p>
+            </div>
           </form>
         </section>
 
-        <section className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-          <h2 className="text-2xl font-black tracking-[-0.04em] text-[#13233a]">
-            Saldos cadastrados
-          </h2>
+        <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+          <div>
+            <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
+              Saldos cadastrados
+            </h2>
+
+            <p className="text-xs font-bold text-[#596579]">
+              Lista dos saldos iniciais mensais usados nos relatórios e fechamentos.
+            </p>
+          </div>
 
           {loading ? (
-            <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-4 text-sm font-bold text-[#596579]">
+            <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-3 text-sm font-bold text-[#596579]">
               Carregando saldos...
             </div>
           ) : balances.length === 0 ? (
-            <div className="mt-5 rounded-2xl bg-[#f7f8fa] p-5">
-              <h3 className="text-xl font-black tracking-[-0.04em] text-[#13233a]">
+            <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-4">
+              <h3 className="text-base font-black tracking-[-0.03em] text-[#13233a]">
                 Nenhum saldo cadastrado
               </h3>
 
-              <p className="mt-2 leading-7 text-[#596579]">
+              <p className="mt-1 text-sm leading-6 text-[#596579]">
                 Cadastre o saldo inicial do mês para que ele seja considerado no Movimento Financeiro.
               </p>
             </div>
           ) : (
-            <div className="mt-5 grid gap-3">
-              {balances.map((balance) => (
-                <article
-                  key={balance.id}
-                  className="rounded-3xl border border-[#e8dccb] p-4"
-                >
-                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.2em] text-[#c7a56b]">
+            <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
+              <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#596579] md:grid">
+                <div className="col-span-3">Mês</div>
+                <div className="col-span-3 text-right">Saldo inicial</div>
+                <div className="col-span-3">Atualização</div>
+                <div className="col-span-3">Observações</div>
+              </div>
+
+              <div className="divide-y divide-[#eee7db]">
+                {balances.map((balance) => (
+                  <article
+                    key={balance.id}
+                    className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-start"
+                  >
+                    <div className="md:col-span-3">
+                      <p className="font-black text-[#13233a]">
                         {formatMonth(balance.month_ref)}
                       </p>
 
-                      <h3 className="mt-2 text-xl font-black tracking-[-0.04em] text-[#13233a]">
-                        {formatCurrency(balance.opening_balance)}
-                      </h3>
-
-                      <p className="mt-1 text-sm font-bold text-[#596579]">
+                      <p className="mt-0.5 text-xs font-bold text-[#596579]">
                         Saldo inicial do mês
                       </p>
                     </div>
 
-                    <div className="text-left md:text-right">
-                      <p className="text-sm font-black text-[#13233a]">
-                        Atualizado em {formatDate(balance.updated_at)}
-                      </p>
+                    <div className="font-black text-[#13233a] md:col-span-3 md:text-right">
+                      {formatCurrency(balance.opening_balance)}
                     </div>
-                  </div>
 
-                  {balance.notes && (
-                    <p className="mt-3 whitespace-pre-line rounded-2xl bg-[#f7f8fa] p-3 text-sm leading-6 text-[#596579]">
-                      {balance.notes}
-                    </p>
-                  )}
-                </article>
-              ))}
+                    <div className="font-bold text-[#596579] md:col-span-3">
+                      {formatDate(balance.updated_at)}
+                    </div>
+
+                    <div className="whitespace-pre-line text-xs font-bold leading-5 text-[#596579] md:col-span-3">
+                      {balance.notes || "Sem observações."}
+                    </div>
+                  </article>
+                ))}
+              </div>
             </div>
           )}
         </section>
