@@ -91,6 +91,21 @@ type ExtraContributionGroup = {
   referenceLabel: string;
 };
 
+type UpcomingDueGroup = {
+  associateId: string;
+  associateName: string;
+  phone: string | null;
+  items: {
+    id: string;
+    title: string;
+    dueDate: string;
+    openAmount: number;
+  }[];
+  totalAmount: number;
+  referenceId: string;
+  referenceLabel: string;
+};
+
 function getTodayReference() {
   const today = new Date();
   const year = today.getFullYear();
@@ -144,6 +159,26 @@ function isOverdueDate(dueDate: string | null, todayKey: string) {
 
 function formatMonthReference(year: number, month: number) {
   return `${String(month).padStart(2, "0")}/${year}`;
+}
+
+function addDaysToDateKey(dateKey: string, days: number) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  date.setDate(date.getDate() + days);
+
+  const finalYear = date.getFullYear();
+  const finalMonth = String(date.getMonth() + 1).padStart(2, "0");
+  const finalDay = String(date.getDate()).padStart(2, "0");
+
+  return `${finalYear}-${finalMonth}-${finalDay}`;
+}
+
+function isUpcomingDueDate(dueDate: string | null, todayKey: string, daysAhead = 3) {
+  if (!dueDate) return false;
+
+  const limitDate = addDaysToDateKey(todayKey, daysAhead);
+
+  return dueDate >= todayKey && dueDate <= limitDate;
 }
 
 function normalizeAssociate(value: RelatedAssociate | RelatedAssociate[] | null) {
@@ -207,7 +242,7 @@ function makeExtraContributionMessage(group: ExtraContributionGroup) {
   const itemLines = group.items
     .map(
       (item) =>
-        `• ${item.title}, vencimento ${item.dueDate}, valor em aberto ${formatCurrency(
+        `- ${item.title}, vencimento ${item.dueDate}, valor em aberto ${formatCurrency(
           item.openAmount
         )}`
     )
@@ -224,6 +259,32 @@ ${itemLines}
 Pedimos, por gentileza, que verifique a pendência. Caso o pagamento já tenha sido realizado, registre ou encaminhe o comprovante pela área do associado.
 
 Esta mensagem é apenas um lembrete manual da Tesouraria.
+
+Atenciosamente,
+*Tesouraria da AAD Direito 2028*`;
+}
+
+function makeUpcomingDueMessage(group: UpcomingDueGroup) {
+  const itemLines = group.items
+    .map(
+      (item) =>
+        `- ${item.title}, vencimento ${item.dueDate}, valor ${formatCurrency(
+          item.openAmount
+        )}`
+    )
+    .join("\n");
+
+  return `Olá, ${firstName(group.associateName)}!
+
+Passando apenas para lembrar que há lançamento(s) da *AAD Direito 2028* com vencimento próximo:
+
+${itemLines}
+
+*Total previsto:* ${formatCurrency(group.totalAmount)}
+
+Caso o pagamento já tenha sido realizado, desconsidere esta mensagem ou registre o comprovante pela área do associado.
+
+Esta mensagem é apenas um lembrete preventivo da Tesouraria.
 
 Atenciosamente,
 *Tesouraria da AAD Direito 2028*`;
@@ -323,6 +384,95 @@ export default function ComunicacoesPage() {
     );
   }, [monthlyFees, today.dateKey]);
 
+  const upcomingDueGroups = useMemo(() => {
+    const grouped = new Map<string, UpcomingDueGroup>();
+
+    monthlyFees
+      .filter((fee) => ["pendente", "parcialmente_paga"].includes(fee.status))
+      .forEach((fee) => {
+        if (!isUpcomingDueDate(fee.due_date, today.dateKey, 3)) return;
+
+        const associate = normalizeAssociate(fee.associates);
+        if (!associate) return;
+
+        const openAmount =
+          Number(fee.total_amount || 0) - Number(fee.paid_amount || 0);
+
+        if (openAmount <= 0) return;
+
+        const currentItem = {
+          id: fee.id,
+          title: `Mensalidade ${formatMonthReference(fee.year, fee.month)}`,
+          dueDate: formatDate(fee.due_date),
+          openAmount,
+        };
+
+        const current = grouped.get(fee.associate_id);
+
+        if (!current) {
+          grouped.set(fee.associate_id, {
+            associateId: fee.associate_id,
+            associateName: associate.full_name,
+            phone: associate.phone,
+            items: [currentItem],
+            totalAmount: openAmount,
+            referenceId: `upcoming-due-${today.dateKey}-${fee.associate_id}`,
+            referenceLabel: `Vencimentos próximos ${formatDate(today.dateKey)}`,
+          });
+          return;
+        }
+
+        current.items.push(currentItem);
+        current.totalAmount += openAmount;
+      });
+
+    extraItems
+      .filter((item) => ["pendente", "parcialmente_paga"].includes(item.status))
+      .forEach((item) => {
+        if (!isUpcomingDueDate(item.due_date, today.dateKey, 3)) return;
+
+        const associate = normalizeAssociate(item.associates);
+        if (!associate) return;
+
+        const contribution = normalizeContribution(item.extra_contributions);
+        const title = contribution?.title || "Contribuição extra";
+
+        const openAmount =
+          Number(item.amount || 0) - Number(item.paid_amount || 0);
+
+        if (openAmount <= 0) return;
+
+        const currentItem = {
+          id: item.id,
+          title,
+          dueDate: formatDate(item.due_date),
+          openAmount,
+        };
+
+        const current = grouped.get(item.associate_id);
+
+        if (!current) {
+          grouped.set(item.associate_id, {
+            associateId: item.associate_id,
+            associateName: associate.full_name,
+            phone: associate.phone,
+            items: [currentItem],
+            totalAmount: openAmount,
+            referenceId: `upcoming-due-${today.dateKey}-${item.associate_id}`,
+            referenceLabel: `Vencimentos próximos ${formatDate(today.dateKey)}`,
+          });
+          return;
+        }
+
+        current.items.push(currentItem);
+        current.totalAmount += openAmount;
+      });
+
+    return Array.from(grouped.values()).sort((a, b) =>
+      a.associateName.localeCompare(b.associateName)
+    );
+  }, [monthlyFees, extraItems, today.dateKey]);
+
   const extraContributionGroups = useMemo(() => {
     const grouped = new Map<string, ExtraContributionGroup>();
 
@@ -412,6 +562,10 @@ export default function ComunicacoesPage() {
     hasLog("birthday", today.birthdayReferenceId, associate.id)
   ).length;
 
+  const totalUpcomingDueSent = upcomingDueGroups.filter((group) =>
+    hasLog("upcoming_due_reminder", group.referenceId, group.associateId)
+  ).length;
+
   const totalMonthlyFeeSent = monthlyFeeGroups.filter((group) =>
     hasLog("monthly_fee_overdue", group.referenceId, group.associateId)
   ).length;
@@ -474,6 +628,7 @@ export default function ComunicacoesPage() {
       .select("id, associate_id, communication_type, reference_id, sent_at")
       .in("communication_type", [
         "birthday",
+        "upcoming_due_reminder",
         "monthly_fee_overdue",
         "extra_contribution_overdue",
       ]);
@@ -583,7 +738,7 @@ export default function ComunicacoesPage() {
 
   function StatusBadge({ sent }: { sent: boolean }) {
     return sent ? (
-      <span className="rounded-full bg-emerald-700 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
+      <span className="rounded-full bg-[#13233a] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
         enviado hoje
       </span>
     ) : (
@@ -623,7 +778,7 @@ export default function ComunicacoesPage() {
             disabled={saving || sent}
             className={`rounded-full px-3.5 py-2 text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-70 ${
               sent
-                ? "bg-emerald-700 text-white"
+                ? "bg-[#13233a] text-white"
                 : "bg-[#13233a] text-white hover:bg-[#0c1728]"
             }`}
           >
@@ -744,7 +899,7 @@ export default function ComunicacoesPage() {
                       key={associate.id}
                       className={`rounded-2xl border px-4 py-3 ${
                         sent
-                          ? "border-emerald-200 bg-emerald-50"
+                          ? "border-[#d7c7b4] bg-[#f1f5f9]"
                           : "border-[#e8dccb] bg-[#f7f8fa]"
                       }`}
                     >
@@ -785,6 +940,55 @@ export default function ComunicacoesPage() {
             )}
           </div>
         </section>
+
+        <CommunicationSection
+          title="Vencimentos próximos"
+          eyebrow="Lembrete"
+          description="Lançamentos com vencimento de hoje até os próximos 3 dias."
+          totalLabel="Associados"
+          total={upcomingDueGroups.length}
+          sent={totalUpcomingDueSent}
+          loading={loading}
+          emptyText="Nenhum vencimento próximo encontrado."
+        >
+          {upcomingDueGroups.map((group) => {
+            const preparedMessage = makeUpcomingDueMessage(group);
+            const sent = hasLog(
+              "upcoming_due_reminder",
+              group.referenceId,
+              group.associateId
+            );
+            const hasPhone = Boolean(normalizePhoneForWhatsApp(group.phone));
+            const saving =
+              savingKey ===
+              `upcoming_due_reminder-${group.referenceId}-${group.associateId}`;
+
+            return (
+              <CompactCommunicationItem
+                key={group.associateId}
+                sent={sent}
+                name={group.associateName}
+                detail={`${group.phone || "Telefone não informado"} • ${
+                  group.items.length
+                } lançamento(s) • Total: ${formatCurrency(group.totalAmount)}`}
+                saving={saving}
+                hasPhone={hasPhone}
+                preparedMessage={preparedMessage}
+                onCopy={() => copyMessage(preparedMessage)}
+                onSend={() =>
+                  openWhatsAppAndRegister({
+                    associateId: group.associateId,
+                    phone: group.phone,
+                    communicationType: "upcoming_due_reminder",
+                    referenceId: group.referenceId,
+                    referenceLabel: group.referenceLabel,
+                    preparedMessage,
+                  })
+                }
+              />
+            );
+          })}
+        </CommunicationSection>
 
         <CommunicationSection
           title="Mensalidades vencidas"
@@ -981,7 +1185,7 @@ function CompactCommunicationItem({
   return (
     <article
       className={`rounded-2xl border px-4 py-3 ${
-        sent ? "border-emerald-200 bg-emerald-50" : "border-[#e8dccb] bg-[#f7f8fa]"
+        sent ? "border-[#d7c7b4] bg-[#f1f5f9]" : "border-[#e8dccb] bg-[#f7f8fa]"
       }`}
     >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -989,7 +1193,7 @@ function CompactCommunicationItem({
           <div className="flex flex-wrap items-center gap-2">
             <p className="font-black text-[#13233a]">{name}</p>
             {sent ? (
-              <span className="rounded-full bg-emerald-700 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
+              <span className="rounded-full bg-[#13233a] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
                 enviado hoje
               </span>
             ) : (
@@ -1018,7 +1222,7 @@ function CompactCommunicationItem({
               disabled={saving || sent}
               className={`rounded-full px-3.5 py-2 text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-70 ${
                 sent
-                  ? "bg-emerald-700 text-white"
+                  ? "bg-[#13233a] text-white"
                   : "bg-[#13233a] text-white hover:bg-[#0c1728]"
               }`}
             >
