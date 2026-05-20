@@ -17,18 +17,43 @@ const menuItems = [
   { label: "Associados", href: "/dashboard/associados", icon: "👥" },
   { label: "Solicitações", href: "/dashboard/solicitacoes", icon: "📝" },
   { label: "Avisos", href: "/dashboard/avisos", icon: "📢" },
+  { label: "Comunicações", href: "/dashboard/comunicacoes", icon: "💬" },
   { label: "Regras Financeiras", href: "/dashboard/financeiro", icon: "⚖️" },
   { label: "Mensalidades", href: "/dashboard/mensalidades", icon: "📅" },
-  { label: "Contribuições Extras", href: "/dashboard/contribuicoes-extras", icon: "➕" },
+  {
+    label: "Contribuições Extras",
+    href: "/dashboard/contribuicoes-extras",
+    icon: "➕",
+  },
   { label: "Informes de Pagamento", href: "/dashboard/pagamentos", icon: "💳" },
   { label: "Inadimplência", href: "/dashboard/inadimplencia", icon: "⚠️" },
-  { label: "Movimento Financeiro", href: "/dashboard/movimento-financeiro", icon: "📒" },
+  {
+    label: "Movimento Financeiro",
+    href: "/dashboard/movimento-financeiro",
+    icon: "📒",
+  },
   { label: "Saldos do Caixa", href: "/dashboard/saldos-caixa", icon: "🏦" },
-  { label: "Fechamento Mensal", href: "/dashboard/fechamento-mensal", icon: "🔒" },
-  { label: "Conferência de Saldos", href: "/dashboard/conferencia-saldos", icon: "🧾" },
-  { label: "Receitas Avulsas", href: "/dashboard/receitas-avulsas", icon: "➕" },
+  {
+    label: "Fechamento Mensal",
+    href: "/dashboard/fechamento-mensal",
+    icon: "🔒",
+  },
+  {
+    label: "Conferência de Saldos",
+    href: "/dashboard/conferencia-saldos",
+    icon: "🧾",
+  },
+  {
+    label: "Receitas Avulsas",
+    href: "/dashboard/receitas-avulsas",
+    icon: "➕",
+  },
   { label: "Despesas", href: "/dashboard/despesas", icon: "📤" },
-  { label: "Prestação de Contas", href: "/dashboard/prestacao-contas", icon: "📑" },
+  {
+    label: "Prestação de Contas",
+    href: "/dashboard/prestacao-contas",
+    icon: "📑",
+  },
   { label: "Relatórios", href: "/dashboard/relatorios", icon: "📊" },
   { label: "Configurações", href: "/dashboard/configuracoes", icon: "⚙️" },
 ];
@@ -82,11 +107,20 @@ export function DashboardLayout({
         </div>
 
         {mobileMenuOpen && (
-        <div className="border-t border-[#e8dccb] bg-white px-5 py-4">
-          <nav className="grid gap-2">
-            <div className="my-2 border-t border-[#e8dccb]" />
+          <div className="border-t border-[#e8dccb] bg-white px-5 py-4">
+            <nav className="grid gap-2">
+              <Link
+                href="/area"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 rounded-2xl bg-[#13233a] px-4 py-3 font-black text-white shadow-sm"
+              >
+                <span>👤</span>
+                <span>Ir para Área do Associado</span>
+              </Link>
 
-            {visibleMenuItems.map((item) => (
+              <div className="my-2 border-t border-[#e8dccb]" />
+
+              {visibleMenuItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -97,15 +131,6 @@ export function DashboardLayout({
                   <span>{item.label}</span>
                 </Link>
               ))}
-
-              <Link
-                href="/area"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 font-black text-[#13233a]"
-              >
-                <span>👤</span>
-                <span>Área do Associado</span>
-              </Link>
 
               <div className="mt-3 rounded-2xl border border-[#e8dccb] bg-[#f7f8fa] p-4">
                 <p className="text-sm font-black">{userName || "Usuário"}</p>
@@ -168,6 +193,7 @@ export function DashboardLayout({
                 <span>{item.label}</span>
               </Link>
             ))}
+
             <Link
               href="/area"
               className="mt-2 flex items-center gap-3 rounded-2xl border border-[#e8dccb] bg-white px-3 py-2 text-[14px] font-black text-[#13233a] transition hover:bg-[#f7f8fa]"

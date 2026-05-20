@@ -15,6 +15,7 @@ export type DashboardModule =
   | "associados"
   | "solicitacoes"
   | "avisos"
+  | "comunicacoes"
   | "financeiro"
   | "mensalidades"
   | "contribuicoes_extras"
@@ -43,6 +44,7 @@ const moduleByPath: { path: string; module: DashboardModule }[] = [
   { path: "/dashboard/associados", module: "associados" },
   { path: "/dashboard/solicitacoes", module: "solicitacoes" },
   { path: "/dashboard/avisos", module: "avisos" },
+  { path: "/dashboard/comunicacoes", module: "comunicacoes" },
   { path: "/dashboard/financeiro", module: "financeiro" },
   { path: "/dashboard/mensalidades", module: "mensalidades" },
   { path: "/dashboard/contribuicoes-extras", module: "contribuicoes_extras" },
@@ -65,6 +67,7 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
     "associados",
     "solicitacoes",
     "avisos",
+    "comunicacoes",
     "financeiro",
     "mensalidades",
     "contribuicoes_extras",
@@ -86,6 +89,7 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
     "associados",
     "solicitacoes",
     "avisos",
+    "comunicacoes",
     "financeiro",
     "mensalidades",
     "contribuicoes_extras",
@@ -107,6 +111,7 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
     "associados",
     "solicitacoes",
     "avisos",
+    "comunicacoes",
     "financeiro",
     "mensalidades",
     "contribuicoes_extras",
@@ -126,11 +131,13 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
     "associados",
     "solicitacoes",
     "avisos",
+    "comunicacoes",
     "relatorios",
   ],
 
   tesoureira: [
     "inicio",
+    "comunicacoes",
     "financeiro",
     "mensalidades",
     "contribuicoes_extras",
@@ -170,6 +177,13 @@ const writePermissions: Partial<Record<DashboardModule, AppRole[]>> = {
   associados: ["administrador", "presidente", "vice_presidente", "secretaria"],
   solicitacoes: ["administrador", "presidente", "vice_presidente", "secretaria"],
   avisos: ["administrador", "presidente", "vice_presidente", "secretaria"],
+  comunicacoes: [
+    "administrador",
+    "presidente",
+    "vice_presidente",
+    "secretaria",
+    "tesoureira",
+  ],
 
   financeiro: ["administrador", "presidente", "tesoureira"],
   mensalidades: ["administrador", "presidente", "tesoureira"],

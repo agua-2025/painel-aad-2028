@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   Bar,
@@ -18,6 +19,8 @@ import { createClient } from "@/lib/supabase/client";
 type Associate = {
   id: string;
   status: string;
+  full_name: string | null;
+  birth_date: string | null;
 };
 
 type MonthlyFee = {
@@ -49,6 +52,21 @@ type PaymentReport = {
 type MembershipRequest = {
   id: string;
   status: string;
+};
+
+type BirthdayLog = {
+  associate_id: string;
+  reference_id: string | null;
+};
+
+type BirthdayWeekItem = {
+  id: string;
+  name: string;
+  dateLabel: string;
+  weekdayLabel: string;
+  isToday: boolean;
+  sentToday: boolean;
+  daysUntil: number;
 };
 
 type DashboardData = {
@@ -119,6 +137,83 @@ function getMonthRange() {
   };
 }
 
+function toDateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function getTodayInfo() {
+  const today = new Date();
+  const dateKey = toDateKey(today);
+  const [year, month, day] = dateKey.split("-");
+
+  return {
+    today,
+    dateKey,
+    birthdayReferenceId: `birthday-${year}-${month}-${day}`,
+  };
+}
+
+function getBirthdayWeekItems(
+  associates: Associate[],
+  birthdayLogs: BirthdayLog[]
+): BirthdayWeekItem[] {
+  const { today, birthdayReferenceId } = getTodayInfo();
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+
+  const sentTodayIds = new Set(
+    birthdayLogs
+      .filter((log) => log.reference_id === birthdayReferenceId)
+      .map((log) => log.associate_id)
+  );
+
+  return associates
+    .filter((associate) => associate.status === "ativo")
+    .filter((associate) => Boolean(associate.birth_date))
+    .map((associate) => {
+      const [, birthMonth, birthDay] = String(associate.birth_date).split("-");
+      const birthdayThisYear = new Date(
+        start.getFullYear(),
+        Number(birthMonth) - 1,
+        Number(birthDay)
+      );
+
+      const birthdayDate =
+        birthdayThisYear < start
+          ? new Date(start.getFullYear() + 1, Number(birthMonth) - 1, Number(birthDay))
+          : birthdayThisYear;
+
+      const daysUntil = Math.round(
+        (birthdayDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      return {
+        id: associate.id,
+        name: associate.full_name || "Associado",
+        dateLabel: birthdayDate.toLocaleDateString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+        }),
+        weekdayLabel: daysUntil === 0
+          ? "Hoje"
+          : birthdayDate.toLocaleDateString("pt-BR", { weekday: "long" }),
+        isToday: daysUntil === 0,
+        sentToday: sentTodayIds.has(associate.id),
+        daysUntil,
+      };
+    })
+    .filter((item) => item.daysUntil >= 0 && item.daysUntil <= 6)
+    .sort((a, b) => {
+      if (a.daysUntil !== b.daysUntil) return a.daysUntil - b.daysUntil;
+      return a.name.localeCompare(b.name);
+    });
+}
+
 function SimpleTooltip({
   active,
   payload,
@@ -141,12 +236,17 @@ function SimpleTooltip({
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData>(emptyData);
+  const [birthdayWeek, setBirthdayWeek] = useState<BirthdayWeekItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
   const monthRange = useMemo(() => getMonthRange(), []);
 
   const result = data.monthlyRevenue - data.monthlyExpenses;
+
+  const pendingBirthdayToday = birthdayWeek.filter(
+    (item) => item.isToday && !item.sentToday
+  ).length;
 
   const financialChart = [
     {
@@ -188,8 +288,9 @@ export default function DashboardPage() {
       expensesResult,
       reportsResult,
       requestsResult,
+      birthdayLogsResult,
     ] = await Promise.all([
-      supabase.from("associates").select("id, status"),
+      supabase.from("associates").select("id, status, full_name, birth_date"),
       supabase
         .from("monthly_fees")
         .select("id, associate_id, status, total_amount, paid_amount")
@@ -219,6 +320,11 @@ export default function DashboardPage() {
         .from("membership_requests")
         .select("id, status")
         .in("status", ["pendente", "com_pendencia"]),
+      supabase
+        .from("communication_logs")
+        .select("associate_id, reference_id")
+        .eq("communication_type", "birthday")
+        .eq("reference_id", getTodayInfo().birthdayReferenceId),
     ]);
 
     const errors = [
@@ -245,6 +351,8 @@ export default function DashboardPage() {
     const expenses = (expensesResult.data as Expense[] | null) ?? [];
     const reports = (reportsResult.data as PaymentReport[] | null) ?? [];
     const requests = (requestsResult.data as MembershipRequest[] | null) ?? [];
+    const birthdayLogs =
+      (birthdayLogsResult.data as BirthdayLog[] | null) ?? [];
 
     const activeAssociates = associates.filter(
       (associate) => associate.status === "ativo"
@@ -280,6 +388,8 @@ export default function DashboardPage() {
       (sum, report) => sum + Number(report.amount ?? 0),
       0
     );
+
+    setBirthdayWeek(getBirthdayWeekItems(activeAssociates, birthdayLogs));
 
     setData({
       activeAssociates: activeAssociates.length,
@@ -336,6 +446,73 @@ export default function DashboardPage() {
         {message && (
           <section className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
             {message}
+          </section>
+        )}
+
+        {birthdayWeek.length > 0 && (
+          <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#a7834d]">
+                    Aniversários da semana
+                  </p>
+
+                  {pendingBirthdayToday > 0 && (
+                    <span className="rounded-full bg-[#13233a] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
+                      {pendingBirthdayToday} pendente hoje
+                    </span>
+                  )}
+                </div>
+
+              </div>
+
+              <Link
+                href="/dashboard/comunicacoes"
+                className="w-fit rounded-full bg-[#13233a] px-5 py-2.5 text-sm font-black text-white transition hover:bg-[#0c1728]"
+              >
+                Ver comunicações
+              </Link>
+            </div>
+
+            <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+              {birthdayWeek.slice(0, 4).map((item) => (
+                <div
+                  key={item.id}
+                  className={`rounded-xl border px-3.5 py-2.5 ${
+                    item.isToday
+                      ? item.sentToday
+                        ? "border-[#d7c7b4] bg-[#f1f5f9]"
+                        : "border-[#e8dccb] bg-[#fff7ed]"
+                      : "border-[#e8dccb] bg-[#f7f8fa]"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-black text-[#13233a]">
+                        {item.name}
+                      </p>
+
+                      <p className="mt-1 text-xs font-bold capitalize text-[#596579]">
+                        {item.dateLabel} • {item.weekdayLabel}
+                      </p>
+                    </div>
+
+                    {item.isToday && (
+                      <span
+                        className={`shrink-0 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.1em] ${
+                          item.sentToday
+                            ? "bg-[#13233a] text-white"
+                            : "bg-[#c7a56b] text-[#13233a]"
+                        }`}
+                      >
+                        {item.sentToday ? "enviado" : "hoje"}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </section>
         )}
 
