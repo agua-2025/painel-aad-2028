@@ -142,6 +142,7 @@ function isOpenFee(fee: MonthlyFee) {
 export default function AreaFinanceiroPage() {
   const [associate, setAssociate] = useState<Associate | null>(null);
   const [fees, setFees] = useState<MonthlyFee[]>([]);
+  const [visibleOpenFeesCount, setVisibleOpenFeesCount] = useState(5);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
@@ -188,6 +189,9 @@ export default function AreaFinanceiroPage() {
       totalPaid,
     };
   }, [fees, today]);
+
+  const visibleOpenFees = summary.openFees.slice(0, visibleOpenFeesCount);
+  const hasMoreOpenFees = visibleOpenFeesCount < summary.openFees.length;
 
   useEffect(() => {
     async function loadFinancialData() {
@@ -264,6 +268,7 @@ export default function AreaFinanceiroPage() {
       }
 
       setFees((feesData as unknown as MonthlyFee[]) ?? []);
+      setVisibleOpenFeesCount(5);
       setLoading(false);
     }
 
@@ -359,6 +364,8 @@ export default function AreaFinanceiroPage() {
 
                 <p className="text-xs font-bold text-[#596579]">
                   Valores calculados até hoje. Após o pagamento, informe a Tesouraria pelo botão correspondente.
+                  {summary.openFees.length > 0 &&
+                    ` Mostrando ${Math.min(visibleOpenFeesCount, summary.openFees.length)} de ${summary.openFees.length}.`}
                 </p>
               </div>
 
@@ -384,7 +391,7 @@ export default function AreaFinanceiroPage() {
                   </div>
 
                   <div className="divide-y divide-[#eee7db]">
-                    {summary.openFees.map((fee, index) => {
+                    {visibleOpenFees.map((fee, index) => {
                       const calculated = calculateAmountDueAtDate(fee, today);
                       const remaining = Math.max(
                         calculated.totalDue - Number(fee.paid_amount ?? 0),
@@ -483,6 +490,20 @@ export default function AreaFinanceiroPage() {
                       );
                     })}
                   </div>
+
+                  {hasMoreOpenFees && (
+                    <div className="border-t border-[#eee7db] bg-white px-3 py-3 text-center">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setVisibleOpenFeesCount((current) => current + 5)
+                        }
+                        className="rounded-full border border-[#e8dccb] bg-[#f7f8fa] px-5 py-2.5 text-xs font-black uppercase tracking-[0.08em] text-[#13233a] transition hover:bg-white"
+                      >
+                        Ver mais mensalidades
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </section>

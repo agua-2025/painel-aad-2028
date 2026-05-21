@@ -199,8 +199,12 @@ function getChargeAmount(payment: Payment) {
 export default function AreaPagamentosPage() {
   const [associate, setAssociate] = useState<Associate | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [visiblePaymentsCount, setVisiblePaymentsCount] = useState(10);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+
+  const visiblePayments = payments.slice(0, visiblePaymentsCount);
+  const hasMorePayments = visiblePaymentsCount < payments.length;
 
   const summary = useMemo(() => {
     const totalPaid = payments.reduce(
@@ -291,6 +295,7 @@ export default function AreaPagamentosPage() {
       }
 
       setPayments((paymentsData as unknown as Payment[]) ?? []);
+      setVisiblePaymentsCount(10);
       setLoading(false);
     }
 
@@ -371,6 +376,8 @@ export default function AreaPagamentosPage() {
 
                   <p className="text-xs font-bold text-[#596579]">
                     Pagamentos lançados pela Tesouraria em seu nome.
+                    {payments.length > 0 &&
+                      ` Mostrando ${Math.min(visiblePaymentsCount, payments.length)} de ${payments.length}.`}
                   </p>
                 </div>
 
@@ -407,7 +414,7 @@ export default function AreaPagamentosPage() {
                   </div>
 
                   <div className="divide-y divide-[#eee7db]">
-                    {payments.map((payment) => {
+                    {visiblePayments.map((payment) => {
                       const originType = getPaymentOriginType(payment);
                       const dueDate = getDueDate(payment);
                       const chargeStatus = getChargeStatus(payment);
@@ -518,6 +525,20 @@ export default function AreaPagamentosPage() {
                       );
                     })}
                   </div>
+
+                  {hasMorePayments && (
+                    <div className="border-t border-[#eee7db] bg-white px-3 py-3 text-center">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setVisiblePaymentsCount((current) => current + 10)
+                        }
+                        className="rounded-full border border-[#e8dccb] bg-[#f7f8fa] px-5 py-2.5 text-xs font-black uppercase tracking-[0.08em] text-[#13233a] transition hover:bg-white"
+                      >
+                        Ver mais pagamentos
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </section>
