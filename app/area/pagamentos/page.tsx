@@ -418,73 +418,101 @@ export default function AreaPagamentosPage() {
                           key={payment.id}
                           className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-start"
                         >
-                          <div className="md:col-span-3">
-                            <p className="font-black text-[#13233a]">
+                          <div className="rounded-xl bg-[#f7f8fa] px-3 py-3 md:col-span-3 md:rounded-none md:bg-transparent md:px-0 md:py-0">
+                            <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                              Referência
+                            </p>
+
+                            <p className="mt-1 font-black text-[#13233a] md:mt-0">
                               {getReferenceLabel(payment)}
                             </p>
 
-                            <div className="mt-1 flex flex-wrap gap-1.5">
-                              <span className="rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                            <div className="mt-2 flex flex-wrap gap-1.5 md:mt-1">
+                              <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579] md:bg-[#f7f8fa]">
                                 {getOriginBadge(payment)}
                               </span>
 
                               {originType === "extra" && (
-                                <span className="rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                                <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579] md:bg-[#f7f8fa]">
                                   Rateio
                                 </span>
                               )}
                             </div>
                           </div>
 
-                          <div className="font-bold text-[#596579] md:col-span-2">
-                            <p>{formatDate(payment.paid_at)}</p>
-
-                            <p className="text-xs">
-                              {paymentMethodLabels[payment.payment_method] ??
-                                payment.payment_method}
-                            </p>
-                          </div>
-
-                          <div className="font-black text-[#13233a] md:col-span-2 md:text-right">
-                            {formatCurrency(payment.amount)}
-                          </div>
-
-                          <div className="font-bold text-[#596579] md:col-span-2 md:text-right">
-                            <p>{formatCurrency(chargeAmount)}</p>
-
-                            <p className="text-xs">
-                              Venc.: {formatDate(dueDate)}
-                            </p>
-                          </div>
-
-                          <div className="md:col-span-1 md:text-center">
-                            {chargeStatus ? (
-                              <span className="inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
-                                {statusLabels[chargeStatus] ?? chargeStatus}
-                              </span>
-                            ) : (
-                              <span className="text-xs font-bold text-[#596579]">
-                                -
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="text-xs font-bold leading-5 text-[#596579] md:col-span-2">
-                            <p>
-                              Ref.: {payment.reference || "Não informada"}
-                            </p>
-
-                            {payment.notes && (
-                              <p className="mt-1 rounded-lg bg-[#f7f8fa] px-3 py-2">
-                                {payment.notes}
+                          <div className="grid gap-2 sm:grid-cols-2 md:contents">
+                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0">
+                              <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                                Pagamento
                               </p>
-                            )}
 
-                            {originType === "extra" && !payment.notes && (
-                              <p className="mt-1">
-                                Pagamento vinculado a contribuição extra.
+                              <p className="mt-1 md:mt-0">{formatDate(payment.paid_at)}</p>
+
+                              <p className="text-xs">
+                                {paymentMethodLabels[payment.payment_method] ??
+                                  payment.payment_method}
                               </p>
-                            )}
+                            </div>
+
+                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
+                              <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                                Valor pago
+                              </p>
+
+                              <p className="mt-1 font-black text-[#13233a] md:mt-0">
+                                {formatCurrency(payment.amount)}
+                              </p>
+                            </div>
+
+                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
+                              <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                                Cobrança
+                              </p>
+
+                              <p className="mt-1 md:mt-0">{formatCurrency(chargeAmount)}</p>
+
+                              <p className="text-xs">
+                                Venc.: {formatDate(dueDate)}
+                              </p>
+                            </div>
+
+                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 md:col-span-1 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-center">
+                              <p className="mb-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                                Status
+                              </p>
+
+                              {chargeStatus ? (
+                                <span className="inline-flex rounded-full bg-white px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579] md:bg-[#f7f8fa]">
+                                  {statusLabels[chargeStatus] ?? chargeStatus}
+                                </span>
+                              ) : (
+                                <span className="text-xs font-bold text-[#596579]">
+                                  -
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 text-xs font-bold leading-5 text-[#596579] sm:col-span-2 md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0">
+                              <p className="mb-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                                Referência/observação
+                              </p>
+
+                              <p>
+                                Ref.: {payment.reference || "Não informada"}
+                              </p>
+
+                              {payment.notes && (
+                                <p className="mt-1 rounded-lg bg-white px-3 py-2 md:bg-[#f7f8fa]">
+                                  {payment.notes}
+                                </p>
+                              )}
+
+                              {originType === "extra" && !payment.notes && (
+                                <p className="mt-1">
+                                  Pagamento vinculado a contribuição extra.
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </article>
                       );

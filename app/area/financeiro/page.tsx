@@ -396,59 +396,88 @@ export default function AreaFinanceiroPage() {
                           key={fee.id}
                           className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-center"
                         >
-                          <div className="md:col-span-3">
-                            <div className="flex flex-wrap items-center gap-1.5">
+                          <div className="rounded-xl bg-[#f7f8fa] px-3 py-3 md:col-span-3 md:rounded-none md:bg-transparent md:px-0 md:py-0">
+                            <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                              Referência
+                            </p>
+
+                            <div className="mt-1 flex flex-wrap items-center gap-1.5 md:mt-0">
                               <p className="font-black text-[#13233a]">
                                 {getMonthLabel(fee)}
                               </p>
 
                               {index === 0 && summary.openFees.length > 1 && (
-                                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-amber-900">
+                                <span className="rounded-full bg-[#c7a56b] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a]">
                                   Prioridade
                                 </span>
                               )}
                             </div>
 
-                            <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                            <p className="mt-1 text-xs font-bold text-[#596579]">
                               Pago: {formatCurrency(fee.paid_amount)}
                             </p>
                           </div>
 
-                          <div className="font-bold text-[#596579] md:col-span-2">
-                            {formatDate(fee.due_date)}
-                          </div>
+                          <div className="grid gap-2 sm:grid-cols-2 md:contents">
+                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0">
+                              <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                                Vencimento
+                              </p>
 
-                          <div className="font-bold text-[#596579] md:col-span-2 md:text-right">
-                            <p className="font-black text-[#13233a]">
-                              {formatCurrency(remaining)}
-                            </p>
+                              <p className="mt-1 md:mt-0">{formatDate(fee.due_date)}</p>
+                            </div>
 
-                            <p className="text-xs">
-                              Base: {formatCurrency(fee.base_amount)}
-                            </p>
-                          </div>
+                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
+                              <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                                Valor em aberto
+                              </p>
 
-                          <div className="font-bold text-[#596579] md:col-span-2 md:text-right">
-                            <p>Multa: {formatCurrency(calculated.lateFeeAmount)}</p>
-                            <p className="text-xs">
-                              Juros: {formatCurrency(calculated.interestAmount)} · Dias:{" "}
-                              {calculated.daysWithCharges}
-                            </p>
-                          </div>
+                              <p className="mt-1 font-black text-[#13233a] md:mt-0">
+                                {formatCurrency(remaining)}
+                              </p>
 
-                          <div className="md:col-span-1 md:text-center">
-                            <span className="inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
-                              {statusLabels[fee.status] ?? fee.status}
-                            </span>
-                          </div>
+                              <p className="text-xs">
+                                Base: {formatCurrency(fee.base_amount)}
+                              </p>
+                            </div>
 
-                          <div className="md:col-span-2 md:text-right">
-                            <a
-                              href={`/area/informar-pagamento/${fee.id}`}
-                              className="inline-flex rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
-                            >
-                              Informar
-                            </a>
+                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
+                              <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                                Encargos
+                              </p>
+
+                              <p className="mt-1 md:mt-0">
+                                Multa: {formatCurrency(calculated.lateFeeAmount)}
+                              </p>
+
+                              <p className="text-xs">
+                                Juros: {formatCurrency(calculated.interestAmount)} · Dias:{" "}
+                                {calculated.daysWithCharges}
+                              </p>
+                            </div>
+
+                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 md:col-span-1 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-center">
+                              <p className="mb-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                                Status
+                              </p>
+
+                              <span className="inline-flex rounded-full bg-white px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579] md:bg-[#f7f8fa]">
+                                {statusLabels[fee.status] ?? fee.status}
+                              </span>
+                            </div>
+
+                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 sm:col-span-2 md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
+                              <p className="mb-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                                Ação
+                              </p>
+
+                              <a
+                                href={`/area/informar-pagamento/${fee.id}`}
+                                className="inline-flex rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
+                              >
+                                Informar pagamento
+                              </a>
+                            </div>
                           </div>
                         </article>
                       );
@@ -497,28 +526,52 @@ export default function AreaFinanceiroPage() {
                           key={fee.id}
                           className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-center"
                         >
-                          <div className="md:col-span-4">
-                            <p className="font-black text-[#13233a]">
+                          <div className="rounded-xl bg-[#f7f8fa] px-3 py-3 md:col-span-4 md:rounded-none md:bg-transparent md:px-0 md:py-0">
+                            <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                              Referência
+                            </p>
+
+                            <p className="mt-1 font-black text-[#13233a] md:mt-0">
                               {getMonthLabel(fee)}
                             </p>
                           </div>
 
-                          <div className="font-bold text-[#596579] md:col-span-2">
-                            {formatDate(fee.due_date)}
-                          </div>
+                          <div className="grid gap-2 sm:grid-cols-2 md:contents">
+                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0">
+                              <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                                Vencimento
+                              </p>
 
-                          <div className="font-black text-[#13233a] md:col-span-2 md:text-right">
-                            {formatCurrency(valueToShow)}
-                          </div>
+                              <p className="mt-1 md:mt-0">{formatDate(fee.due_date)}</p>
+                            </div>
 
-                          <div className="font-bold text-[#596579] md:col-span-2 md:text-right">
-                            {formatCurrency(fee.paid_amount)}
-                          </div>
+                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
+                              <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                                Valor
+                              </p>
 
-                          <div className="md:col-span-2 md:text-center">
-                            <span className="inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
-                              {statusLabels[fee.status] ?? fee.status}
-                            </span>
+                              <p className="mt-1 font-black text-[#13233a] md:mt-0">
+                                {formatCurrency(valueToShow)}
+                              </p>
+                            </div>
+
+                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
+                              <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                                Pago
+                              </p>
+
+                              <p className="mt-1 md:mt-0">{formatCurrency(fee.paid_amount)}</p>
+                            </div>
+
+                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 sm:col-span-2 md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-center">
+                              <p className="mb-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                                Status
+                              </p>
+
+                              <span className="inline-flex rounded-full bg-white px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579] md:bg-[#f7f8fa]">
+                                {statusLabels[fee.status] ?? fee.status}
+                              </span>
+                            </div>
                           </div>
                         </article>
                       );
