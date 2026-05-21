@@ -26,8 +26,7 @@ export default function Home() {
 
             <p className="mt-6 max-w-2xl text-base font-medium leading-8 text-[#596579] md:text-lg">
               Ambiente restrito da Associação dos Acadêmicos do Curso de Direito –
-              Turma de Formatura 2028, com acesso separado para associados e
-              perfis administrativos autorizados.
+              Turma de Formatura 2028.
             </p>
 
             <div className="mt-8 grid gap-3 sm:max-w-2xl sm:grid-cols-2">
