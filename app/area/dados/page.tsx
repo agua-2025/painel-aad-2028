@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ProtectedArea } from "@/components/ProtectedArea";
 import { createClient } from "@/lib/supabase/client";
@@ -70,11 +71,13 @@ function formatStatus(value?: string | null) {
 function formatDate(value?: string | null) {
   if (!value) return "Não informado";
 
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(new Date(value));
+  const [year, month, day] = value.split("-");
+
+  if (year && month && day) {
+    return `${day}/${month}/${year}`;
+  }
+
+  return value;
 }
 
 function Field({
@@ -85,13 +88,33 @@ function Field({
   value?: string | null;
 }) {
   return (
-    <div className="rounded-2xl bg-[#f7f8fa] p-4">
-      <p className="text-xs font-black uppercase tracking-[0.12em] text-[#596579]">
+    <div className="border-b border-[#e8dccb] py-3 last:border-b-0">
+      <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[#a7834d]">
         {label}
       </p>
 
-      <p className="mt-2 break-words text-base font-black text-[#13233a]">
+      <p className="mt-1 break-words text-sm font-bold leading-6 text-[#13233a]">
         {value || "Não informado"}
+      </p>
+    </div>
+  );
+}
+
+function StatusCard({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 shadow-sm">
+      <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[#596579]">
+        {label}
+      </p>
+
+      <p className="mt-1 text-lg font-black tracking-[-0.03em] text-[#13233a]">
+        {value}
       </p>
     </div>
   );
@@ -153,7 +176,6 @@ export default function AreaDadosPage() {
         .maybeSingle();
 
       setAssociate(associateData);
-
       setLoading(false);
     }
 
@@ -164,118 +186,145 @@ export default function AreaDadosPage() {
 
   return (
     <ProtectedArea>
-      <div className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10 md:p-8">
-        <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
-          Minha área
-        </p>
+      <div className="space-y-4">
+        <section className="rounded-2xl bg-[#13233a] px-5 py-5 text-white shadow-xl shadow-slate-900/10 md:px-6">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c7a56b]">
+                Minha área
+              </p>
 
-        <h1 className="mt-4 text-3xl font-black tracking-[-0.05em] md:text-5xl">
-          Meus dados
-        </h1>
+              <h1 className="mt-2 text-2xl font-black tracking-[-0.04em] md:text-3xl">
+                Meus dados
+              </h1>
 
-        <p className="mt-4 max-w-3xl leading-7 text-white/75">
-          Consulte seus dados cadastrais vinculados à solicitação e à Associação.
-        </p>
-      </div>
-
-      {errorMessage && (
-        <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 font-bold text-red-700">
-          {errorMessage}
-        </div>
-      )}
-
-      {loading ? (
-        <div className="mt-8 rounded-3xl border border-[#e8dccb] bg-white p-6 shadow-sm">
-          <p className="font-bold text-[#596579]">Carregando dados...</p>
-        </div>
-      ) : (
-        <>
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-              <p className="text-sm font-bold text-[#596579]">Perfil</p>
-              <p className="mt-2 text-2xl font-black tracking-[-0.04em]">
-                {formatStatus(profile?.status)}
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
+                Consulte seus dados cadastrais vinculados à solicitação e à Associação.
               </p>
             </div>
 
-            <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-              <p className="text-sm font-bold text-[#596579]">Solicitação</p>
-              <p className="mt-2 text-2xl font-black tracking-[-0.04em]">
-                {request ? formatStatus(request.status) : "Não enviada"}
-              </p>
-            </div>
-
-            <div className="rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-              <p className="text-sm font-bold text-[#596579]">Associado</p>
-              <p className="mt-2 text-2xl font-black tracking-[-0.04em]">
-                {associate ? formatStatus(associate.status) : "Ainda não associado"}
-              </p>
-            </div>
+            <span className="w-fit rounded-full bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-white">
+              Somente consulta
+            </span>
           </div>
+        </section>
 
-          <div className="mt-8 rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm md:p-6">
-            <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-              <div>
-                <h2 className="text-2xl font-black tracking-[-0.04em]">
-                  Dados cadastrais
-                </h2>
+        {errorMessage && (
+          <section className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+            {errorMessage}
+          </section>
+        )}
 
-                <p className="mt-2 text-sm font-medium text-[#596579]">
-                  Essas informações são usadas para identificação interna e
-                  acompanhamento da participação na Associação.
-                </p>
+        {loading ? (
+          <section className="rounded-2xl border border-[#e8dccb] bg-white px-4 py-4 shadow-sm">
+            <p className="text-sm font-bold text-[#596579]">Carregando dados...</p>
+          </section>
+        ) : (
+          <>
+            <section className="grid gap-3 md:grid-cols-3">
+              <StatusCard label="Perfil" value={formatStatus(profile?.status)} />
+
+              <StatusCard
+                label="Solicitação"
+                value={request ? formatStatus(request.status) : "Não enviada"}
+              />
+
+              <StatusCard
+                label="Associado"
+                value={associate ? formatStatus(associate.status) : "Ainda não associado"}
+              />
+            </section>
+
+            <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+              <div className="rounded-2xl border border-[#e8dccb] bg-white shadow-sm">
+                <div className="border-b border-[#e8dccb] px-5 py-4">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#a7834d]">
+                    Cadastro
+                  </p>
+
+                  <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-[#13233a]">
+                    Dados pessoais
+                  </h2>
+                </div>
+
+                <div className="px-5">
+                  <Field label="Nome completo" value={mainData?.full_name || profile?.full_name} />
+                  <Field label="CPF" value={mainData?.cpf} />
+                  <Field label="RG" value={mainData?.rg} />
+                  <Field label="Data de nascimento" value={formatDate(mainData?.birth_date)} />
+                  <Field label="Semestre" value={request?.semester} />
+                  <Field
+                    label="Data de ingresso"
+                    value={associate ? formatDate(associate.joined_at) : "Não disponível"}
+                  />
+                </div>
               </div>
 
-              <span className="rounded-full bg-[#f7f8fa] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-[#596579]">
-                Somente consulta
-              </span>
-            </div>
+              <div className="space-y-4">
+                <section className="rounded-2xl border border-[#e8dccb] bg-white shadow-sm">
+                  <div className="border-b border-[#e8dccb] px-5 py-4">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-[#a7834d]">
+                      Contato
+                    </p>
 
-            <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              <Field label="Nome completo" value={mainData?.full_name || profile?.full_name} />
-              <Field label="CPF" value={mainData?.cpf} />
-              <Field label="RG" value={mainData?.rg} />
-              <Field label="Data de nascimento" value={formatDate(mainData?.birth_date)} />
-              <Field label="Telefone/WhatsApp" value={mainData?.phone} />
-              <Field label="E-mail" value={mainData?.email || profile?.email} />
-              <Field label="Endereço" value={mainData?.address} />
-              <Field label="Cidade" value={mainData?.city} />
-              <Field label="Estado" value={mainData?.state} />
-              <Field label="CEP" value={mainData?.zip_code} />
-              <Field label="Semestre" value={request?.semester} />
-              <Field
-                label="Data de ingresso"
-                value={associate ? formatDate(associate.joined_at) : "Não disponível"}
-              />
-            </div>
-          </div>
+                    <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-[#13233a]">
+                      Endereço e canais
+                    </h2>
+                  </div>
 
-          {request?.review_notes && (
-            <div className="mt-8 rounded-3xl border border-[#e8dccb] bg-[#fffaf1] p-6 shadow-sm">
-              <h2 className="text-2xl font-black tracking-[-0.04em]">
-                Análise da Associação
-              </h2>
+                  <div className="px-5">
+                    <Field label="Telefone/WhatsApp" value={mainData?.phone} />
+                    <Field label="E-mail" value={mainData?.email || profile?.email} />
+                    <Field label="Endereço" value={mainData?.address} />
+                    <Field label="Cidade" value={mainData?.city} />
+                    <Field label="Estado" value={mainData?.state} />
+                    <Field label="CEP" value={mainData?.zip_code} />
+                  </div>
+                </section>
 
-              <p className="mt-3 leading-7 text-[#596579]">
-                {request.review_notes}
-              </p>
-            </div>
-          )}
+                {request?.review_notes && (
+                  <section className="rounded-2xl border border-[#e8dccb] bg-[#fffaf1] px-5 py-4 shadow-sm">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-[#a7834d]">
+                      Análise
+                    </p>
 
-          <div className="mt-8 rounded-3xl border border-[#e8dccb] bg-white p-6 shadow-sm">
-            <h2 className="text-2xl font-black tracking-[-0.04em]">
-              Precisa alterar algum dado?
-            </h2>
+                    <h2 className="mt-1 text-lg font-black tracking-[-0.03em] text-[#13233a]">
+                      Observação da Associação
+                    </h2>
 
-            <p className="mt-3 leading-7 text-[#596579]">
-              Por segurança, os dados não podem ser alterados livremente após o
-              envio ou aprovação da solicitação. Caso identifique alguma
-              informação incorreta, solicite orientação à Secretaria/Diretoria da
-              Associação.
-            </p>
-          </div>
-        </>
-      )}
+                    <p className="mt-2 text-sm leading-6 text-[#596579]">
+                      {request.review_notes}
+                    </p>
+                  </section>
+                )}
+
+                <section className="rounded-2xl border border-[#e8dccb] bg-white px-5 py-4 shadow-sm">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#a7834d]">
+                    Atualização
+                  </p>
+
+                  <h2 className="mt-1 text-lg font-black tracking-[-0.03em] text-[#13233a]">
+                    Precisa alterar algum dado?
+                  </h2>
+
+                  <p className="mt-2 text-sm leading-6 text-[#596579]">
+                    Por segurança, os dados não podem ser alterados livremente após o envio
+                    ou aprovação da solicitação. Caso identifique alguma informação incorreta,
+                    solicite orientação à Secretaria/Diretoria.
+                  </p>
+
+                  <Link
+                    href="/area/suporte"
+                    className="mt-4 inline-flex rounded-full bg-[#13233a] px-5 py-2.5 text-sm font-black text-white transition hover:bg-[#0c1728]"
+                  >
+                    Solicitar orientação
+                  </Link>
+                </section>
+              </div>
+            </section>
+          </>
+        )}
+      </div>
     </ProtectedArea>
   );
 }

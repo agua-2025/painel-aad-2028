@@ -4,9 +4,10 @@ const documents = [
   {
     title: "Estatuto Social",
     description:
-      "Documento que estabelece a organização, finalidade, direitos, deveres e regras gerais da Associação.",
+      "Organização, finalidade, direitos, deveres e regras gerais da Associação.",
     href: "https://associacao-direito-2028.vercel.app/documentos/estatuto-social-aad-direito-2028-versao-publica.pdf",
     tag: "Institucional",
+    available: true,
   },
   {
     title: "Ata de Constituição",
@@ -14,100 +15,122 @@ const documents = [
       "Versão pública da ata de constituição da AAD Direito 2028, com dados pessoais protegidos.",
     href: "https://associacao-direito-2028.vercel.app/documentos/ata-constituicao-aad-direito-2028-versao-publica.pdf",
     tag: "Institucional",
+    available: true,
   },
   {
     title: "Orientações ao associado",
     description:
-      "Resumo das principais orientações sobre participação, contribuições, campanhas e acompanhamento da Associação.",
+      "Resumo com orientações sobre participação, contribuições, campanhas e acompanhamento da Associação.",
     href: "#",
     tag: "Em breve",
+    available: false,
   },
   {
     title: "Aviso sobre proteção de dados",
     description:
-      "Informações sobre o uso de dados pessoais no sistema da Associação, especialmente para cadastro, identificação e gestão interna.",
+      "Informações sobre o uso de dados pessoais para cadastro, identificação e gestão interna.",
     href: "#",
     tag: "Em breve",
+    available: false,
   },
 ];
 
 export default function AreaDocumentosPage() {
   return (
     <ProtectedArea>
-      <div className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10 md:p-8">
-        <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
-          Minha área
-        </p>
-
-        <h1 className="mt-4 text-3xl font-black tracking-[-0.05em] md:text-5xl">
-          Documentos
-        </h1>
-
-        <p className="mt-4 max-w-3xl leading-7 text-white/75">
-          Consulte documentos importantes da AAD Direito 2028, orientações e
-          informações liberadas aos interessados e associados.
-        </p>
-      </div>
-
-      <div className="mt-8 grid gap-5 md:grid-cols-2">
-        {documents.map((document) => {
-          const available = document.href !== "#";
-
-          return (
-            <article
-              key={document.title}
-              className="rounded-3xl border border-[#e8dccb] bg-white p-6 shadow-sm"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <span className="rounded-full bg-[#f7f8fa] px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-[#596579]">
-                    {document.tag}
-                  </span>
-
-                  <h2 className="mt-5 text-2xl font-black tracking-[-0.04em]">
-                    {document.title}
-                  </h2>
-                </div>
-
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#13233a] text-xl text-[#c7a56b]">
-                  📄
-                </div>
-              </div>
-
-              <p className="mt-4 leading-7 text-[#596579]">
-                {document.description}
+      <div className="space-y-4">
+        <section className="rounded-2xl bg-[#13233a] px-5 py-5 text-white shadow-xl shadow-slate-900/10 md:px-6">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c7a56b]">
+                Minha área
               </p>
 
-              {available ? (
-                <a
-                  href={document.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-6 inline-flex rounded-full bg-[#13233a] px-6 py-3 text-sm font-black uppercase tracking-[0.1em] text-white"
-                >
-                  Abrir documento
-                </a>
-              ) : (
-                <span className="mt-6 inline-flex rounded-full border border-[#e8dccb] bg-[#f7f8fa] px-6 py-3 text-sm font-black uppercase tracking-[0.1em] text-[#596579]">
-                  Em breve
-                </span>
-              )}
-            </article>
-          );
-        })}
-      </div>
+              <h1 className="mt-2 text-2xl font-black tracking-[-0.04em] md:text-3xl">
+                Documentos
+              </h1>
 
-      <div className="mt-8 rounded-3xl border border-[#e8dccb] bg-[#fffaf1] p-6 shadow-sm">
-        <h2 className="text-2xl font-black tracking-[-0.04em]">
-          Atenção
-        </h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
+                Consulte documentos importantes da AAD Direito 2028 e orientações
+                liberadas aos associados.
+              </p>
+            </div>
 
-        <p className="mt-3 leading-7 text-[#596579]">
-          Alguns documentos disponibilizados nesta área poderão possuir versão
-          pública, com supressão de dados pessoais, assinaturas e informações
-          internas, em observância à proteção de dados e à segurança dos
-          associados.
-        </p>
+            <span className="w-fit rounded-full bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-white">
+              Área documental
+            </span>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-[#e8dccb] bg-white shadow-sm">
+          <div className="border-b border-[#e8dccb] px-5 py-4">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#a7834d]">
+              Arquivos disponíveis
+            </p>
+
+            <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-[#13233a]">
+              Documentos da Associação
+            </h2>
+          </div>
+
+          <div className="divide-y divide-[#e8dccb]">
+            {documents.map((document) => (
+              <article
+                key={document.title}
+                className="grid gap-3 px-5 py-4 md:grid-cols-[1fr_auto] md:items-center"
+              >
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-black text-[#13233a]">
+                      {document.title}
+                    </h3>
+
+                    <span
+                      className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${
+                        document.available
+                          ? "bg-[#13233a] text-white"
+                          : "bg-[#f7f8fa] text-[#596579]"
+                      }`}
+                    >
+                      {document.tag}
+                    </span>
+                  </div>
+
+                  <p className="mt-1 max-w-3xl text-sm leading-6 text-[#596579]">
+                    {document.description}
+                  </p>
+                </div>
+
+                {document.available ? (
+                  <a
+                    href={document.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex w-fit rounded-full bg-[#13233a] px-5 py-2.5 text-sm font-black text-white transition hover:bg-[#0c1728]"
+                  >
+                    Abrir documento
+                  </a>
+                ) : (
+                  <span className="inline-flex w-fit rounded-full border border-[#e8dccb] bg-[#f7f8fa] px-5 py-2.5 text-sm font-black text-[#596579]">
+                    Em breve
+                  </span>
+                )}
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-[#e8dccb] bg-[#fffaf1] px-5 py-4 shadow-sm">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-[#a7834d]">
+            Atenção
+          </p>
+
+          <p className="mt-2 text-sm leading-6 text-[#596579]">
+            Alguns documentos podem ser disponibilizados em versão pública, com
+            supressão de dados pessoais, assinaturas e informações internas, em
+            observância à proteção de dados e à segurança dos associados.
+          </p>
+        </section>
       </div>
     </ProtectedArea>
   );

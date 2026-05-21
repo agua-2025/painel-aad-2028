@@ -271,51 +271,175 @@ export default function AreaSolicitacaoPage() {
 
   return (
     <ProtectedArea>
-        <div className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10 md:p-8">
-          <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
-            Minha área
-          </p>
+        <div className="space-y-4">
+          <section className="rounded-2xl bg-[#13233a] px-5 py-5 text-white shadow-xl shadow-slate-900/10 md:px-6">
+            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c7a56b]">
+                  Minha área
+                </p>
 
-          <h1 className="mt-4 text-3xl font-black tracking-[-0.05em] md:text-5xl">
-            Solicitação de associação
-          </h1>
+                <h1 className="mt-2 text-2xl font-black tracking-[-0.04em] md:text-3xl">
+                  Solicitação de associação
+                </h1>
 
-          <p className="mt-4 max-w-3xl leading-7 text-white/75">
-            Preencha ou atualize sua ficha para análise da Diretoria/Secretaria
-            da AAD Direito 2028.
-          </p>
-        </div>
-
-        {existingRequest && (
-          <div className="mt-6 rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-            <p className="text-sm font-bold text-[#596579]">Situação atual</p>
-            <p className="mt-2 text-2xl font-black tracking-[-0.04em]">
-              {formatStatus(existingRequest.status)}
-            </p>
-
-            {existingRequest.review_notes && (
-              <div className="mt-4 rounded-2xl bg-[#fffaf1] p-4 text-sm leading-6 text-[#596579]">
-                <strong className="text-[#13233a]">Análise da Associação:</strong>{" "}
-                {existingRequest.review_notes}
+                <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
+                  Preencha ou atualize sua ficha para análise da Diretoria/Secretaria
+                  da AAD Direito 2028.
+                </p>
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          </section>
 
-        {blocked ? (
-          <div className="mt-8 rounded-3xl border border-[#e8dccb] bg-white p-6 shadow-sm">
-            <h2 className="text-2xl font-black tracking-[-0.04em]">
-              Solicitação encerrada
-            </h2>
+          {existingRequest && (
+            <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+              <div className="grid gap-4 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[#a7834d]">
+                    Situação atual
+                  </p>
 
-            <p className="mt-3 leading-7 text-[#596579]">
-              Esta solicitação já foi analisada. Para nova orientação ou ajuste,
-              procure a Diretoria/Secretaria da Associação.
-            </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <p className="text-xl font-black tracking-[-0.03em] text-[#13233a]">
+                      {formatStatus(existingRequest.status)}
+                    </p>
 
+                    {existingRequest.status === "aprovada" && (
+                      <span className="rounded-full bg-[#13233a] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
+                        associado ativo
+                      </span>
+                    )}
 
-          </div>
-        ) : (
+                    {existingRequest.status === "pendente" && (
+                      <span className="rounded-full bg-[#fff7ed] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-amber-800">
+                        em análise
+                      </span>
+                    )}
+
+                    {existingRequest.status === "com_pendencia" && (
+                      <span className="rounded-full bg-[#fff7ed] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-amber-800">
+                        ajuste necessário
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="mt-2 text-sm leading-6 text-[#596579]">
+                    {existingRequest.status === "aprovada" &&
+                      "Sua solicitação foi aprovada e seu cadastro já consta como associado no sistema."}
+
+                    {existingRequest.status === "pendente" &&
+                      "Sua solicitação foi enviada e está aguardando análise da Diretoria/Secretaria."}
+
+                    {existingRequest.status === "com_pendencia" &&
+                      "Sua solicitação precisa de ajuste. Confira a observação da Associação e atualize os dados necessários."}
+
+                    {existingRequest.status === "rejeitada" &&
+                      "Sua solicitação foi analisada e não foi aprovada neste momento."}
+                  </p>
+                </div>
+
+                <div className="rounded-xl bg-[#f7f8fa] px-4 py-3">
+                  {existingRequest.review_notes ? (
+                    <p className="text-sm leading-6 text-[#596579]">
+                      <strong className="text-[#13233a]">Análise da Associação:</strong>{" "}
+                      {existingRequest.review_notes}
+                    </p>
+                  ) : (
+                    <p className="text-sm leading-6 text-[#596579]">
+                      Acompanhe esta página para verificar o andamento da sua solicitação.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {blocked ? (
+            <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+              {existingRequest?.status === "aprovada" ? (
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.16em] text-[#a7834d]">
+                      Próximos passos
+                    </p>
+
+                    <h2 className="mt-1 text-lg font-black tracking-[-0.03em] text-[#13233a]">
+                      Acompanhe sua vida associativa
+                    </h2>
+
+                    <p className="mt-2 text-sm leading-6 text-[#596579]">
+                      Use sua área para acompanhar pendências, pagamentos, contribuições extras,
+                      avisos e seus dados cadastrais.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                    <Link
+                      href="/area/financeiro"
+                      className="rounded-xl border border-[#e8dccb] bg-[#f7f8fa] px-4 py-3 transition hover:bg-white"
+                    >
+                      <p className="text-sm font-black text-[#13233a]">Financeiro</p>
+                      <p className="mt-1 text-xs font-bold text-[#596579]">
+                        Mensalidades e saldos
+                      </p>
+                    </Link>
+
+                    <Link
+                      href="/area/pagamentos"
+                      className="rounded-xl border border-[#e8dccb] bg-[#f7f8fa] px-4 py-3 transition hover:bg-white"
+                    >
+                      <p className="text-sm font-black text-[#13233a]">Pagamentos</p>
+                      <p className="mt-1 text-xs font-bold text-[#596579]">
+                        Histórico e comprovantes
+                      </p>
+                    </Link>
+
+                    <Link
+                      href="/area/contribuicoes-extras"
+                      className="rounded-xl border border-[#e8dccb] bg-[#f7f8fa] px-4 py-3 transition hover:bg-white"
+                    >
+                      <p className="text-sm font-black text-[#13233a]">Contribuições</p>
+                      <p className="mt-1 text-xs font-bold text-[#596579]">
+                        Extras da Associação
+                      </p>
+                    </Link>
+
+                    <Link
+                      href="/area/dados"
+                      className="rounded-xl border border-[#e8dccb] bg-[#f7f8fa] px-4 py-3 transition hover:bg-white"
+                    >
+                      <p className="text-sm font-black text-[#13233a]">Meus dados</p>
+                      <p className="mt-1 text-xs font-bold text-[#596579]">
+                        Conferir cadastro
+                      </p>
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.16em] text-[#a7834d]">
+                    Orientação
+                  </p>
+
+                  <h2 className="mt-1 text-lg font-black tracking-[-0.03em] text-[#13233a]">
+                    Solicitação encerrada
+                  </h2>
+
+                  <p className="mt-2 text-sm leading-6 text-[#596579]">
+                    Esta solicitação já foi analisada. Para nova orientação ou ajuste,
+                    procure a Diretoria/Secretaria da Associação.
+                  </p>
+
+                  <Link
+                    href="/area/suporte"
+                    className="mt-4 inline-flex rounded-full bg-[#13233a] px-5 py-2.5 text-sm font-black text-white transition hover:bg-[#0c1728]"
+                  >
+                    Solicitar orientação
+                  </Link>
+                </div>
+              )}
+            </section>
+          ) : (
           <form
             onSubmit={handleSubmit}
             className="mt-8 rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm md:p-6"
@@ -501,6 +625,7 @@ export default function AreaSolicitacaoPage() {
             </div>
           </form>
         )}
+        </div>
     </ProtectedArea>
   );
 }
