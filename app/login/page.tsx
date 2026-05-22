@@ -133,116 +133,95 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f8f7f4] text-[#13233a]">
-      <section className="mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-center px-5 py-8 md:px-8">
-        <div className="border-b border-[#e6ded2] pb-5">
+    <main className="flex min-h-screen items-center justify-center bg-[#f8f7f4] px-5 py-8 text-[#13233a]">
+      <section className="w-full max-w-md">
+        <div className="mb-5 text-center">
           <Link
             href="/"
             className="text-[11px] font-black uppercase tracking-[0.28em] text-[#a98246] transition hover:text-[#13233a]"
           >
             AAD Direito 2028
           </Link>
+
+          <h1 className="mt-4 text-3xl font-black tracking-[-0.05em] text-[#13233a]">
+            Entrar no sistema
+          </h1>
+
+          <p className="mt-2 text-sm font-medium leading-6 text-[#596579]">
+            Informe seu e-mail e senha para acessar.
+          </p>
         </div>
 
-        <div className="grid gap-10 py-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
-          <section>
-            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#a98246]">
-              Acesso restrito
-            </p>
+        <section className="rounded-2xl border border-[#e6ded2] bg-white p-5 shadow-xl shadow-slate-900/8">
+          <form onSubmit={handleLogin} className="grid gap-4">
+            <label className="grid gap-2">
+              <span className="text-sm font-bold text-[#596579]">E-mail</span>
 
-            <h1 className="mt-5 max-w-xl text-5xl font-black leading-[0.95] tracking-[-0.07em] text-[#13233a] md:text-6xl">
-              Entrar no sistema
-            </h1>
+              <input
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+                autoComplete="email"
+                className="w-full rounded-xl border border-[#e6ded2] bg-[#fcfcfd] px-4 py-3 text-sm font-bold text-[#13233a] outline-none transition focus:border-[#c7a56b] focus:bg-white"
+                placeholder="seuemail@exemplo.com"
+              />
+            </label>
 
-            <p className="mt-6 max-w-md text-base font-medium leading-8 text-[#596579]">
-              Informe suas credenciais para acessar a área do associado ou o
-              painel administrativo, conforme seu perfil de acesso.
-            </p>
+            <label className="grid gap-2">
+              <span className="text-sm font-bold text-[#596579]">Senha</span>
 
-            <p className="mt-6 max-w-md border-l-2 border-[#c7a56b] pl-4 text-sm font-medium leading-7 text-[#596579]">
-              O acesso é liberado conforme o perfil definido no sistema. Usuários
-              administrativos serão direcionados ao painel.
-            </p>
-          </section>
+              <input
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+                autoComplete="current-password"
+                className="w-full rounded-xl border border-[#e6ded2] bg-[#fcfcfd] px-4 py-3 text-sm font-bold text-[#13233a] outline-none transition focus:border-[#c7a56b] focus:bg-white"
+                placeholder="Digite sua senha"
+              />
+            </label>
 
-          <section className="rounded-[1.75rem] border border-[#e6ded2] bg-white p-5 shadow-xl shadow-slate-900/8 md:p-7">
-            <div className="flex items-center justify-between gap-4 border-b border-[#eee7db] pb-5">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#a98246]">
-                  Login
-                </p>
+            <button
+              type="submit"
+              disabled={loading}
+              className="rounded-xl bg-[#13233a] px-6 py-3 text-[12px] font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-slate-900/12 transition hover:bg-[#0d1a2d] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {loading ? "Entrando..." : "Entrar"}
+            </button>
 
-                <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[#13233a]">
-                  Dados de acesso
-                </h2>
+            {status && (
+              <div className="rounded-xl border border-[#e6ded2] bg-[#f8f7f4] px-4 py-3 text-sm font-bold leading-6 text-[#596579]">
+                {status}
               </div>
+            )}
+          </form>
 
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#f1eadf] text-xs font-black text-[#a98246]">
-                AAD
-              </div>
-            </div>
+          <div className="mt-5 grid gap-2 border-t border-[#eee7db] pt-4 sm:grid-cols-2">
+            <Link
+              href="/esqueci-senha"
+              className="rounded-xl border border-[#e6ded2] bg-[#f8f7f4] px-4 py-2.5 text-center text-xs font-black uppercase tracking-[0.1em] text-[#596579] transition hover:bg-white hover:text-[#13233a]"
+            >
+              Esqueci minha senha
+            </Link>
 
-            <form onSubmit={handleLogin} className="mt-6 grid gap-4">
-              <label className="grid gap-2">
-                <span className="text-sm font-bold text-[#596579]">E-mail</span>
-
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  required
-                  autoComplete="email"
-                  className="w-full rounded-xl border border-[#e6ded2] bg-[#fcfcfd] px-4 py-3 text-sm font-bold text-[#13233a] outline-none transition focus:border-[#c7a56b] focus:bg-white"
-                  placeholder="seuemail@exemplo.com"
-                />
-              </label>
-
-              <label className="grid gap-2">
-                <span className="text-sm font-bold text-[#596579]">Senha</span>
-
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  required
-                  autoComplete="current-password"
-                  className="w-full rounded-xl border border-[#e6ded2] bg-[#fcfcfd] px-4 py-3 text-sm font-bold text-[#13233a] outline-none transition focus:border-[#c7a56b] focus:bg-white"
-                  placeholder="Digite sua senha"
-                />
-              </label>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="mt-2 rounded-xl bg-[#13233a] px-6 py-3 text-[12px] font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-slate-900/12 transition hover:bg-[#0d1a2d] disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {loading ? "Entrando..." : "Entrar"}
-              </button>
-
-              {status && (
-                <div className="rounded-xl border border-[#e6ded2] bg-[#f8f7f4] px-4 py-3 text-sm font-bold leading-6 text-[#596579]">
-                  {status}
-                </div>
-              )}
-            </form>
-
-            <div className="mt-6 border-t border-[#eee7db] pt-4">
-              <Link
-                href="/"
-                className="text-xs font-black uppercase tracking-[0.14em] text-[#596579] underline decoration-[#d8cbb7] decoration-2 underline-offset-8 transition hover:text-[#13233a]"
-              >
-                Voltar para a página inicial
-              </Link>
-            </div>
-          </section>
-        </div>
-
-        <footer className="border-t border-[#e6ded2] pt-5">
-          <div className="flex flex-col gap-2 text-xs font-bold text-[#596579] md:flex-row md:items-center md:justify-between">
-            <p>AAD Direito 2028 · Ambiente restrito.</p>
-            <p>Acesso conforme perfil autorizado.</p>
+            <Link
+              href="/cadastro"
+              className="rounded-xl border border-[#e6ded2] bg-[#fffaf1] px-4 py-2.5 text-center text-xs font-black uppercase tracking-[0.1em] text-[#13233a] transition hover:bg-white"
+            >
+              Criar cadastro
+            </Link>
           </div>
-        </footer>
+        </section>
+
+        <div className="mt-5 text-center">
+          <Link
+            href="/"
+            className="text-xs font-black uppercase tracking-[0.14em] text-[#596579] underline decoration-[#d8cbb7] decoration-2 underline-offset-8 transition hover:text-[#13233a]"
+          >
+            Voltar para a página inicial
+          </Link>
+        </div>
       </section>
     </main>
   );

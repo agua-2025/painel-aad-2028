@@ -25,57 +25,30 @@ export default function Home() {
             </h1>
 
             <p className="mt-6 max-w-2xl text-base font-medium leading-8 text-[#596579] md:text-lg">
-              Ambiente restrito da Associação dos Acadêmicos do Curso de Direito –
-              Turma de Formatura 2028.
+              Ambiente restrito da Associação dos Acadêmicos do Curso de Direito
+              – Turma de Formatura 2028.
             </p>
 
-            <div className="mt-8 grid gap-3 sm:max-w-2xl sm:grid-cols-2">
+            <div className="mt-8 flex flex-col gap-3 sm:max-w-xl sm:flex-row">
               <Link
-                href="/area"
-                className="rounded-2xl bg-[#13233a] px-5 py-4 text-white shadow-lg shadow-slate-900/10 transition hover:-translate-y-0.5 hover:bg-[#0c1728]"
+                href="/login"
+                className="inline-flex flex-1 items-center justify-center rounded-full bg-[#13233a] px-6 py-3.5 text-sm font-black uppercase tracking-[0.12em] text-white shadow-lg shadow-slate-900/10 transition hover:bg-[#0c1728]"
               >
-                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#c7a56b]">
-                  Associado
-                </p>
-
-                <p className="mt-2 text-lg font-black">
-                  Já tenho conta
-                </p>
-
-                <p className="mt-2 text-sm leading-6 text-white/70">
-                  Acesse sua área para consultar dados, financeiro, pagamentos,
-                  contribuições e avisos.
-                </p>
+                Entrar no sistema
               </Link>
 
               <Link
                 href="/cadastro"
-                className="rounded-2xl border border-[#d8cbb7] bg-white px-5 py-4 shadow-sm transition hover:-translate-y-0.5 hover:bg-[#fffaf1]"
+                className="inline-flex flex-1 items-center justify-center rounded-full border border-[#d8cbb7] bg-white px-6 py-3.5 text-sm font-black uppercase tracking-[0.12em] text-[#13233a] shadow-sm transition hover:bg-[#fffaf1]"
               >
-                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#a98246]">
-                  Primeiro acesso
-                </p>
-
-                <p className="mt-2 text-lg font-black text-[#13233a]">
-                  Criar cadastro
-                </p>
-
-                <p className="mt-2 text-sm leading-6 text-[#596579]">
-                  Crie sua conta para solicitar associação e acompanhar sua
-                  solicitação pelo sistema.
-                </p>
+                Criar cadastro
               </Link>
             </div>
 
-            <div className="mt-3 sm:max-w-2xl">
-              <Link
-                href="/login"
-                className="flex items-center justify-between gap-3 rounded-2xl border border-[#e6ded2] bg-white/70 px-5 py-3 text-sm font-bold text-[#596579] transition hover:bg-white hover:text-[#13233a]"
-              >
-                <span>Sou da Diretoria, Tesouraria ou Secretaria</span>
-                <span className="font-black text-[#13233a]">Entrar no painel</span>
-              </Link>
-            </div>
+            <p className="mt-4 max-w-xl text-sm font-medium leading-7 text-[#596579]">
+              Entre com sua conta para acessar o sistema. Se ainda não possui
+              cadastro, crie sua conta para solicitar associação.
+            </p>
           </section>
 
           <aside className="rounded-3xl border border-[#e6ded2] bg-white/70 p-5 shadow-sm lg:p-6">
