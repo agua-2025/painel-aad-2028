@@ -51,6 +51,13 @@ export function ProtectedDashboard({ children }: ProtectedDashboardProps) {
         return;
       }
 
+      if (!user.email_confirmed_at) {
+        await supabase.auth.signOut();
+        setErrorMessage("Confirme seu e-mail antes de acessar o painel administrativo.");
+        setLoading(false);
+        return;
+      }
+
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("id, full_name, email, status")

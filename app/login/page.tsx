@@ -3,6 +3,18 @@
 import Link from "next/link";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { hasDashboardAccess } from "@/lib/permissions";
+
+type RoleRow = {
+  roles:
+    | {
+        name: string;
+      }
+    | {
+        name: string;
+      }[]
+    | null;
+};
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -18,19 +30,106 @@ export default function LoginPage() {
 
     const supabase = createClient();
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-      setStatus("E-mail ou senha inválidos. Verifique os dados e tente novamente.");
+      const message = error.message?.toLowerCase() || "";
+
+      if (message.includes("email not confirmed") || message.includes("not confirmed")) {
+        setStatus(
+          "Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada e confirme o e-mail antes de acessar o sistema."
+        );
+      } else {
+        setStatus("E-mail ou senha inválidos. Verifique os dados e tente novamente.");
+      }
+
       setLoading(false);
       return;
     }
 
+    if (!data.user?.email_confirmed_at) {
+      await supabase.auth.signOut();
+      setStatus(
+        "Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada e confirme o e-mail antes de acessar o sistema."
+      );
+      setLoading(false);
+      return;
+    }
+
+    const user = data.user;
+    const metadata = user.user_metadata || {};
+
+    const fullName =
+      typeof metadata.full_name === "string" && metadata.full_name.trim()
+        ? metadata.full_name
+        : user.email || "Usuário";
+
+    const userEmail = user.email || email;
+
+    let { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .select("id, full_name, email, status")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!profileData) {
+      const { data: createdProfile, error: createProfileError } = await supabase
+        .from("profiles")
+        .insert({
+          user_id: user.id,
+          full_name: fullName,
+          email: userEmail,
+          status: "ativo",
+        })
+        .select("id, full_name, email, status")
+        .single();
+
+      if (createProfileError || !createdProfile) {
+        console.error("Erro ao criar perfil:", createProfileError);
+        setStatus(
+          "Login realizado, mas não foi possível preparar seu perfil. Procure o suporte."
+        );
+        setLoading(false);
+        return;
+      }
+
+      profileData = createdProfile;
+      profileError = null;
+    }
+
+    if (profileError || !profileData) {
+      setStatus("Não foi possível carregar seu perfil.");
+      setLoading(false);
+      return;
+    }
+
+    const { data: roleData } = await supabase
+      .from("user_roles")
+      .select("roles(name)")
+      .eq("profile_id", profileData.id);
+
+    const roleNames =
+      ((roleData as unknown as RoleRow[] | null) ?? [])
+        .map((item) => {
+          if (Array.isArray(item.roles)) {
+            return item.roles[0]?.name;
+          }
+
+          return item.roles?.name;
+        })
+        .filter((name): name is string => Boolean(name)) ?? [];
+
     setStatus("Login realizado com sucesso. Redirecionando...");
-    window.location.href = "/dashboard";
+
+    if (hasDashboardAccess(roleNames)) {
+      window.location.href = "/dashboard";
+      return;
+    }
+
+    window.location.href = "/area";
   }
 
   return (
@@ -52,17 +151,17 @@ export default function LoginPage() {
             </p>
 
             <h1 className="mt-5 max-w-xl text-5xl font-black leading-[0.95] tracking-[-0.07em] text-[#13233a] md:text-6xl">
-              Entrar no painel
+              Entrar no sistema
             </h1>
 
             <p className="mt-6 max-w-md text-base font-medium leading-8 text-[#596579]">
-              Informe suas credenciais para acessar o ambiente administrativo da
-              Associação.
+              Informe suas credenciais para acessar a área do associado ou o
+              painel administrativo, conforme seu perfil de acesso.
             </p>
 
             <p className="mt-6 max-w-md border-l-2 border-[#c7a56b] pl-4 text-sm font-medium leading-7 text-[#596579]">
-              O acesso é permitido apenas aos usuários autorizados conforme o
-              perfil definido no sistema.
+              O acesso é liberado conforme o perfil definido no sistema. Usuários
+              administrativos serão direcionados ao painel.
             </p>
           </section>
 
@@ -140,8 +239,8 @@ export default function LoginPage() {
 
         <footer className="border-t border-[#e6ded2] pt-5">
           <div className="flex flex-col gap-2 text-xs font-bold text-[#596579] md:flex-row md:items-center md:justify-between">
-            <p>AAD Direito 2028 · Ambiente administrativo.</p>
-            <p>Acesso restrito aos perfis autorizados.</p>
+            <p>AAD Direito 2028 · Ambiente restrito.</p>
+            <p>Acesso conforme perfil autorizado.</p>
           </div>
         </footer>
       </section>

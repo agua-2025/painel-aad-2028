@@ -39,29 +39,41 @@ export default function Home() {
                 </p>
 
                 <p className="mt-2 text-lg font-black">
-                  Acessar área do associado
+                  Já tenho conta
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-white/70">
-                  Consulte dados, financeiro, pagamentos, contribuições e avisos.
+                  Acesse sua área para consultar dados, financeiro, pagamentos,
+                  contribuições e avisos.
                 </p>
               </Link>
 
               <Link
-                href="/login"
+                href="/cadastro"
                 className="rounded-2xl border border-[#d8cbb7] bg-white px-5 py-4 shadow-sm transition hover:-translate-y-0.5 hover:bg-[#fffaf1]"
               >
                 <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#a98246]">
-                  Administração
+                  Primeiro acesso
                 </p>
 
                 <p className="mt-2 text-lg font-black text-[#13233a]">
-                  Entrar no painel
+                  Criar cadastro
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-[#596579]">
-                  Acesso da Diretoria, Tesouraria, Secretaria e perfis autorizados.
+                  Crie sua conta para solicitar associação e acompanhar sua
+                  solicitação pelo sistema.
                 </p>
+              </Link>
+            </div>
+
+            <div className="mt-3 sm:max-w-2xl">
+              <Link
+                href="/login"
+                className="flex items-center justify-between gap-3 rounded-2xl border border-[#e6ded2] bg-white/70 px-5 py-3 text-sm font-bold text-[#596579] transition hover:bg-white hover:text-[#13233a]"
+              >
+                <span>Sou da Diretoria, Tesouraria ou Secretaria</span>
+                <span className="font-black text-[#13233a]">Entrar no painel</span>
               </Link>
             </div>
           </section>

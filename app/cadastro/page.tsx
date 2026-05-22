@@ -73,6 +73,10 @@ export default function CadastroPage() {
       email,
       password: form.password,
       options: {
+        emailRedirectTo:
+          typeof window !== "undefined"
+            ? `${window.location.origin}/login`
+            : undefined,
         data: {
           full_name: fullName,
           cpf,
@@ -84,6 +88,14 @@ export default function CadastroPage() {
     if (error) {
       console.error("Erro ao criar conta:", error);
       setStatusMessage(error.message || "Não foi possível criar a conta. Verifique os dados e tente novamente.");
+      setLoading(false);
+      return;
+    }
+
+    if (!data.session) {
+      setStatusMessage(
+        "Conta criada com sucesso. Enviamos um link de confirmação para seu e-mail. Confirme o e-mail antes de entrar no sistema."
+      );
       setLoading(false);
       return;
     }
@@ -110,28 +122,43 @@ export default function CadastroPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f8fa] px-6 py-10 text-[#13233a]">
-      <section className="mx-auto max-w-3xl">
-        <div className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10 md:p-8">
-          <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
-            Primeiro acesso
-          </p>
+    <main className="min-h-screen bg-[#f7f8fa] px-5 py-8 text-[#13233a] md:px-8">
+      <section className="mx-auto max-w-4xl">
+        <div className="rounded-2xl bg-[#13233a] px-5 py-5 text-white shadow-xl shadow-slate-900/10 md:px-6">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c7a56b]">
+                Primeiro acesso
+              </p>
 
-          <h1 className="mt-4 text-3xl font-black tracking-[-0.05em] md:text-5xl">
-            Criar conta
-          </h1>
+              <h1 className="mt-2 text-2xl font-black tracking-[-0.04em] md:text-3xl">
+                Criar cadastro
+              </h1>
 
-          <p className="mt-4 leading-7 text-white/75">
-            Crie sua conta para solicitar associação e acompanhar a análise pela
-            Diretoria/Secretaria.
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
+                Crie sua conta para solicitar associação e acompanhar a análise
+                pela Diretoria/Secretaria.
+              </p>
+            </div>
+
+            <span className="w-fit rounded-full bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-white">
+              AAD Direito 2028
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-[#e8dccb] bg-[#fffaf1] px-5 py-4 shadow-sm">
+          <p className="text-sm leading-6 text-[#596579]">
+            Use um e-mail válido. Após criar a conta, poderá ser necessário
+            confirmar o e-mail antes de acessar o sistema.
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="mt-8 rounded-3xl border border-[#e8dccb] bg-white p-5 shadow-sm md:p-6"
+          className="mt-4 rounded-2xl border border-[#e8dccb] bg-white p-5 shadow-sm md:p-6"
         >
-          <div className="grid gap-5">
+          <div className="grid gap-4">
             <label className="grid gap-2">
               <span className="text-sm font-bold text-[#596579]">Nome completo *</span>
               <input
@@ -144,7 +171,7 @@ export default function CadastroPage() {
               />
             </label>
 
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2">
               <label className="grid gap-2">
                 <span className="text-sm font-bold text-[#596579]">CPF *</span>
                 <input
@@ -183,7 +210,7 @@ export default function CadastroPage() {
               />
             </label>
 
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2">
               <label className="grid gap-2">
                 <span className="text-sm font-bold text-[#596579]">Senha *</span>
                 <input
@@ -220,10 +247,10 @@ export default function CadastroPage() {
             </div>
           )}
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between">
             <Link
-              href="/associar"
-              className="rounded-full border border-[#e8dccb] bg-white px-6 py-3 text-center text-sm font-black uppercase tracking-[0.1em] text-[#13233a]"
+              href="/"
+              className="rounded-full border border-[#e8dccb] bg-white px-6 py-3 text-center text-sm font-black uppercase tracking-[0.1em] text-[#13233a] transition hover:bg-[#f7f8fa]"
             >
               Voltar
             </Link>
@@ -231,7 +258,7 @@ export default function CadastroPage() {
             <button
               type="submit"
               disabled={loading}
-              className="rounded-full bg-[#13233a] px-6 py-3 text-sm font-black uppercase tracking-[0.1em] text-white shadow-lg shadow-slate-900/10 disabled:cursor-not-allowed disabled:opacity-70"
+              className="rounded-full bg-[#13233a] px-6 py-3 text-sm font-black uppercase tracking-[0.1em] text-white shadow-lg shadow-slate-900/10 transition hover:bg-[#0c1728] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {loading ? "Criando..." : "Criar conta"}
             </button>

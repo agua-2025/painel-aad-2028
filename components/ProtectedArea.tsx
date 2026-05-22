@@ -71,6 +71,13 @@ export function ProtectedArea({ children }: ProtectedAreaProps) {
         return;
       }
 
+      if (!user.email_confirmed_at) {
+        await supabase.auth.signOut();
+        setErrorMessage("Confirme seu e-mail antes de acessar a área do associado.");
+        setLoading(false);
+        return;
+      }
+
       let { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("id, full_name, email, status")
