@@ -15,7 +15,7 @@ type AreaLayoutProps = {
 
 const baseMenuItems = [
   { label: "Início", href: "/area", icon: "🏠" },
-  { label: "Solicitação", href: "/area/solicitacao", icon: "📝" },
+  { label: "Termo de Adesão", href: "/area/solicitacao", icon: "📝" },
   { label: "Meus dados", href: "/area/dados", icon: "👤" },
   { label: "Documentos", href: "/area/documentos", icon: "📄" },
   { label: "Avisos", href: "/area/avisos", icon: "📢" },
@@ -29,7 +29,7 @@ const associateMenuItems = [
 ];
 
 function formatStatus(value?: string | null) {
-  if (!value) return "Sem solicitação";
+  if (!value) return "Sem termo de adesão";
 
   const labels: Record<string, string> = {
     pendente: "Pendente",

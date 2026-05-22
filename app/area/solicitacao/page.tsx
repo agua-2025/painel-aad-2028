@@ -198,7 +198,7 @@ export default function AreaSolicitacaoPage() {
     }
 
     if (!form.accepted_statute || !form.accepted_financial_rules) {
-      setStatusMessage("Para enviar a solicitação, é necessário aceitar o Estatuto e as regras financeiras.");
+      setStatusMessage("Para enviar o Termo de Adesão, é necessário aceitar o Estatuto Social e as regras financeiras da Associação.");
       return;
     }
 
@@ -251,7 +251,7 @@ export default function AreaSolicitacaoPage() {
       }
     }
 
-    setStatusMessage("Solicitação enviada com sucesso.");
+    setStatusMessage("Termo de Adesão enviado com sucesso.");
     router.push("/area");
     router.refresh();
   }
@@ -280,12 +280,14 @@ export default function AreaSolicitacaoPage() {
                 </p>
 
                 <h1 className="mt-2 text-2xl font-black tracking-[-0.04em] md:text-3xl">
-                  Solicitação de associação
+                  Termo de Adesão à Associação
                 </h1>
 
                 <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
-                  Preencha ou atualize sua ficha para análise da Diretoria/Secretaria
-                  da AAD Direito 2028.
+                  Preencha este Termo de Adesão para solicitar seu ingresso como associado
+                  da AAD Direito 2028. O envio deste formulário representa sua manifestação
+                  de interesse em aderir à Associação, sujeita à análise e aprovação da
+                  Diretoria/Secretaria.
                 </p>
               </div>
             </div>
@@ -572,34 +574,41 @@ export default function AreaSolicitacaoPage() {
             </div>
 
             <div className="mt-6 grid gap-3 rounded-2xl bg-[#f7f8fa] p-5">
-              <label className="flex gap-3 text-sm font-bold leading-6 text-[#596579]">
-                <input
-                  type="checkbox"
-                  checked={form.accepted_statute}
-                  onChange={(event) => updateField("accepted_statute", event.target.checked)}
-                  className="mt-1 h-4 w-4"
-                />
-                <span>
-                  Declaro ciência de que o ingresso na Associação depende de
-                  análise e concordo em observar o Estatuto Social.
-                </span>
-              </label>
+            <label className="flex gap-3 text-sm font-bold leading-6 text-[#596579]">
+              <input
+                type="checkbox"
+                checked={form.accepted_statute}
+                onChange={(event) => updateField("accepted_statute", event.target.checked)}
+                className="mt-1 h-4 w-4"
+              />
+              <span>
+                Declaro que este formulário constitui meu Termo de Adesão à Associação
+                dos Acadêmicos do Curso de Direito – Turma de Formatura 2028 – AAD Direito
+                2028. Declaro, sob minha responsabilidade, que as informações prestadas
+                são verdadeiras e correspondem à minha situação atual, bem como afirmo
+                que li, compreendi e aceito o Estatuto Social da Associação.
+              </span>
+            </label>
 
-              <label className="flex gap-3 text-sm font-bold leading-6 text-[#596579]">
-                <input
-                  type="checkbox"
-                  checked={form.accepted_financial_rules}
-                  onChange={(event) =>
-                    updateField("accepted_financial_rules", event.target.checked)
-                  }
-                  className="mt-1 h-4 w-4"
-                />
-                <span>
-                  Declaro ciência de que poderão existir contribuições mensais,
-                  taxas, regras financeiras e obrigações aprovadas pela Associação.
-                </span>
-              </label>
-            </div>
+            <label className="flex gap-3 text-sm font-bold leading-6 text-[#596579]">
+              <input
+                type="checkbox"
+                checked={form.accepted_financial_rules}
+                onChange={(event) =>
+                  updateField("accepted_financial_rules", event.target.checked)
+                }
+                className="mt-1 h-4 w-4"
+              />
+              <span>
+                Declaro ciência e concordância com as regras financeiras aplicáveis aos
+                associados, incluindo contribuições mensais, taxas, contribuições extras
+                e demais obrigações regularmente aprovadas pela Associação. Estou ciente
+                de que meu ingresso depende de análise e aprovação da Diretoria/Secretaria
+                e de que a Associação poderá solicitar documentos ou informações
+                complementares para conferência cadastral quando necessário.
+              </span>
+            </label>
+          </div>
 
             {statusMessage && (
               <div className="mt-6 rounded-2xl bg-[#f7f8fa] p-4 text-sm font-bold text-[#596579]">
@@ -620,7 +629,7 @@ export default function AreaSolicitacaoPage() {
                 disabled={saving}
                 className="rounded-full bg-[#13233a] px-6 py-3 text-sm font-black uppercase tracking-[0.1em] text-white shadow-lg shadow-slate-900/10 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {saving ? "Salvando..." : "Enviar solicitação"}
+                {saving ? "Salvando..." : "Enviar Termo de Adesão"}
               </button>
             </div>
           </form>

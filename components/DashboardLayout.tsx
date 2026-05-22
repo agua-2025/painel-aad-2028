@@ -15,7 +15,7 @@ type DashboardLayoutProps = {
 const menuItems = [
   { label: "Início", href: "/dashboard", icon: "🏠" },
   { label: "Associados", href: "/dashboard/associados", icon: "👥" },
-  { label: "Solicitações", href: "/dashboard/solicitacoes", icon: "📝" },
+  { label: "Termos de Adesão", href: "/dashboard/solicitacoes", icon: "📝" },
   { label: "Avisos", href: "/dashboard/avisos", icon: "📢" },
   { label: "Comunicações", href: "/dashboard/comunicacoes", icon: "💬" },
   { label: "Regras Financeiras", href: "/dashboard/financeiro", icon: "⚖️" },
