@@ -656,13 +656,7 @@ export default function SolicitacoesPage() {
                               <span>{request.message || "Nenhuma observação informada."}</span>
                             </div>
 
-                            {request.review_notes && (
-                              <div className="rounded-lg border border-[#e8dccb] bg-[#fffaf1] px-3 py-2">
-                                <strong className="text-[#13233a]">Análise da Associação:</strong>{" "}
-                                <span>{request.review_notes}</span>
-                              </div>
-                            )}
-                          </div>
+                            </div>
                         </td>
 
                           <td className="px-4 py-3">
@@ -676,14 +670,14 @@ export default function SolicitacoesPage() {
                           </td>
 
                           <td className="px-4 py-3">
-                            <div className="flex justify-end gap-1.5">
+                            <div className="flex flex-col items-end gap-2">
                             <button
-                              type="button"
-                              onClick={() => setSelectedRequest(request)}
-                              className="rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
-                            >
-                              Ver termo
-                            </button>
+                            type="button"
+                            onClick={() => setSelectedRequest(request)}
+                            className="w-28 rounded-full border border-[#e8dccb] bg-white px-3 py-2 text-center text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
+                          >
+                            Ver termo
+                          </button>
 
                             {canAnalyze ? (
                                 <>
@@ -715,9 +709,9 @@ export default function SolicitacoesPage() {
                                   </button>
                                 </>
                               ) : (
-                                <span className="rounded-full bg-[#f7f8fa] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
-                                  Analisada
-                                </span>
+                                <span className="w-28 rounded-full bg-[#f7f8fa] px-3 py-2 text-center text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                                Analisada
+                              </span>
                               )}
                             </div>
                           </td>
@@ -833,14 +827,7 @@ export default function SolicitacoesPage() {
                         </div>
                       )}
 
-                      {request.review_notes && (
-                        <div className="mt-3 rounded-xl border border-[#e8dccb] bg-[#fffaf1] p-3 text-sm leading-6 text-[#596579]">
-                          <strong className="text-[#13233a]">Análise:</strong>{" "}
-                          {request.review_notes}
-                        </div>
-                      )}
-
-                      <div className="mt-4 flex flex-wrap gap-2">
+                        <div className="mt-4 flex flex-wrap gap-2">
                         {canAnalyze ? (
                           <>
                             <button
