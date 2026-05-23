@@ -54,12 +54,27 @@ function formatStatus(value: string) {
   return labels[value] || value.replaceAll("_", " ");
 }
 
+function formatZipCode(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 8);
+
+  if (digits.length <= 5) {
+    return digits;
+  }
+
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+}
+
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(new Date(value));
+  if (!value) return "Não informado";
+
+  const [datePart] = value.split("T");
+  const [year, month, day] = datePart.split("-");
+
+  if (!year || !month || !day) {
+    return "Não informado";
+  }
+
+  return `${day}/${month}/${year}`;
 }
 
 function formatValue(value: string | null | undefined) {
@@ -748,6 +763,18 @@ export default function AreaSolicitacaoPage() {
                   onChange={(event) => updateField("address", event.target.value)}
                   className="rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
                   placeholder="Rua, número, bairro"
+                />
+              </label>
+
+              <label className="grid gap-2">
+                <span className="text-sm font-bold text-[#596579]">CEP</span>
+                <input
+                  type="text"
+                  value={form.zip_code}
+                  onChange={(event) => updateField("zip_code", formatZipCode(event.target.value))}
+                  inputMode="numeric"
+                  className="rounded-2xl border border-[#e8dccb] px-4 py-3 outline-none transition focus:border-[#c7a56b]"
+                  placeholder="00000-000"
                 />
               </label>
 

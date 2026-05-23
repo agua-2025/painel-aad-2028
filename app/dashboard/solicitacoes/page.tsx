@@ -50,11 +50,16 @@ function statusStyle(value: string) {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(new Date(value));
+  if (!value) return "Não informado";
+
+  const [datePart] = value.split("T");
+  const [year, month, day] = datePart.split("-");
+
+  if (!year || !month || !day) {
+    return "Não informado";
+  }
+
+  return `${day}/${month}/${year}`;
 }
 
 function todayISO() {
