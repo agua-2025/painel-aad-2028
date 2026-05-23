@@ -273,11 +273,12 @@ export default function SolicitacoesPage() {
           <div className="mt-2 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
               <h1 className="text-2xl font-black tracking-[-0.04em]">
-                Solicitações de associação
+                Termos de Adesão
               </h1>
 
               <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
-                Acompanhe os pedidos enviados pelos acadêmicos interessados em ingressar na AAD Direito 2028.
+                Analise os Termos de Adesão enviados pelos acadêmicos interessados em ingressar
+                na AAD Direito 2028 antes de aprovar, solicitar correção ou rejeitar.
               </p>
             </div>
 
@@ -345,11 +346,12 @@ export default function SolicitacoesPage() {
         <section className="overflow-hidden rounded-2xl border border-[#e8dccb] bg-white shadow-sm">
           <div className="border-b border-[#e8dccb] px-4 py-3">
             <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
-              Pedidos recebidos
+              Termos recebidos
             </h2>
 
             <p className="mt-1 text-xs font-bold leading-6 text-[#596579]">
-              Revise os dados do interessado antes de aprovar, marcar pendência ou rejeitar.
+              Revise os dados completos declarados no Termo de Adesão antes de aprovar,
+              solicitar correção ou rejeitar.
             </p>
           </div>
 
@@ -379,7 +381,7 @@ export default function SolicitacoesPage() {
                     <tr>
                       <th className="px-4 py-2.5">Interessado</th>
                       <th className="px-4 py-2.5">Contato</th>
-                      <th className="px-4 py-2.5">Dados</th>
+                      <th className="px-4 py-2.5">Dados do termo</th>
                       <th className="px-4 py-2.5">Situação</th>
                       <th className="px-4 py-2.5 text-right">Ação</th>
                     </tr>
@@ -396,44 +398,87 @@ export default function SolicitacoesPage() {
                       return (
                         <tr key={request.id} className="align-top">
                           <td className="px-4 py-3">
-                            <p className="font-black text-[#13233a]">
-                              {request.full_name}
+                          <p className="font-black text-[#13233a]">
+                            {request.full_name}
+                          </p>
+
+                          <div className="mt-2 space-y-1 text-xs font-medium leading-5 text-[#596579]">
+                            <p>
+                              <strong className="text-[#13233a]">CPF:</strong>{" "}
+                              {request.cpf || "Não informado"}
                             </p>
 
-                            <p className="mt-0.5 text-xs font-medium text-[#596579]">
-                              CPF: {request.cpf || "Não informado"}
+                            <p>
+                              <strong className="text-[#13233a]">RG:</strong>{" "}
+                              {request.rg || "Não informado"}
                             </p>
 
-                            {request.message && (
-                              <p className="mt-2 max-w-md rounded-lg bg-[#f7f8fa] px-3 py-2 text-xs leading-5 text-[#596579]">
-                                {request.message}
+                            <p>
+                              <strong className="text-[#13233a]">Nascimento:</strong>{" "}
+                              {request.birth_date ? formatDate(request.birth_date) : "Não informado"}
+                            </p>
+
+                            <p>
+                              <strong className="text-[#13233a]">Semestre:</strong>{" "}
+                              {request.semester || "Não informado"}
+                            </p>
+                          </div>
+                        </td>
+
+                        <td className="px-4 py-3">
+                          <div className="space-y-1 text-xs font-medium leading-5 text-[#596579]">
+                            <p className="text-sm font-bold text-[#13233a]">{request.email}</p>
+
+                            <p>
+                              <strong className="text-[#13233a]">Telefone/WhatsApp:</strong>{" "}
+                              {request.phone || "Não informado"}
+                            </p>
+
+                            <p>
+                              <strong className="text-[#13233a]">Endereço:</strong>{" "}
+                              {request.address || "Não informado"}
+                            </p>
+
+                            <p>
+                              <strong className="text-[#13233a]">Cidade/UF:</strong>{" "}
+                              {[request.city, request.state].filter(Boolean).join(" / ") ||
+                                "Não informado"}
+                            </p>
+
+                            <p>
+                              <strong className="text-[#13233a]">CEP:</strong>{" "}
+                              {request.zip_code || "Não informado"}
+                            </p>
+                          </div>
+                        </td>
+
+                        <td className="px-4 py-3">
+                          <div className="space-y-2 text-xs leading-5 text-[#596579]">
+                            <p>
+                              <strong className="text-[#13233a]">Enviado em:</strong>{" "}
+                              {formatDate(request.created_at)}
+                            </p>
+
+                            {request.reviewed_at && (
+                              <p>
+                                <strong className="text-[#13233a]">Analisado em:</strong>{" "}
+                                {formatDate(request.reviewed_at)}
                               </p>
                             )}
+
+                            <div className="rounded-lg bg-[#f7f8fa] px-3 py-2">
+                              <strong className="text-[#13233a]">Observação do interessado:</strong>{" "}
+                              <span>{request.message || "Nenhuma observação informada."}</span>
+                            </div>
 
                             {request.review_notes && (
-                              <p className="mt-2 max-w-md rounded-lg border border-[#e8dccb] bg-[#fffaf1] px-3 py-2 text-xs leading-5 text-[#596579]">
-                                <strong className="text-[#13233a]">Análise:</strong>{" "}
-                                {request.review_notes}
-                              </p>
+                              <div className="rounded-lg border border-[#e8dccb] bg-[#fffaf1] px-3 py-2">
+                                <strong className="text-[#13233a]">Análise da Associação:</strong>{" "}
+                                <span>{request.review_notes}</span>
+                              </div>
                             )}
-                          </td>
-
-                          <td className="px-4 py-3">
-                            <p className="font-medium text-[#13233a]">{request.email}</p>
-                            <p className="mt-0.5 text-xs font-medium text-[#596579]">
-                              {request.phone || "Telefone não informado"}
-                            </p>
-                          </td>
-
-                          <td className="px-4 py-3 text-xs font-bold leading-5 text-[#596579]">
-                            <p>
-                              {[request.city, request.state].filter(Boolean).join(" / ") ||
-                                "Localidade não informada"}
-                            </p>
-
-                            <p>Semestre: {request.semester || "Não informado"}</p>
-                            <p>Enviado em: {formatDate(request.created_at)}</p>
-                          </td>
+                          </div>
+                        </td>
 
                           <td className="px-4 py-3">
                             <span
@@ -529,22 +574,64 @@ export default function SolicitacoesPage() {
                       </div>
 
                       <div className="mt-4 grid gap-2 text-sm text-[#596579] sm:grid-cols-2">
-                        <p>
-                          <strong className="text-[#13233a]">Cidade:</strong>{" "}
-                          {[request.city, request.state].filter(Boolean).join(" / ") ||
-                            "Não informada"}
-                        </p>
+                      <p>
+                        <strong className="text-[#13233a]">CPF:</strong>{" "}
+                        {request.cpf || "Não informado"}
+                      </p>
 
-                        <p>
-                          <strong className="text-[#13233a]">Semestre:</strong>{" "}
-                          {request.semester || "Não informado"}
-                        </p>
+                      <p>
+                        <strong className="text-[#13233a]">RG:</strong>{" "}
+                        {request.rg || "Não informado"}
+                      </p>
 
+                      <p>
+                        <strong className="text-[#13233a]">Nascimento:</strong>{" "}
+                        {request.birth_date ? formatDate(request.birth_date) : "Não informado"}
+                      </p>
+
+                      <p>
+                        <strong className="text-[#13233a]">Semestre:</strong>{" "}
+                        {request.semester || "Não informado"}
+                      </p>
+
+                      <p>
+                        <strong className="text-[#13233a]">Telefone/WhatsApp:</strong>{" "}
+                        {request.phone || "Não informado"}
+                      </p>
+
+                      <p>
+                        <strong className="text-[#13233a]">E-mail:</strong>{" "}
+                        {request.email}
+                      </p>
+
+                      <p className="sm:col-span-2">
+                        <strong className="text-[#13233a]">Endereço:</strong>{" "}
+                        {request.address || "Não informado"}
+                      </p>
+
+                      <p>
+                        <strong className="text-[#13233a]">Cidade/UF:</strong>{" "}
+                        {[request.city, request.state].filter(Boolean).join(" / ") ||
+                          "Não informada"}
+                      </p>
+
+                      <p>
+                        <strong className="text-[#13233a]">CEP:</strong>{" "}
+                        {request.zip_code || "Não informado"}
+                      </p>
+
+                      <p>
+                        <strong className="text-[#13233a]">Enviado em:</strong>{" "}
+                        {formatDate(request.created_at)}
+                      </p>
+
+                      {request.reviewed_at && (
                         <p>
-                          <strong className="text-[#13233a]">Enviado em:</strong>{" "}
-                          {formatDate(request.created_at)}
+                          <strong className="text-[#13233a]">Analisado em:</strong>{" "}
+                          {formatDate(request.reviewed_at)}
                         </p>
-                      </div>
+                      )}
+                    </div>
 
                       {request.message && (
                         <div className="mt-4 rounded-xl bg-[#f7f8fa] p-3 text-sm leading-6 text-[#596579]">
