@@ -19,6 +19,8 @@ type MembershipRequest = {
   zip_code: string | null;
   semester: string | null;
   message: string | null;
+  accepted_statute: boolean | null;
+  accepted_financial_rules: boolean | null;
   status: string;
   review_notes: string | null;
   reviewed_at: string | null;
@@ -59,10 +61,193 @@ function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function formatValue(value: string | null | undefined) {
+  return value && value.trim() ? value : "Não informado";
+}
+
+function formatBoolean(value: boolean | null | undefined) {
+  return value ? "Sim" : "Não";
+}
+
+function escapeHtml(value: string | null | undefined) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function printMembershipRequest(request: MembershipRequest) {
+  const printWindow = window.open("", "_blank", "width=900,height=700");
+
+  if (!printWindow) {
+    alert("Não foi possível abrir a janela de impressão. Verifique se o navegador bloqueou pop-ups.");
+    return;
+  }
+
+  const cityState =
+    [request.city, request.state].filter(Boolean).join(" / ") || "Não informado";
+
+  const html = `
+    <!doctype html>
+    <html lang="pt-BR">
+      <head>
+        <meta charset="utf-8" />
+        <title>Termo de Adesão - ${escapeHtml(request.full_name)}</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 32px;
+            color: #13233a;
+            line-height: 1.45;
+          }
+
+          h1 {
+            font-size: 22px;
+            margin: 0 0 4px;
+            text-align: center;
+          }
+
+          h2 {
+            font-size: 15px;
+            margin: 24px 0 10px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 6px;
+          }
+
+          .subtitle {
+            text-align: center;
+            font-size: 13px;
+            margin-bottom: 28px;
+          }
+
+          .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 24px;
+          }
+
+          .item {
+            font-size: 13px;
+          }
+
+          .label {
+            font-weight: bold;
+          }
+
+          .box {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 8px;
+            font-size: 13px;
+          }
+
+          .declaration {
+            text-align: justify;
+          }
+
+          .signature {
+            margin-top: 56px;
+            text-align: center;
+          }
+
+          .signature-line {
+            width: 320px;
+            border-top: 1px solid #13233a;
+            margin: 0 auto 8px;
+          }
+
+          @media print {
+            button {
+              display: none;
+            }
+
+            body {
+              margin: 24px;
+            }
+          }
+        </style>
+      </head>
+
+      <body>
+        <h1>Termo de Adesão à Associação</h1>
+        <p class="subtitle">
+          Associação dos Acadêmicos do Curso de Direito – Turma de Formatura 2028 – AAD Direito 2028
+        </p>
+
+        <h2>Dados do interessado</h2>
+        <div class="grid">
+          <div class="item"><span class="label">Nome completo:</span> ${escapeHtml(formatValue(request.full_name))}</div>
+          <div class="item"><span class="label">CPF:</span> ${escapeHtml(formatValue(request.cpf))}</div>
+          <div class="item"><span class="label">RG:</span> ${escapeHtml(formatValue(request.rg))}</div>
+          <div class="item"><span class="label">Data de nascimento:</span> ${escapeHtml(request.birth_date ? formatDate(request.birth_date) : "Não informado")}</div>
+          <div class="item"><span class="label">Telefone/WhatsApp:</span> ${escapeHtml(formatValue(request.phone))}</div>
+          <div class="item"><span class="label">E-mail:</span> ${escapeHtml(formatValue(request.email))}</div>
+          <div class="item"><span class="label">Semestre:</span> ${escapeHtml(formatValue(request.semester))}</div>
+          <div class="item"><span class="label">Cidade/UF:</span> ${escapeHtml(cityState)}</div>
+          <div class="item"><span class="label">Endereço:</span> ${escapeHtml(formatValue(request.address))}</div>
+          <div class="item"><span class="label">CEP:</span> ${escapeHtml(formatValue(request.zip_code))}</div>
+        </div>
+
+        <h2>Manifestação de adesão</h2>
+        <div class="box declaration">
+          Declaro que este formulário constitui meu Termo de Adesão à Associação dos Acadêmicos do Curso de Direito –
+          Turma de Formatura 2028 – AAD Direito 2028. Declaro, sob minha responsabilidade, que as informações
+          prestadas são verdadeiras e correspondem à minha situação atual, bem como afirmo que li, compreendi e aceito
+          o Estatuto Social da Associação.
+        </div>
+
+        <div class="box declaration">
+          Declaro ciência e concordância com as regras financeiras aplicáveis aos associados, incluindo contribuições
+          mensais, taxas, contribuições extras e demais obrigações regularmente aprovadas pela Associação.
+        </div>
+
+        <h2>Observações</h2>
+        <div class="box">
+          <span class="label">Observação do interessado:</span>
+          ${escapeHtml(request.message || "Nenhuma observação informada.")}
+        </div>
+
+        <h2>Análise da Associação</h2>
+        <div class="grid">
+          <div class="item"><span class="label">Situação:</span> ${escapeHtml(formatStatus(request.status))}</div>
+          <div class="item"><span class="label">Enviado em:</span> ${escapeHtml(formatDate(request.created_at))}</div>
+          <div class="item"><span class="label">Analisado em:</span> ${escapeHtml(request.reviewed_at ? formatDate(request.reviewed_at) : "Não analisado")}</div>
+          <div class="item"><span class="label">Aceitou Estatuto:</span> ${escapeHtml(formatBoolean(request.accepted_statute))}</div>
+          <div class="item"><span class="label">Aceitou regras financeiras:</span> ${escapeHtml(formatBoolean(request.accepted_financial_rules))}</div>
+        </div>
+
+        <div class="box">
+          <span class="label">Observação da Associação:</span>
+          ${escapeHtml(request.review_notes || "Nenhuma observação registrada.")}
+        </div>
+
+        <div class="signature">
+          <div class="signature-line"></div>
+          <div>${escapeHtml(request.full_name)}</div>
+        </div>
+
+        <script>
+          window.onload = function () {
+            window.print();
+          };
+        </script>
+      </body>
+    </html>
+  `;
+
+  printWindow.document.open();
+  printWindow.document.write(html);
+  printWindow.document.close();
+}
+
 export default function SolicitacoesPage() {
   const [requests, setRequests] = useState<MembershipRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<MembershipRequest | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -74,13 +259,13 @@ export default function SolicitacoesPage() {
     const { data, error } = await supabase
       .from("membership_requests")
       .select(
-        "id, profile_id, full_name, cpf, rg, birth_date, phone, email, address, city, state, zip_code, semester, message, status, review_notes, reviewed_at, created_at"
+      "id, profile_id, full_name, cpf, rg, birth_date, phone, email, address, city, state, zip_code, semester, message, accepted_statute, accepted_financial_rules, status, review_notes, reviewed_at, created_at"
       )
       .order("created_at", { ascending: false });
 
     if (error) {
       console.error(error);
-      setErrorMessage("Não foi possível carregar as solicitações.");
+      setErrorMessage("Não foi possível carregar os Termos de Adesão.");
       setLoading(false);
       return;
     }
@@ -178,7 +363,7 @@ export default function SolicitacoesPage() {
       return;
     }
 
-    setSuccessMessage("Solicitação aprovada e associado cadastrado com sucesso.");
+    setSuccessMessage("Termo de Adesão aprovado e associado cadastrado com sucesso.");
     setProcessingId(null);
     await loadRequests();
   }
@@ -207,7 +392,7 @@ export default function SolicitacoesPage() {
 
     if (error) {
       console.error(error);
-      setErrorMessage("Não foi possível marcar a solicitação com pendência.");
+      setErrorMessage("Não foi possível marcar o Termo de Adesão com pendência.");
       setProcessingId(null);
       return;
     }
@@ -247,12 +432,12 @@ export default function SolicitacoesPage() {
 
     if (error) {
       console.error(error);
-      setErrorMessage("Não foi possível rejeitar a solicitação.");
+      setErrorMessage("Não foi possível rejeitar o Termo de Adesão.");
       setProcessingId(null);
       return;
     }
 
-    setSuccessMessage("Solicitação rejeitada com registro do motivo.");
+    setSuccessMessage("Termo de Adesão rejeitado com registro do motivo.");
     setProcessingId(null);
     await loadRequests();
   }
@@ -492,7 +677,15 @@ export default function SolicitacoesPage() {
 
                           <td className="px-4 py-3">
                             <div className="flex justify-end gap-1.5">
-                              {canAnalyze ? (
+                            <button
+                              type="button"
+                              onClick={() => setSelectedRequest(request)}
+                              className="rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
+                            >
+                              Ver termo
+                            </button>
+
+                            {canAnalyze ? (
                                 <>
                                   <button
                                     type="button"
@@ -690,6 +883,188 @@ export default function SolicitacoesPage() {
             </>
           )}
         </section>
+                {selectedRequest && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6">
+            <div className="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-3xl bg-white shadow-2xl">
+              <div className="sticky top-0 z-10 flex flex-col gap-3 border-b border-[#e8dccb] bg-white px-5 py-4 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#a7834d]">
+                    Termo de Adesão
+                  </p>
+
+                  <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-[#13233a]">
+                    {selectedRequest.full_name}
+                  </h2>
+
+                  <p className="mt-1 text-sm font-bold text-[#596579]">
+                    Enviado em {formatDate(selectedRequest.created_at)} •{" "}
+                    {formatStatus(selectedRequest.status)}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => printMembershipRequest(selectedRequest)}
+                    className="rounded-full bg-[#13233a] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white"
+                  >
+                    Imprimir termo
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedRequest(null)}
+                    className="rounded-full border border-[#e8dccb] bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-[#13233a]"
+                  >
+                    Fechar
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-4 p-5">
+                <section className="rounded-2xl border border-[#e8dccb] bg-[#f7f8fa] p-4">
+                  <h3 className="text-sm font-black uppercase tracking-[0.12em] text-[#13233a]">
+                    Dados do interessado
+                  </h3>
+
+                  <div className="mt-4 grid gap-3 text-sm text-[#596579] md:grid-cols-2">
+                    <p>
+                      <strong className="text-[#13233a]">Nome completo:</strong>{" "}
+                      {selectedRequest.full_name}
+                    </p>
+
+                    <p>
+                      <strong className="text-[#13233a]">CPF:</strong>{" "}
+                      {selectedRequest.cpf || "Não informado"}
+                    </p>
+
+                    <p>
+                      <strong className="text-[#13233a]">RG:</strong>{" "}
+                      {selectedRequest.rg || "Não informado"}
+                    </p>
+
+                    <p>
+                      <strong className="text-[#13233a]">Data de nascimento:</strong>{" "}
+                      {selectedRequest.birth_date
+                        ? formatDate(selectedRequest.birth_date)
+                        : "Não informado"}
+                    </p>
+
+                    <p>
+                      <strong className="text-[#13233a]">Telefone/WhatsApp:</strong>{" "}
+                      {selectedRequest.phone || "Não informado"}
+                    </p>
+
+                    <p>
+                      <strong className="text-[#13233a]">E-mail:</strong>{" "}
+                      {selectedRequest.email}
+                    </p>
+
+                    <p>
+                      <strong className="text-[#13233a]">Semestre:</strong>{" "}
+                      {selectedRequest.semester || "Não informado"}
+                    </p>
+
+                    <p>
+                      <strong className="text-[#13233a]">Cidade/UF:</strong>{" "}
+                      {[selectedRequest.city, selectedRequest.state].filter(Boolean).join(" / ") ||
+                        "Não informado"}
+                    </p>
+
+                    <p className="md:col-span-2">
+                      <strong className="text-[#13233a]">Endereço:</strong>{" "}
+                      {selectedRequest.address || "Não informado"}
+                    </p>
+
+                    <p>
+                      <strong className="text-[#13233a]">CEP:</strong>{" "}
+                      {selectedRequest.zip_code || "Não informado"}
+                    </p>
+                  </div>
+                </section>
+
+                <section className="rounded-2xl border border-[#e8dccb] bg-white p-4">
+                  <h3 className="text-sm font-black uppercase tracking-[0.12em] text-[#13233a]">
+                    Declarações do Termo
+                  </h3>
+
+                  <div className="mt-4 space-y-3 text-sm leading-6 text-[#596579]">
+                    <p className="rounded-xl bg-[#f7f8fa] p-3">
+                      Declaro que este formulário constitui meu Termo de Adesão à
+                      Associação dos Acadêmicos do Curso de Direito – Turma de
+                      Formatura 2028 – AAD Direito 2028. Declaro, sob minha
+                      responsabilidade, que as informações prestadas são verdadeiras
+                      e correspondem à minha situação atual, bem como afirmo que li,
+                      compreendi e aceito o Estatuto Social da Associação.
+                    </p>
+
+                    <p className="rounded-xl bg-[#f7f8fa] p-3">
+                      Declaro ciência e concordância com as regras financeiras
+                      aplicáveis aos associados, incluindo contribuições mensais,
+                      taxas, contribuições extras e demais obrigações regularmente
+                      aprovadas pela Associação.
+                    </p>
+
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <p>
+                        <strong className="text-[#13233a]">Aceitou Estatuto:</strong>{" "}
+                        {formatBoolean(selectedRequest.accepted_statute)}
+                      </p>
+
+                      <p>
+                        <strong className="text-[#13233a]">
+                          Aceitou regras financeiras:
+                        </strong>{" "}
+                        {formatBoolean(selectedRequest.accepted_financial_rules)}
+                      </p>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="rounded-2xl border border-[#e8dccb] bg-white p-4">
+                  <h3 className="text-sm font-black uppercase tracking-[0.12em] text-[#13233a]">
+                    Observações e análise
+                  </h3>
+
+                  <div className="mt-4 space-y-3 text-sm leading-6 text-[#596579]">
+                    <div className="rounded-xl bg-[#f7f8fa] p-3">
+                      <strong className="text-[#13233a]">
+                        Observação do interessado:
+                      </strong>{" "}
+                      {selectedRequest.message || "Nenhuma observação informada."}
+                    </div>
+
+                    <div className="rounded-xl border border-[#e8dccb] bg-[#fffaf1] p-3">
+                      <strong className="text-[#13233a]">
+                        Análise da Associação:
+                      </strong>{" "}
+                      {selectedRequest.review_notes || "Nenhuma observação registrada."}
+                    </div>
+
+                    <div className="grid gap-3 md:grid-cols-3">
+                      <p>
+                        <strong className="text-[#13233a]">Situação:</strong>{" "}
+                        {formatStatus(selectedRequest.status)}
+                      </p>
+
+                      <p>
+                        <strong className="text-[#13233a]">Enviado em:</strong>{" "}
+                        {formatDate(selectedRequest.created_at)}
+                      </p>
+
+                      <p>
+                        <strong className="text-[#13233a]">Analisado em:</strong>{" "}
+                        {selectedRequest.reviewed_at
+                          ? formatDate(selectedRequest.reviewed_at)
+                          : "Não analisado"}
+                      </p>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </ProtectedDashboard>
   );
