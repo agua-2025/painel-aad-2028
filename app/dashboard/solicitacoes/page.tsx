@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
+import { registerAuditLog } from "@/lib/audit";
 
 type MembershipRequest = {
   id: string;
@@ -368,9 +369,29 @@ export default function SolicitacoesPage() {
       return;
     }
 
-    setSuccessMessage("Termo de Adesão aprovado e associado cadastrado com sucesso.");
-    setProcessingId(null);
-    await loadRequests();
+      await registerAuditLog({
+    supabase,
+    action: "approve_membership_request",
+    module: "termos_adesao",
+    tableName: "membership_requests",
+    recordId: request.id,
+    description: `Aprovou o Termo de Adesão de ${request.full_name} e cadastrou/atualizou o associado.`,
+    oldData: {
+      status: request.status,
+      review_notes: request.review_notes,
+    },
+    newData: {
+      status: "aprovada",
+      review_notes: "Solicitação aprovada e associado cadastrado no sistema.",
+      full_name: request.full_name,
+      email: request.email,
+      cpf: request.cpf,
+    },
+  });
+
+  setSuccessMessage("Termo de Adesão aprovado e associado cadastrado com sucesso.");
+  setProcessingId(null);
+  await loadRequests();
   }
 
   async function markAsPending(request: MembershipRequest) {
@@ -402,7 +423,27 @@ export default function SolicitacoesPage() {
       return;
     }
 
-    setSuccessMessage("Solicitação marcada com pendência.");
+await registerAuditLog({
+  supabase,
+  action: "mark_membership_request_pending",
+  module: "termos_adesao",
+  tableName: "membership_requests",
+  recordId: request.id,
+  description: `Marcou o Termo de Adesão de ${request.full_name} com pendência.`,
+  oldData: {
+    status: request.status,
+    review_notes: request.review_notes,
+  },
+  newData: {
+    status: "com_pendencia",
+    review_notes: note.trim(),
+    full_name: request.full_name,
+    email: request.email,
+    cpf: request.cpf,
+  },
+});
+
+    setSuccessMessage("Termo de Adesão marcado com pendência.");
     setProcessingId(null);
     await loadRequests();
   }
@@ -441,6 +482,46 @@ export default function SolicitacoesPage() {
       setProcessingId(null);
       return;
     }
+
+await registerAuditLog({
+  supabase,
+  action: "reject_membership_request",
+  module: "termos_adesao",
+  tableName: "membership_requests",
+  recordId: request.id,
+  description: `Rejeitou o Termo de Adesão de ${request.full_name}.`,
+  oldData: {
+    status: request.status,
+    review_notes: request.review_notes,
+  },
+  newData: {
+    status: "rejeitada",
+    review_notes: note.trim(),
+    full_name: request.full_name,
+    email: request.email,
+    cpf: request.cpf,
+  },
+});
+
+await registerAuditLog({
+  supabase,
+  action: "reject_membership_request",
+  module: "termos_adesao",
+  tableName: "membership_requests",
+  recordId: request.id,
+  description: `Rejeitou o Termo de Adesão de ${request.full_name}.`,
+  oldData: {
+    status: request.status,
+    review_notes: request.review_notes,
+  },
+  newData: {
+    status: "rejeitada",
+    review_notes: note.trim(),
+    full_name: request.full_name,
+    email: request.email,
+    cpf: request.cpf,
+  },
+});
 
     setSuccessMessage("Termo de Adesão rejeitado com registro do motivo.");
     setProcessingId(null);
