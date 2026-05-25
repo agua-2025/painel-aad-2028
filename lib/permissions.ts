@@ -13,6 +13,7 @@ export type PermissionAction = "read" | "create" | "update" | "delete" | "approv
 export type DashboardModule =
   | "inicio"
   | "associados"
+  | "auditoria"
   | "solicitacoes"
   | "avisos"
   | "comunicacoes"
@@ -42,6 +43,7 @@ const dashboardRoles: AppRole[] = [
 
 const moduleByPath: { path: string; module: DashboardModule }[] = [
   { path: "/dashboard/associados", module: "associados" },
+  { path: "/dashboard/auditoria", module: "auditoria" },
   { path: "/dashboard/solicitacoes", module: "solicitacoes" },
   { path: "/dashboard/avisos", module: "avisos" },
   { path: "/dashboard/comunicacoes", module: "comunicacoes" },
@@ -62,9 +64,10 @@ const moduleByPath: { path: string; module: DashboardModule }[] = [
 ];
 
 const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
-  administrador: [
+    administrador: [
     "inicio",
     "associados",
+    "auditoria",
     "solicitacoes",
     "avisos",
     "comunicacoes",
@@ -87,6 +90,7 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
   presidente: [
     "inicio",
     "associados",
+    "auditoria",
     "solicitacoes",
     "avisos",
     "comunicacoes",
@@ -109,6 +113,7 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
   vice_presidente: [
     "inicio",
     "associados",
+    "auditoria",
     "solicitacoes",
     "avisos",
     "comunicacoes",
@@ -128,7 +133,9 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
 
   secretaria: [
     "inicio",
+    "auditoria",
     "associados",
+    "auditoria",
     "solicitacoes",
     "avisos",
     "comunicacoes",
@@ -137,6 +144,7 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
 
   tesoureira: [
     "inicio",
+    "auditoria",
     "comunicacoes",
     "financeiro",
     "mensalidades",
