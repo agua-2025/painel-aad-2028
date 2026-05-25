@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
 import { useDashboardPermissions } from "@/lib/useDashboardPermissions";
+import { registerAuditLog } from "@/lib/audit";
 
 type AssociateData = {
   full_name: string;
@@ -420,160 +421,201 @@ export default function DashboardPagamentosPage() {
       .eq("id", report.id);
   }
 
-  async function approveMonthlyReport(report: PaymentReport) {
-    const fee = getMonthlyFee(report);
+async function approveMonthlyReport(report: PaymentReport) {
+  const fee = getMonthlyFee(report);
 
-    if (!fee) {
-      setMessage("Mensalidade vinculada ao informe não foi localizada.");
-      return;
-    }
-
-    const supabase = createClient();
-    const profileId = await getCurrentProfileId();
-
-    const calculated = calculateMonthlyAmountDueAtDate(report);
-    const paidAmountBefore = Number(fee.paid_amount ?? 0);
-    const reportAmount = Number(report.amount ?? 0);
-    const paidAmountAfter = Number((paidAmountBefore + reportAmount).toFixed(2));
-
-    const nextStatus =
-      paidAmountAfter >= calculated.totalDue ? "paga" : "parcialmente_paga";
-
-    const { error: paymentError } = await supabase.from("payments").insert({
-      associate_id: report.associate_id,
-      monthly_fee_id: report.monthly_fee_id,
-      extra_contribution_item_id: null,
-      amount: reportAmount,
-      paid_at: report.paid_at,
-      payment_method: report.payment_method,
-      reference: report.reference,
-      notes:
-        forms[report.id]?.review_notes?.trim() ||
-        report.notes ||
-        "Baixa realizada a partir de informe de pagamento do associado.",
-    });
-
-    if (paymentError) {
-      setMessage(paymentError.message || "Não foi possível registrar o pagamento.");
-      return;
-    }
-
-    const { error: feeError } = await supabase
-      .from("monthly_fees")
-      .update({
-        late_fee_amount: calculated.lateFeeAmount,
-        interest_amount: calculated.interestAmount,
-        total_amount: calculated.totalDue,
-        paid_amount: paidAmountAfter,
-        paid_at: report.paid_at,
-        status: nextStatus,
-      })
-      .eq("id", report.monthly_fee_id);
-
-    if (feeError) {
-      setMessage(
-        "O pagamento foi criado, mas houve erro ao atualizar a mensalidade: " +
-          feeError.message
-      );
-      return;
-    }
-
-    const { error: reportError } = await markReportAsApproved(report, profileId);
-
-    if (reportError) {
-      setMessage(
-        "A baixa foi realizada, mas houve erro ao atualizar o informe: " +
-          reportError.message
-      );
-    }
+  if (!fee) {
+    setMessage("Mensalidade vinculada ao informe não foi localizada.");
+    return false;
   }
 
-  async function approveExtraReport(report: PaymentReport) {
-    const item = getExtraItem(report);
+  const supabase = createClient();
+  const profileId = await getCurrentProfileId();
 
-    if (!item) {
-      setMessage("Contribuição extra vinculada ao informe não foi localizada.");
-      return;
-    }
+  const calculated = calculateMonthlyAmountDueAtDate(report);
+  const paidAmountBefore = Number(fee.paid_amount ?? 0);
+  const reportAmount = Number(report.amount ?? 0);
+  const paidAmountAfter = Number((paidAmountBefore + reportAmount).toFixed(2));
 
-    const supabase = createClient();
-    const profileId = await getCurrentProfileId();
+  const nextStatus =
+    paidAmountAfter >= calculated.totalDue ? "paga" : "parcialmente_paga";
 
-    const reportAmount = Number(report.amount ?? 0);
-    const paidAmountBefore = Number(item.paid_amount ?? 0);
-    const paidAmountAfter = Number((paidAmountBefore + reportAmount).toFixed(2));
-    const totalDue = Number(item.amount ?? 0);
+  const { error: paymentError } = await supabase.from("payments").insert({
+    associate_id: report.associate_id,
+    monthly_fee_id: report.monthly_fee_id,
+    extra_contribution_item_id: null,
+    amount: reportAmount,
+    paid_at: report.paid_at,
+    payment_method: report.payment_method,
+    reference: report.reference,
+    notes:
+      forms[report.id]?.review_notes?.trim() ||
+      report.notes ||
+      "Baixa realizada a partir de informe de pagamento do associado.",
+  });
 
-    const nextStatus =
-      paidAmountAfter >= totalDue ? "paga" : "parcialmente_paga";
-
-    const { error: paymentError } = await supabase.from("payments").insert({
-      associate_id: report.associate_id,
-      monthly_fee_id: null,
-      extra_contribution_item_id: report.extra_contribution_item_id,
-      amount: reportAmount,
-      paid_at: report.paid_at,
-      payment_method: report.payment_method,
-      reference: report.reference,
-      notes:
-        forms[report.id]?.review_notes?.trim() ||
-        report.notes ||
-        "Baixa realizada a partir de informe de pagamento de contribuição extra.",
-    });
-
-    if (paymentError) {
-      setMessage(paymentError.message || "Não foi possível registrar o pagamento.");
-      return;
-    }
-
-    const { error: itemError } = await supabase
-      .from("extra_contribution_items")
-      .update({
-        paid_amount: paidAmountAfter,
-        status: nextStatus,
-      })
-      .eq("id", report.extra_contribution_item_id);
-
-    if (itemError) {
-      setMessage(
-        "O pagamento foi criado, mas houve erro ao atualizar a contribuição extra: " +
-          itemError.message
-      );
-      return;
-    }
-
-    const { error: reportError } = await markReportAsApproved(report, profileId);
-
-    if (reportError) {
-      setMessage(
-        "A baixa foi realizada, mas houve erro ao atualizar o informe: " +
-          reportError.message
-      );
-    }
+  if (paymentError) {
+    setMessage(paymentError.message || "Não foi possível registrar o pagamento.");
+    return false;
   }
+
+  const { error: feeError } = await supabase
+    .from("monthly_fees")
+    .update({
+      late_fee_amount: calculated.lateFeeAmount,
+      interest_amount: calculated.interestAmount,
+      total_amount: calculated.totalDue,
+      paid_amount: paidAmountAfter,
+      paid_at: report.paid_at,
+      status: nextStatus,
+    })
+    .eq("id", report.monthly_fee_id);
+
+  if (feeError) {
+    setMessage(
+      "O pagamento foi criado, mas houve erro ao atualizar a mensalidade: " +
+        feeError.message
+    );
+    return false;
+  }
+
+  const { error: reportError } = await markReportAsApproved(report, profileId);
+
+  if (reportError) {
+    setMessage(
+      "A baixa foi realizada, mas houve erro ao atualizar o informe: " +
+        reportError.message
+    );
+    return false;
+  }
+
+  return true;
+}
+
+async function approveExtraReport(report: PaymentReport) {
+  const item = getExtraItem(report);
+
+  if (!item) {
+    setMessage("Contribuição extra vinculada ao informe não foi localizada.");
+    return false;
+  }
+
+  const supabase = createClient();
+  const profileId = await getCurrentProfileId();
+
+  const reportAmount = Number(report.amount ?? 0);
+  const paidAmountBefore = Number(item.paid_amount ?? 0);
+  const paidAmountAfter = Number((paidAmountBefore + reportAmount).toFixed(2));
+  const totalDue = Number(item.amount ?? 0);
+
+  const nextStatus =
+    paidAmountAfter >= totalDue ? "paga" : "parcialmente_paga";
+
+  const { error: paymentError } = await supabase.from("payments").insert({
+    associate_id: report.associate_id,
+    monthly_fee_id: null,
+    extra_contribution_item_id: report.extra_contribution_item_id,
+    amount: reportAmount,
+    paid_at: report.paid_at,
+    payment_method: report.payment_method,
+    reference: report.reference,
+    notes:
+      forms[report.id]?.review_notes?.trim() ||
+      report.notes ||
+      "Baixa realizada a partir de informe de pagamento de contribuição extra.",
+  });
+
+  if (paymentError) {
+    setMessage(paymentError.message || "Não foi possível registrar o pagamento.");
+    return false;
+  }
+
+  const { error: itemError } = await supabase
+    .from("extra_contribution_items")
+    .update({
+      paid_amount: paidAmountAfter,
+      status: nextStatus,
+    })
+    .eq("id", report.extra_contribution_item_id);
+
+  if (itemError) {
+    setMessage(
+      "O pagamento foi criado, mas houve erro ao atualizar a contribuição extra: " +
+        itemError.message
+    );
+    return false;
+  }
+
+  const { error: reportError } = await markReportAsApproved(report, profileId);
+
+  if (reportError) {
+    setMessage(
+      "A baixa foi realizada, mas houve erro ao atualizar o informe: " +
+        reportError.message
+    );
+    return false;
+  }
+
+  return true;
+}
 
   async function approveReport(report: PaymentReport) {
-    if (!permissions.canApprove) {
-      setMessage("Seu perfil não tem permissão para aprovar informes de pagamento.");
-      return;
-    }
+  if (!permissions.canApprove) {
+    setMessage("Seu perfil não tem permissão para aprovar informes de pagamento.");
+    return;
+  }
 
-    if (report.status !== "pendente") {
-      setMessage("Este informe já foi analisado.");
-      return;
-    }
+  if (report.status !== "pendente") {
+    setMessage("Este informe já foi analisado.");
+    return;
+  }
 
-    setProcessingId(report.id);
-    setMessage("");
+  setProcessingId(report.id);
+  setMessage("");
 
-    if (getOriginType(report) === "extra") {
-      await approveExtraReport(report);
-    } else {
-      await approveMonthlyReport(report);
-    }
+  const approved =
+    getOriginType(report) === "extra"
+      ? await approveExtraReport(report)
+      : await approveMonthlyReport(report);
 
-    setProcessingId(null);
-    await loadReports();
+  if (approved) {
+    const supabase = createClient();
+    const associate = getAssociate(report);
+
+    await registerAuditLog({
+      supabase,
+      action: "approve_payment_report",
+      module: "informes_pagamento",
+      tableName: "payment_reports",
+      recordId: report.id,
+      description: `Aprovou informe de pagamento de ${
+        associate?.full_name || associate?.email || "associado não identificado"
+      }.`,
+      oldData: {
+        status: report.status,
+        review_notes: report.review_notes,
+        amount: report.amount,
+        paid_at: report.paid_at,
+        origin_type: getOriginType(report),
+        origin_label: getOriginLabel(report),
+      },
+      newData: {
+        status: "aprovado",
+        review_notes:
+          forms[report.id]?.review_notes?.trim() ||
+          "Pagamento conferido e aprovado pela Tesouraria.",
+        amount: report.amount,
+        paid_at: report.paid_at,
+        payment_method: report.payment_method,
+        reference: report.reference,
+        origin_type: getOriginType(report),
+        origin_label: getOriginLabel(report),
+      },
+    });
+  }
+
+  setProcessingId(null);
+  await loadReports();
   }
 
   async function rejectReport(report: PaymentReport) {
@@ -611,13 +653,44 @@ export default function DashboardPagamentosPage() {
       .eq("id", report.id);
 
     if (error) {
-      setMessage(error.message || "Não foi possível rejeitar o informe.");
-      setProcessingId(null);
-      return;
-    }
+  setMessage(error.message || "Não foi possível rejeitar o informe.");
+  setProcessingId(null);
+  return;
+}
 
-    setProcessingId(null);
-    await loadReports();
+const associate = getAssociate(report);
+
+await registerAuditLog({
+  supabase,
+  action: "reject_payment_report",
+  module: "informes_pagamento",
+  tableName: "payment_reports",
+  recordId: report.id,
+  description: `Rejeitou informe de pagamento de ${
+    associate?.full_name || associate?.email || "associado não identificado"
+  }.`,
+  oldData: {
+    status: report.status,
+    review_notes: report.review_notes,
+    amount: report.amount,
+    paid_at: report.paid_at,
+    origin_type: getOriginType(report),
+    origin_label: getOriginLabel(report),
+  },
+  newData: {
+    status: "rejeitado",
+    review_notes: reviewNotes,
+    amount: report.amount,
+    paid_at: report.paid_at,
+    payment_method: report.payment_method,
+    reference: report.reference,
+    origin_type: getOriginType(report),
+    origin_label: getOriginLabel(report),
+  },
+});
+
+setProcessingId(null);
+await loadReports();
   }
 
   return (

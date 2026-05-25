@@ -33,6 +33,7 @@ function formatDateTime(value: string) {
 function formatModule(value: string | null) {
   const labels: Record<string, string> = {
     termos_adesao: "Termos de Adesão",
+    informes_pagamento: "Informes de Pagamento",
   };
 
   if (!value) return "Não informado";
@@ -45,6 +46,8 @@ function formatAction(value: string) {
     approve_membership_request: "Aprovou termo",
     mark_membership_request_pending: "Marcou pendência",
     reject_membership_request: "Rejeitou termo",
+    approve_payment_report: "Aprovou informe",
+    reject_payment_report: "Rejeitou informe",
   };
 
   return labels[value] || value.replaceAll("_", " ");
