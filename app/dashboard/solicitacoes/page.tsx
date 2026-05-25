@@ -503,26 +503,6 @@ await registerAuditLog({
   },
 });
 
-await registerAuditLog({
-  supabase,
-  action: "reject_membership_request",
-  module: "termos_adesao",
-  tableName: "membership_requests",
-  recordId: request.id,
-  description: `Rejeitou o Termo de Adesão de ${request.full_name}.`,
-  oldData: {
-    status: request.status,
-    review_notes: request.review_notes,
-  },
-  newData: {
-    status: "rejeitada",
-    review_notes: note.trim(),
-    full_name: request.full_name,
-    email: request.email,
-    cpf: request.cpf,
-  },
-});
-
     setSuccessMessage("Termo de Adesão rejeitado com registro do motivo.");
     setProcessingId(null);
     await loadRequests();
