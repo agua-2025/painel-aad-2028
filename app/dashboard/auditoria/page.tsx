@@ -34,6 +34,7 @@ function formatModule(value: string | null) {
   const labels: Record<string, string> = {
     termos_adesao: "Termos de Adesão",
     informes_pagamento: "Informes de Pagamento",
+    despesas: "Despesas",
   };
 
   if (!value) return "Não informado";
@@ -48,6 +49,10 @@ function formatAction(value: string) {
     reject_membership_request: "Rejeitou termo",
     approve_payment_report: "Aprovou informe",
     reject_payment_report: "Rejeitou informe",
+    create_expense: "Criou despesa",
+    attach_expense_receipt: "Anexou comprovante",
+    mark_expense_paid: "Marcou despesa paga",
+    cancel_expense: "Cancelou despesa",
   };
 
   return labels[value] || value.replaceAll("_", " ");

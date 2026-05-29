@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
 import { useDashboardPermissions } from "@/lib/useDashboardPermissions";
+import { registerAuditLog } from "@/lib/audit";
 
 type Expense = {
   id: string;
@@ -283,11 +284,27 @@ export default function DashboardDespesasPage() {
       .eq("id", expenseId);
 
     if (updateError) {
-      throw new Error(
-        updateError.message || "O arquivo foi enviado, mas não foi vinculado à despesa."
-      );
-    }
+    throw new Error(
+      updateError.message || "O arquivo foi enviado, mas não foi vinculado à despesa."
+    );
   }
+
+  await registerAuditLog({
+    supabase,
+    action: "attach_expense_receipt",
+    module: "despesas",
+    tableName: "expenses",
+    recordId: expenseId,
+    description: "Anexou comprovante à despesa.",
+    oldData: null,
+    newData: {
+      receipt_path: filePath,
+      receipt_filename: file.name,
+      receipt_mime_type: file.type,
+      receipt_size: file.size,
+    },
+  });
+}
 
   async function openReceipt(expense: Expense) {
     if (!expense.receipt_path) {
@@ -422,6 +439,21 @@ export default function DashboardDespesasPage() {
       return;
     }
 
+    await registerAuditLog({
+      supabase,
+      action: "create_expense",
+      module: "despesas",
+      tableName: "expenses",
+      recordId: insertedExpense.id,
+      description: `Registrou despesa: ${payload.description}.`,
+      oldData: null,
+      newData: {
+        ...payload,
+        id: insertedExpense.id,
+        has_receipt: Boolean(receiptFile),
+      },
+    });
+
     try {
       if (receiptFile) {
         await uploadReceipt(insertedExpense.id, receiptFile);
@@ -516,48 +548,100 @@ export default function DashboardDespesasPage() {
       return;
     }
 
+    await registerAuditLog({
+      supabase,
+      action: "mark_expense_paid",
+      module: "despesas",
+      tableName: "expenses",
+      recordId: expense.id,
+      description: `Marcou despesa como paga: ${expense.description}.`,
+      oldData: {
+        status: expense.status,
+        paid_at: expense.paid_at,
+        payment_method: expense.payment_method,
+        amount: expense.amount,
+        description: expense.description,
+        category: expense.category,
+        payee_name: expense.payee_name,
+      },
+      newData: {
+        status: "paga",
+        paid_at: expense.paid_at ?? getToday(),
+        payment_method: expense.payment_method ?? "pix",
+        amount: expense.amount,
+        description: expense.description,
+        category: expense.category,
+        payee_name: expense.payee_name,
+      },
+    });
+
+
     setSuccess("Despesa marcada como paga.");
     await loadExpenses();
   }
 
   async function cancelExpense(expense: Expense) {
-    setMessage("");
-    setSuccess("");
+  setMessage("");
+  setSuccess("");
 
-    if (!permissions.canUpdate) {
-      setMessage("Seu perfil pode consultar despesas, mas não pode cancelar despesas.");
-      return;
-    }
-
-    const confirmed = window.confirm(
-      "Deseja cancelar esta despesa? O registro ficará no histórico."
-    );
-
-    if (!confirmed) return;
-
-    const supabase = createClient();
-
-    const { error } = await supabase
-      .from("expenses")
-      .update({
-        status: "cancelada",
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", expense.id);
-
-    if (error) {
-      console.error("Erro ao cancelar despesa:", error);
-      setMessage(
-        error.message?.includes("mês já está fechado") || error.message?.includes("mes ja esta fechado")
-          ? error.message
-          : "Não foi possível cancelar a despesa. Verifique se seu perfil tem permissão para essa ação."
-      );
-      return;
-    }
-
-    setSuccess("Despesa cancelada.");
-    await loadExpenses();
+  if (!permissions.canUpdate) {
+    setMessage("Seu perfil pode consultar despesas, mas não pode cancelar despesas.");
+    return;
   }
+
+  const confirmed = window.confirm(
+    "Deseja cancelar esta despesa? O registro ficará no histórico."
+  );
+
+  if (!confirmed) return;
+
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .from("expenses")
+    .update({
+      status: "cancelada",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", expense.id);
+
+  if (error) {
+    console.error("Erro ao cancelar despesa:", error);
+    setMessage(
+      error.message?.includes("mês já está fechado") || error.message?.includes("mes ja esta fechado")
+        ? error.message
+        : "Não foi possível cancelar a despesa. Verifique se seu perfil tem permissão para essa ação."
+    );
+    return;
+  }
+
+  await registerAuditLog({
+    supabase,
+    action: "cancel_expense",
+    module: "despesas",
+    tableName: "expenses",
+    recordId: expense.id,
+    description: `Cancelou despesa: ${expense.description}.`,
+    oldData: {
+      status: expense.status,
+      paid_at: expense.paid_at,
+      amount: expense.amount,
+      description: expense.description,
+      category: expense.category,
+      payee_name: expense.payee_name,
+    },
+    newData: {
+      status: "cancelada",
+      amount: expense.amount,
+      description: expense.description,
+      category: expense.category,
+      payee_name: expense.payee_name,
+    },
+  });
+
+  setSuccess("Despesa cancelada.");
+  await loadExpenses();
+}
 
   return (
     <ProtectedDashboard>
