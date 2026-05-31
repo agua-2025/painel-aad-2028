@@ -38,6 +38,7 @@ function formatModule(value: string | null) {
     receitas_avulsas: "Receitas Avulsas",
     mensalidades: "Mensalidades",
     contribuicoes_extras: "Contribuições Extras",
+    fechamento_mensal: "Fechamento Mensal",
   };
 
   if (!value) return "Não informado";
@@ -61,6 +62,9 @@ function formatAction(value: string) {
     generate_monthly_fees: "Gerou mensalidades",
     manual_monthly_payment: "Baixa manual de mensalidade",
     create_extra_contribution: "Criou contribuição extra",
+    close_monthly_period: "Fechou mês",
+    update_monthly_closing: "Atualizou fechamento",
+    reopen_monthly_period: "Reabriu mês",
   };
 
   return labels[value] || value.replaceAll("_", " ");

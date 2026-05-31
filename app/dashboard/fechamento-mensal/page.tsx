@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
+import { registerAuditLog } from "@/lib/audit";
 
 type Payment = {
   id: string;
@@ -470,14 +471,56 @@ export default function DashboardFechamentoMensalPage() {
       .upsert(payload, { onConflict: "month_ref" });
 
     if (error) {
-      setMessage(error.message || "Não foi possível fechar o mês.");
-      setSaving(false);
-      return;
-    }
+  setMessage(error.message || "Não foi possível fechar o mês.");
+  setSaving(false);
+  return;
+}
 
-    setSuccess("Fechamento mensal registrado com sucesso.");
-    setSaving(false);
-    await loadData();
+await registerAuditLog({
+  supabase,
+  action: selectedClosing ? "update_monthly_closing" : "close_monthly_period",
+  module: "fechamento_mensal",
+  tableName: "monthly_closings",
+  recordId: selectedClosing?.id ?? monthToDate(month),
+  description: selectedClosing
+    ? `Atualizou o fechamento mensal de ${formatMonth(month)}.`
+    : `Fechou o mês de ${formatMonth(month)}.`,
+  oldData: selectedClosing
+    ? {
+        status: selectedClosing.status,
+        opening_balance: selectedClosing.opening_balance,
+        total_entries: selectedClosing.total_entries,
+        total_exits: selectedClosing.total_exits,
+        period_result: selectedClosing.period_result,
+        final_balance: selectedClosing.final_balance,
+        bank_balance: selectedClosing.bank_balance,
+        difference_amount: selectedClosing.difference_amount,
+        checked_with_bank_statement: selectedClosing.checked_with_bank_statement,
+        has_pending_receipts: selectedClosing.has_pending_receipts,
+        notes: selectedClosing.notes,
+      }
+    : null,
+  newData: {
+    month_ref: payload.month_ref,
+    status: payload.status,
+    opening_balance: payload.opening_balance,
+    total_entries: payload.total_entries,
+    total_exits: payload.total_exits,
+    period_result: payload.period_result,
+    final_balance: payload.final_balance,
+    bank_balance: payload.bank_balance,
+    difference_amount: payload.difference_amount,
+    checked_with_bank_statement: payload.checked_with_bank_statement,
+    has_pending_receipts: payload.has_pending_receipts,
+    notes: payload.notes,
+    closed_by: payload.closed_by,
+    closed_at: payload.closed_at,
+  },
+});
+
+setSuccess("Fechamento mensal registrado com sucesso.");
+setSaving(false);
+await loadData();
   }
 
   async function reopenMonth() {
@@ -522,14 +565,45 @@ export default function DashboardFechamentoMensalPage() {
       .eq("id", selectedClosing.id);
 
     if (error) {
-      setMessage(error.message || "Não foi possível reabrir o mês.");
-      setSaving(false);
-      return;
-    }
+  setMessage(error.message || "Não foi possível reabrir o mês.");
+  setSaving(false);
+  return;
+}
 
-    setSuccess("Mês reaberto com justificativa registrada.");
-    setSaving(false);
-    await loadData();
+await registerAuditLog({
+  supabase,
+  action: "reopen_monthly_period",
+  module: "fechamento_mensal",
+  tableName: "monthly_closings",
+  recordId: selectedClosing.id,
+  description: `Reabriu o mês de ${formatMonth(month)}.`,
+  oldData: {
+    status: selectedClosing.status,
+    month_ref: selectedClosing.month_ref,
+    opening_balance: selectedClosing.opening_balance,
+    total_entries: selectedClosing.total_entries,
+    total_exits: selectedClosing.total_exits,
+    period_result: selectedClosing.period_result,
+    final_balance: selectedClosing.final_balance,
+    bank_balance: selectedClosing.bank_balance,
+    difference_amount: selectedClosing.difference_amount,
+    notes: selectedClosing.notes,
+    closed_at: selectedClosing.closed_at,
+    reopened_at: selectedClosing.reopened_at,
+    reopen_reason: selectedClosing.reopen_reason,
+  },
+  newData: {
+    status: "reaberto",
+    month_ref: selectedClosing.month_ref,
+    reopened_by: profileId,
+    reopened_at: new Date().toISOString(),
+    reopen_reason: trimmedReason,
+  },
+});
+
+setSuccess("Mês reaberto com justificativa registrada.");
+setSaving(false);
+await loadData();
   }
 
   return (
