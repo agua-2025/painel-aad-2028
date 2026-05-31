@@ -35,6 +35,7 @@ function formatModule(value: string | null) {
     termos_adesao: "Termos de Adesão",
     informes_pagamento: "Informes de Pagamento",
     despesas: "Despesas",
+    receitas_avulsas: "Receitas Avulsas",
   };
 
   if (!value) return "Não informado";
@@ -53,6 +54,8 @@ function formatAction(value: string) {
     attach_expense_receipt: "Anexou comprovante",
     mark_expense_paid: "Marcou despesa paga",
     cancel_expense: "Cancelou despesa",
+    create_other_revenue: "Criou receita avulsa",
+    cancel_other_revenue: "Cancelou receita avulsa",
   };
 
   return labels[value] || value.replaceAll("_", " ");

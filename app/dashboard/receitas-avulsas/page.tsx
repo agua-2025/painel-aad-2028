@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
 import { useDashboardPermissions } from "@/lib/useDashboardPermissions";
+import { registerAuditLog } from "@/lib/audit";
 
 type OtherRevenue = {
   id: string;
@@ -237,7 +238,7 @@ export default function DashboardReceitasAvulsasPage() {
     const profileId = await getCurrentProfileId();
     const supabase = createClient();
 
-    const { error } = await supabase.from("other_revenues").insert({
+    const payload = {
       received_at: form.received_at,
       amount,
       category: form.category,
@@ -248,7 +249,13 @@ export default function DashboardReceitasAvulsasPage() {
       notes: form.notes.trim() || null,
       status: "confirmada",
       created_by: profileId,
-    });
+    };
+
+    const { data: insertedRevenue, error } = await supabase
+      .from("other_revenues")
+      .insert(payload)
+      .select("id")
+      .single();
 
     if (error) {
       console.error("Erro ao registrar receita avulsa:", error);
@@ -256,6 +263,20 @@ export default function DashboardReceitasAvulsasPage() {
       setSaving(false);
       return;
     }
+
+    await registerAuditLog({
+      supabase,
+      action: "create_other_revenue",
+      module: "receitas_avulsas",
+      tableName: "other_revenues",
+      recordId: insertedRevenue?.id ?? null,
+      description: `Registrou receita avulsa: ${payload.description}.`,
+      oldData: null,
+      newData: {
+        ...payload,
+        id: insertedRevenue?.id ?? null,
+      },
+    });
 
     setSuccessMessage("Receita avulsa registrada com sucesso.");
 
@@ -304,6 +325,37 @@ export default function DashboardReceitasAvulsasPage() {
       setMessage("Não foi possível cancelar a receita avulsa. Verifique se seu perfil tem permissão para essa ação.");
       return;
     }
+
+    await registerAuditLog({
+      supabase,
+      action: "cancel_other_revenue",
+      module: "receitas_avulsas",
+      tableName: "other_revenues",
+      recordId: revenue.id,
+      description: `Cancelou receita avulsa: ${revenue.description}.`,
+      oldData: {
+        status: revenue.status,
+        received_at: revenue.received_at,
+        amount: revenue.amount,
+        category: revenue.category,
+        payer_name: revenue.payer_name,
+        description: revenue.description,
+        payment_method: revenue.payment_method,
+        reference: revenue.reference,
+        notes: revenue.notes,
+      },
+      newData: {
+        status: "cancelada",
+        received_at: revenue.received_at,
+        amount: revenue.amount,
+        category: revenue.category,
+        payer_name: revenue.payer_name,
+        description: revenue.description,
+        payment_method: revenue.payment_method,
+        reference: revenue.reference,
+        notes: revenue.notes,
+      },
+    });
 
     setSuccessMessage("Receita avulsa cancelada.");
     await loadRevenues();
