@@ -39,6 +39,7 @@ function formatModule(value: string | null) {
     mensalidades: "Mensalidades",
     contribuicoes_extras: "Contribuições Extras",
     fechamento_mensal: "Fechamento Mensal",
+    saldos_caixa: "Saldos do Caixa",
   };
 
   if (!value) return "Não informado";
@@ -65,6 +66,8 @@ function formatAction(value: string) {
     close_monthly_period: "Fechou mês",
     update_monthly_closing: "Atualizou fechamento",
     reopen_monthly_period: "Reabriu mês",
+    create_cash_monthly_balance: "Cadastrou saldo inicial",
+    update_cash_monthly_balance: "Atualizou saldo inicial",
   };
 
   return labels[value] || value.replaceAll("_", " ");

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
 import { useDashboardPermissions } from "@/lib/useDashboardPermissions";
+import { registerAuditLog } from "@/lib/audit";
 
 type CashMonthlyBalance = {
   id: string;
@@ -193,15 +194,44 @@ export default function DashboardSaldosCaixaPage() {
       .upsert(payload, { onConflict: "month_ref" });
 
     if (error) {
-      console.error("Erro ao salvar saldo inicial:", error);
-      setMessage("Não foi possível salvar o saldo inicial. Verifique se seu perfil tem permissão para essa ação.");
-      setSaving(false);
-      return;
-    }
-
-    setSuccessMessage("Saldo inicial salvo com sucesso.");
+    console.error("Erro ao salvar saldo inicial:", error);
+    setMessage("Não foi possível salvar o saldo inicial. Verifique se seu perfil tem permissão para essa ação.");
     setSaving(false);
-    await loadBalances();
+    return;
+  }
+
+  await registerAuditLog({
+    supabase,
+    action: selectedBalance
+      ? "update_cash_monthly_balance"
+      : "create_cash_monthly_balance",
+    module: "saldos_caixa",
+    tableName: "cash_monthly_balances",
+    recordId: selectedBalance?.id ?? payload.month_ref,
+    description: selectedBalance
+      ? `Atualizou saldo inicial de ${formatMonth(payload.month_ref)}.`
+      : `Cadastrou saldo inicial de ${formatMonth(payload.month_ref)}.`,
+    oldData: selectedBalance
+      ? {
+          id: selectedBalance.id,
+          month_ref: selectedBalance.month_ref,
+          opening_balance: selectedBalance.opening_balance,
+          notes: selectedBalance.notes,
+          updated_at: selectedBalance.updated_at,
+        }
+      : null,
+    newData: {
+      month_ref: payload.month_ref,
+      opening_balance: payload.opening_balance,
+      notes: payload.notes,
+      created_by: payload.created_by,
+      updated_at: payload.updated_at,
+    },
+  });
+
+  setSuccessMessage("Saldo inicial salvo com sucesso.");
+  setSaving(false);
+  await loadBalances();
   }
 
   return (
