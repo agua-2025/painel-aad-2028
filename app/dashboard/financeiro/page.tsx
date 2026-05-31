@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
 import { useDashboardPermissions } from "@/lib/useDashboardPermissions";
+import { registerAuditLog } from "@/lib/audit";
 
 type FinancialSetting = {
   id: string;
@@ -136,7 +137,7 @@ export default function DashboardFinanceiroPage() {
       profileId = profile?.id ?? null;
     }
 
-    const { error } = await supabase.from("financial_settings").insert({
+    const payload = {
       title: form.title.trim(),
       start_date: form.start_date,
       monthly_fee_amount: monthlyFee,
@@ -152,7 +153,13 @@ export default function DashboardFinanceiroPage() {
       approved_by: profileId,
       approved_at: new Date().toISOString(),
       notes: form.notes.trim() || null,
-    });
+    };
+
+    const { data: insertedSetting, error } = await supabase
+      .from("financial_settings")
+      .insert(payload)
+      .select("id")
+      .single();
 
     if (error) {
       console.error("Erro ao salvar regra financeira:", error);
@@ -160,6 +167,20 @@ export default function DashboardFinanceiroPage() {
       setSaving(false);
       return;
     }
+
+    await registerAuditLog({
+      supabase,
+      action: "create_financial_setting",
+      module: "regras_financeiras",
+      tableName: "financial_settings",
+      recordId: insertedSetting?.id ?? null,
+      description: `Criou regra financeira: ${payload.title}.`,
+      oldData: null,
+      newData: {
+        ...payload,
+        id: insertedSetting?.id ?? null,
+      },
+    });
 
     setMessage("Regra financeira salva com sucesso.");
     setSaving(false);

@@ -40,6 +40,7 @@ function formatModule(value: string | null) {
     contribuicoes_extras: "Contribuições Extras",
     fechamento_mensal: "Fechamento Mensal",
     saldos_caixa: "Saldos do Caixa",
+    regras_financeiras: "Regras Financeiras",
   };
 
   if (!value) return "Não informado";
@@ -68,6 +69,7 @@ function formatAction(value: string) {
     reopen_monthly_period: "Reabriu mês",
     create_cash_monthly_balance: "Cadastrou saldo inicial",
     update_cash_monthly_balance: "Atualizou saldo inicial",
+    create_financial_setting: "Criou regra financeira",
   };
 
   return labels[value] || value.replaceAll("_", " ");
@@ -137,13 +139,25 @@ export default function AuditoriaPage() {
     const actions = new Set<string>();
 
     logs.forEach((log) => {
-      if (log.action) {
+      const matchesSelectedModule =
+        moduleFilter === "todos" || log.module === moduleFilter;
+
+      if (matchesSelectedModule && log.action) {
         actions.add(log.action);
       }
     });
 
     return Array.from(actions).sort();
-  }, [logs]);
+  }, [logs, moduleFilter]);
+
+  useEffect(() => {
+  if (
+    actionFilter !== "todos" &&
+    !actionOptions.includes(actionFilter)
+  ) {
+    setActionFilter("todos");
+  }
+}, [actionFilter, actionOptions]);
 
   const filteredLogs = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
