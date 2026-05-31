@@ -15,6 +15,7 @@ import {
 } from "recharts";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
+import { useDashboardPermissions } from "@/lib/useDashboardPermissions";
 
 type Associate = {
   id: string;
@@ -235,6 +236,7 @@ function SimpleTooltip({
 }
 
 export default function DashboardPage() {
+  const communicationsPermissions = useDashboardPermissions("comunicacoes");
   const [data, setData] = useState<DashboardData>(emptyData);
   const [birthdayWeek, setBirthdayWeek] = useState<BirthdayWeekItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -467,12 +469,14 @@ export default function DashboardPage() {
 
               </div>
 
+              {communicationsPermissions.canCreate && (
               <Link
                 href="/dashboard/comunicacoes"
                 className="w-fit rounded-full bg-[#13233a] px-5 py-2.5 text-sm font-black text-white transition hover:bg-[#0c1728]"
               >
                 Ver comunicações
               </Link>
+            )}
             </div>
 
             <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
