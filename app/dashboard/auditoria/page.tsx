@@ -36,6 +36,7 @@ function formatModule(value: string | null) {
     informes_pagamento: "Informes de Pagamento",
     despesas: "Despesas",
     receitas_avulsas: "Receitas Avulsas",
+    mensalidades: "Mensalidades",
   };
 
   if (!value) return "Não informado";
@@ -56,6 +57,8 @@ function formatAction(value: string) {
     cancel_expense: "Cancelou despesa",
     create_other_revenue: "Criou receita avulsa",
     cancel_other_revenue: "Cancelou receita avulsa",
+    generate_monthly_fees: "Gerou mensalidades",
+    manual_monthly_payment: "Baixa manual de mensalidade",
   };
 
   return labels[value] || value.replaceAll("_", " ");

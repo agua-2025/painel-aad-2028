@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
 import { useDashboardPermissions } from "@/lib/useDashboardPermissions";
+import { registerAuditLog } from "@/lib/audit";
 
 type FinancialSetting = {
   id: string;
@@ -397,10 +398,35 @@ export default function DashboardMensalidadesPage() {
       return;
     }
 
+    await registerAuditLog({
+      supabase,
+      action: "generate_monthly_fees",
+      module: "mensalidades",
+      tableName: "monthly_fees",
+      recordId: `${year}-${String(month).padStart(2, "0")}`,
+      description: `Gerou ${payload.length} mensalidade(s) para ${selectedLabel}.`,
+      oldData: {
+        existing_count: existingFees?.length ?? 0,
+      },
+      newData: {
+        year,
+        month,
+        due_date: dueDate,
+        count: payload.length,
+        base_amount: activeSetting.monthly_fee_amount,
+        financial_setting_id: activeSetting.id,
+        associates: payload.map((item) => ({
+          associate_id: item.associate_id,
+          amount: item.base_amount,
+          status: item.status,
+        })),
+      },
+    });
+
     setMessage(`${payload.length} mensalidade(s) gerada(s) com sucesso.`);
     setGenerating(false);
     await loadFees();
-  }
+      }
 
   async function registerPayment(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -500,19 +526,49 @@ export default function DashboardMensalidadesPage() {
       .eq("id", selectedFee.id);
 
     if (feeError) {
-      console.error("Erro ao atualizar mensalidade:", feeError);
-      setMessage(
-        "O pagamento foi registrado, mas não foi possível atualizar a mensalidade."
-      );
-      setSavingPayment(false);
-      return;
-    }
+  console.error("Erro ao atualizar mensalidade:", feeError);
+  setMessage(
+    "O pagamento foi registrado, mas não foi possível atualizar a mensalidade."
+  );
+  setSavingPayment(false);
+  return;
+}
 
-    setMessage("Pagamento registrado com sucesso.");
-    setSavingPayment(false);
-    closePaymentForm();
-    await loadFees();
-  }
+  await registerAuditLog({
+    supabase,
+    action: "manual_monthly_payment",
+    module: "mensalidades",
+    tableName: "monthly_fees",
+    recordId: selectedFee.id,
+    description: `Registrou baixa manual da mensalidade de ${getAssociateName(selectedFee)} referente a ${monthNames[Number(selectedFee.month) - 1]} de ${selectedFee.year}.`,
+    oldData: {
+      status: selectedFee.status,
+      paid_amount: selectedFee.paid_amount,
+      total_amount: selectedFee.total_amount,
+      paid_at: selectedFee.paid_at,
+      late_fee_amount: selectedFee.late_fee_amount,
+      interest_amount: selectedFee.interest_amount,
+    },
+    newData: {
+      status: newStatus,
+      paid_amount: newPaidAmount,
+      total_amount: amountDueAtPaymentDate.totalDue,
+      paid_at: paymentForm.paid_at,
+      amount_paid_now: amount,
+      payment_method: paymentForm.payment_method,
+      reference: paymentForm.reference.trim() || null,
+      notes: paymentForm.notes.trim() || null,
+      late_fee_amount: amountDueAtPaymentDate.lateFeeAmount,
+      interest_amount: amountDueAtPaymentDate.interestAmount,
+      days_with_charges: amountDueAtPaymentDate.daysWithCharges,
+    },
+  });
+
+  setMessage("Pagamento registrado com sucesso.");
+  setSavingPayment(false);
+  closePaymentForm();
+  await loadFees();
+    }
 
   return (
     <ProtectedDashboard>
