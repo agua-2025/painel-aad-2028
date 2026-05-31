@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
 import { useDashboardPermissions } from "@/lib/useDashboardPermissions";
+import { registerAuditLog } from "@/lib/audit";
 
 type Associate = {
   id: string;
@@ -334,14 +335,48 @@ export default function DashboardContribuicoesExtrasPage() {
       .eq("id", contributionId);
 
     if (activateError) {
-      setMessage(
-        "Os itens foram gerados, mas houve erro ao ativar a contribuição: " +
-          activateError.message
+  setMessage(
+    "Os itens foram gerados, mas houve erro ao ativar a contribuição: " +
+      activateError.message
       );
       setSaving(false);
       await loadData();
       return;
     }
+
+    await registerAuditLog({
+      supabase,
+      action: "create_extra_contribution",
+      module: "contribuicoes_extras",
+      tableName: "extra_contributions",
+      recordId: contributionId,
+      description: `Criou contribuição extra: ${form.title.trim()}.`,
+      oldData: null,
+      newData: {
+        id: contributionId,
+        title: form.title.trim(),
+        description: form.description.trim() || null,
+        reason: form.reason.trim() || null,
+        amount_mode: form.amount_mode,
+        total_amount: form.amount_mode === "rateio_total" ? totalAmount : null,
+        individual_amount:
+          form.amount_mode === "valor_individual" ? individualAmount : null,
+        due_date: form.due_date,
+        target_type: "todos_ativos",
+        status: "ativa",
+        generated_items_count: itemsToInsert.length,
+        generated_total_amount: itemsToInsert.reduce(
+          (sum, item) => sum + Number(item.amount ?? 0),
+          0
+        ),
+        items: itemsToInsert.map((item) => ({
+          associate_id: item.associate_id,
+          amount: item.amount,
+          due_date: item.due_date,
+          status: item.status,
+        })),
+      },
+    });
 
     setSuccessMessage("Contribuição extra criada e rateada com sucesso.");
 

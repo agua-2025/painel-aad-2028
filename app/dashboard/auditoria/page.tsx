@@ -37,6 +37,7 @@ function formatModule(value: string | null) {
     despesas: "Despesas",
     receitas_avulsas: "Receitas Avulsas",
     mensalidades: "Mensalidades",
+    contribuicoes_extras: "Contribuições Extras",
   };
 
   if (!value) return "Não informado";
@@ -59,6 +60,7 @@ function formatAction(value: string) {
     cancel_other_revenue: "Cancelou receita avulsa",
     generate_monthly_fees: "Gerou mensalidades",
     manual_monthly_payment: "Baixa manual de mensalidade",
+    create_extra_contribution: "Criou contribuição extra",
   };
 
   return labels[value] || value.replaceAll("_", " ");
