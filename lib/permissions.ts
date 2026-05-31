@@ -182,7 +182,7 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
 };
 
 const writePermissions: Partial<Record<DashboardModule, AppRole[]>> = {
-  associados: ["administrador", "presidente", "vice_presidente", "secretaria"],
+  associados: ["administrador", "presidente", "secretaria"],
   solicitacoes: ["administrador", "presidente", "vice_presidente", "secretaria"],
   avisos: ["administrador", "presidente", "vice_presidente", "secretaria"],
   comunicacoes: [

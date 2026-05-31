@@ -41,6 +41,7 @@ function formatModule(value: string | null) {
     fechamento_mensal: "Fechamento Mensal",
     saldos_caixa: "Saldos do Caixa",
     regras_financeiras: "Regras Financeiras",
+    associados: "Associados",
   };
 
   if (!value) return "Não informado";
@@ -70,6 +71,7 @@ function formatAction(value: string) {
     create_cash_monthly_balance: "Cadastrou saldo inicial",
     update_cash_monthly_balance: "Atualizou saldo inicial",
     create_financial_setting: "Criou regra financeira",
+    update_associate_data: "Atualizou associado",
   };
 
   return labels[value] || value.replaceAll("_", " ");
