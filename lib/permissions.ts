@@ -20,6 +20,7 @@ export type DashboardModule =
   | "financeiro"
   | "mensalidades"
   | "contribuicoes_extras"
+  | "cobrancas"
   | "pagamentos"
   | "inadimplencia"
   | "movimento_financeiro"
@@ -51,6 +52,7 @@ const moduleByPath: { path: string; module: DashboardModule }[] = [
   { path: "/dashboard/financeiro", module: "financeiro" },
   { path: "/dashboard/mensalidades", module: "mensalidades" },
   { path: "/dashboard/contribuicoes-extras", module: "contribuicoes_extras" },
+  { path: "/dashboard/cobrancas", module: "cobrancas" },
   { path: "/dashboard/pagamentos", module: "pagamentos" },
   { path: "/dashboard/inadimplencia", module: "inadimplencia" },
   { path: "/dashboard/movimento-financeiro", module: "movimento_financeiro" },
@@ -76,6 +78,7 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
     "financeiro",
     "mensalidades",
     "contribuicoes_extras",
+    "cobrancas",
     "pagamentos",
     "inadimplencia",
     "movimento_financeiro",
@@ -100,6 +103,7 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
     "financeiro",
     "mensalidades",
     "contribuicoes_extras",
+    "cobrancas",
     "pagamentos",
     "inadimplencia",
     "movimento_financeiro",
@@ -124,6 +128,7 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
     "financeiro",
     "mensalidades",
     "contribuicoes_extras",
+    "cobrancas",
     "pagamentos",
     "inadimplencia",
     "movimento_financeiro",
@@ -153,6 +158,7 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
     "financeiro",
     "mensalidades",
     "contribuicoes_extras",
+    "cobrancas",
     "pagamentos",
     "inadimplencia",
     "movimento_financeiro",
@@ -170,6 +176,7 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
     "financeiro",
     "mensalidades",
     "contribuicoes_extras",
+    "cobrancas",
     "pagamentos",
     "inadimplencia",
     "movimento_financeiro",

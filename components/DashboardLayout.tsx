@@ -26,6 +26,7 @@ const menuItems = [
     href: "/dashboard/contribuicoes-extras",
     icon: "➕",
   },
+  { label: "Cobranças", href: "/dashboard/cobrancas", icon: "📌" },
   { label: "Informes de Pagamento", href: "/dashboard/pagamentos", icon: "💳" },
   { label: "Inadimplência", href: "/dashboard/inadimplencia", icon: "⚠️" },
   {
