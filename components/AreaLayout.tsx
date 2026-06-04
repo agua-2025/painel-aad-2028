@@ -98,7 +98,7 @@ export function AreaLayout({
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 rounded-2xl bg-[#f7f8fa] px-4 py-3 font-bold"
+                  className="flex items-center gap-3 rounded-xl bg-[#f7f8fa] px-3 py-2.5 text-sm font-semibold"
                 >
                   <span>{item.icon}</span>
                   <span>{item.label}</span>
@@ -109,14 +109,14 @@ export function AreaLayout({
                 <Link
                   href="/dashboard"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 font-black text-[#13233a]"
+                  className="flex items-center gap-3 rounded-xl border border-[#e8dccb] bg-white px-3 py-2.5 text-sm font-black text-[#13233a]"
                 >
                   <span>🧭</span>
                   <span>Painel Administrativo</span>
                 </Link>
               )}
 
-              <div className="mt-3 rounded-2xl border border-[#e8dccb] bg-[#f7f8fa] p-4">
+              <div className="mt-3 rounded-2xl border border-[#e8dccb] bg-[#f7f8fa] p-3">
                 <p className="text-sm font-black">{userName || "Usuário"}</p>
                 <p className="mt-1 truncate text-xs font-bold text-[#596579]">
                   {userEmail || ""}
@@ -159,24 +159,29 @@ export function AreaLayout({
             </div>
           </Link>
 
-          <nav className="mt-5 grid gap-1.5">
+          <nav className="mt-5 flex flex-col gap-1">
             {menuItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[15px] font-bold text-[#596579] transition hover:bg-[#f7f8fa] hover:text-[#13233a]"
+                className="group flex items-center gap-3 rounded-xl px-3 py-2 text-[14px] font-semibold text-[#596579] transition hover:bg-[#f7f8fa] hover:text-[#13233a]"
               >
-                <span className="w-5 text-center text-base">{item.icon}</span>
-                <span>{item.label}</span>
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center text-[16px] leading-none">
+                  {item.icon}
+                </span>
+                <span className="truncate leading-5">{item.label}</span>
               </Link>
             ))}
+
             {canAccessDashboard && (
               <Link
                 href="/dashboard"
-                className="mt-2 flex items-center gap-3 rounded-2xl border border-[#e8dccb] bg-white px-3 py-2 text-[14px] font-black text-[#13233a] transition hover:bg-[#f7f8fa]"
+                className="mt-2 flex items-center gap-3 rounded-xl border border-[#e8dccb] bg-white px-3 py-2 text-[13px] font-black text-[#13233a] transition hover:bg-[#f7f8fa]"
               >
-                <span className="w-5 text-center text-sm">🧭</span>
-                <span>Painel Administrativo</span>
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center text-[14px] leading-none">
+                  🧭
+                </span>
+                <span className="truncate leading-5">Painel Administrativo</span>
               </Link>
             )}
           </nav>
