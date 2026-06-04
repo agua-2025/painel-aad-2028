@@ -30,6 +30,7 @@ export type DashboardModule =
   | "despesas"
   | "prestacao_contas"
   | "relatorios"
+  | "backup_exportacao"
   | "configuracoes";
 
 const dashboardRoles: AppRole[] = [
@@ -60,6 +61,7 @@ const moduleByPath: { path: string; module: DashboardModule }[] = [
   { path: "/dashboard/despesas", module: "despesas" },
   { path: "/dashboard/prestacao-contas", module: "prestacao_contas" },
   { path: "/dashboard/relatorios", module: "relatorios" },
+  { path: "/dashboard/backup", module: "backup_exportacao" },
   { path: "/dashboard/configuracoes", module: "configuracoes" },
 ];
 
@@ -84,6 +86,7 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
     "despesas",
     "prestacao_contas",
     "relatorios",
+    "backup_exportacao",
     "configuracoes",
   ],
 
@@ -107,6 +110,7 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
     "despesas",
     "prestacao_contas",
     "relatorios",
+    "backup_exportacao",
     "configuracoes",
   ],
 
@@ -204,6 +208,7 @@ const writePermissions: Partial<Record<DashboardModule, AppRole[]>> = {
   receitas_avulsas: ["administrador", "presidente", "tesoureira"],
   despesas: ["administrador", "presidente", "tesoureira"],
 
+  backup_exportacao: ["administrador", "presidente"],
   configuracoes: ["administrador", "presidente"],
 };
 

@@ -42,6 +42,7 @@ function formatModule(value: string | null) {
     saldos_caixa: "Saldos do Caixa",
     regras_financeiras: "Regras Financeiras",
     associados: "Associados",
+    backup_exportacao: "Backup / Exportação",
   };
 
   if (!value) return "Não informado";
@@ -72,6 +73,7 @@ function formatAction(value: string) {
     update_cash_monthly_balance: "Atualizou saldo inicial",
     create_financial_setting: "Criou regra financeira",
     update_associate_data: "Atualizou associado",
+    export_backup_data: "Exportou backup",
   };
 
   return labels[value] || value.replaceAll("_", " ");

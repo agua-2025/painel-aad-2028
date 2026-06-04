@@ -56,6 +56,7 @@ const menuItems = [
     icon: "📑",
   },
   { label: "Relatórios", href: "/dashboard/relatorios", icon: "📊" },
+  { label: "Backup / Exportação", href: "/dashboard/backup", icon: "💾" },
   { label: "Configurações", href: "/dashboard/configuracoes", icon: "⚙️" },
 ];
 
