@@ -13,9 +13,13 @@ export default function Home() {
     <main className="min-h-screen bg-[#f8f7f4] text-[#13233a]">
       <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center px-5 py-8 md:px-8">
         <div className="border-b border-[#e6ded2] pb-5">
-          <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#a98246]">
-            AAD Direito 2028
-          </p>
+          <Link href="/" className="inline-flex">
+              <img
+                src="/brand/aad-login-logo.png"
+                alt="AAD Direito 2028"
+                className="h-auto max-h-[44px] w-auto max-w-[260px] object-contain"
+              />
+            </Link>
         </div>
 
         <div className="grid gap-8 py-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">

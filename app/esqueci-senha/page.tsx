@@ -57,11 +57,12 @@ export default function EsqueciSenhaPage() {
     <main className="min-h-screen bg-[#f8f7f4] text-[#13233a]">
       <section className="mx-auto flex min-h-screen w-full max-w-4xl flex-col justify-center px-5 py-8 md:px-8">
         <div className="border-b border-[#e6ded2] pb-5">
-          <Link
-            href="/"
-            className="text-[11px] font-black uppercase tracking-[0.28em] text-[#a98246] transition hover:text-[#13233a]"
-          >
-            AAD Direito 2028
+          <Link href="/" className="inline-flex">
+            <img
+              src="/brand/aad-login-logo.png"
+              alt="AAD Direito 2028"
+              className="h-auto max-h-[44px] w-auto max-w-[260px] object-contain"
+            />
           </Link>
         </div>
 
@@ -71,7 +72,7 @@ export default function EsqueciSenhaPage() {
               Recuperação de acesso
             </p>
 
-            <h1 className="mt-5 max-w-xl text-5xl font-black leading-[0.95] tracking-[-0.07em] text-[#13233a] md:text-6xl">
+            <h1 className="mt-5 max-w-xl text-4xl font-black leading-tight tracking-[-0.05em] text-[#13233a] md:text-5xl">
               Esqueci minha senha
             </h1>
 

@@ -133,26 +133,27 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f8f7f4] px-5 py-8 text-[#13233a]">
-      <section className="w-full max-w-md">
-        <div className="mb-5 text-center">
-          <Link
-            href="/"
-            className="text-[11px] font-black uppercase tracking-[0.28em] text-[#a98246] transition hover:text-[#13233a]"
-          >
-            AAD Direito 2028
+    <main className="flex min-h-screen items-center justify-center bg-[#f7f8fa] px-5 py-8 text-[#13233a]">
+      <section className="w-full max-w-[430px]">
+        <div className="mb-4 text-center">
+          <Link href="/" className="mb-3 flex justify-center">
+            <img
+              src="/brand/aad-login-logo.png"
+              alt="AAD Direito 2028"
+              className="h-auto max-h-[44px] w-full max-w-[260px] object-contain"
+            />
           </Link>
 
-          <h1 className="mt-4 text-3xl font-black tracking-[-0.05em] text-[#13233a]">
+          <h1 className="mt-3 text-2xl font-black tracking-[-0.04em] text-[#13233a]">
             Entrar no sistema
           </h1>
 
-          <p className="mt-2 text-sm font-medium leading-6 text-[#596579]">
+          <p className="mt-1.5 text-sm font-medium leading-6 text-[#596579]">
             Informe seu e-mail e senha para acessar.
           </p>
         </div>
 
-        <section className="rounded-2xl border border-[#e6ded2] bg-white p-5 shadow-xl shadow-slate-900/8">
+        <section className="rounded-3xl border border-[#e6ded2] bg-white p-5 shadow-xl shadow-slate-900/10">
           <form onSubmit={handleLogin} className="grid gap-4">
             <label className="grid gap-2">
               <span className="text-sm font-bold text-[#596579]">E-mail</span>
@@ -163,7 +164,7 @@ export default function LoginPage() {
                 onChange={(event) => setEmail(event.target.value)}
                 required
                 autoComplete="email"
-                className="w-full rounded-xl border border-[#e6ded2] bg-[#fcfcfd] px-4 py-3 text-sm font-bold text-[#13233a] outline-none transition focus:border-[#c7a56b] focus:bg-white"
+                className="w-full rounded-xl border border-[#e6ded2] bg-[#f8fafc] px-4 py-3 text-sm font-semibold text-[#13233a] outline-none transition focus:border-[#c7a56b] focus:bg-white"
                 placeholder="seuemail@exemplo.com"
               />
             </label>
@@ -177,7 +178,7 @@ export default function LoginPage() {
                 onChange={(event) => setPassword(event.target.value)}
                 required
                 autoComplete="current-password"
-                className="w-full rounded-xl border border-[#e6ded2] bg-[#fcfcfd] px-4 py-3 text-sm font-bold text-[#13233a] outline-none transition focus:border-[#c7a56b] focus:bg-white"
+                className="w-full rounded-xl border border-[#e6ded2] bg-[#f8fafc] px-4 py-3 text-sm font-semibold text-[#13233a] outline-none transition focus:border-[#c7a56b] focus:bg-white"
                 placeholder="Digite sua senha"
               />
             </label>
@@ -185,7 +186,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="rounded-xl bg-[#13233a] px-6 py-3 text-[12px] font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-slate-900/12 transition hover:bg-[#0d1a2d] disabled:cursor-not-allowed disabled:opacity-70"
+              className="rounded-xl bg-[#13233a] px-6 py-3 text-[12px] font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-slate-900/15 transition hover:bg-[#0d1a2d] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {loading ? "Entrando..." : "Entrar"}
             </button>

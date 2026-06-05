@@ -141,9 +141,13 @@ export default function CadastroPage() {
               </p>
             </div>
 
-            <span className="w-fit rounded-full bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-white">
-              AAD Direito 2028
-            </span>
+            <div className="flex w-fit items-center justify-center rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-white/20">
+              <img
+                src="/brand/aad-login-logo.png"
+                alt="AAD Direito 2028"
+                className="h-auto max-h-[46px] w-full max-w-[260px] object-contain"
+              />
+            </div>
           </div>
         </div>
 
