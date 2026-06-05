@@ -540,24 +540,34 @@ export default function DashboardPrestacaoContasPage() {
         </section>
 
         <section className="rounded-xl border border-[#e8dccb] bg-white p-3 shadow-sm print:rounded-none print:border-black print:p-2 print:shadow-none">
-          <div className="flex flex-col gap-2 border-b border-[#e8dccb] pb-3 print:border-black">
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#596579] print:text-black">
-              Associação dos Acadêmicos do Curso de Direito - Turma de Formatura 2028
-            </p>
-
-            <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
-              <div>
-                <h1 className="text-lg font-black tracking-[-0.04em] text-[#13233a] print:text-xl print:text-black">
-                  Prestação de Contas Mensal
-                </h1>
-
-                <p className="mt-1 text-sm font-bold text-[#596579] print:text-black">
-                  Referência: {formatMonth(month)}
-                </p>
+          <div className="border-b border-[#e8dccb] pb-3 print:border-black">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-3">
+                <img
+                  src="/brand/aad-login-logo.png"
+                  alt="AAD Direito 2028"
+                  className="h-auto max-h-[42px] w-auto max-w-[230px] object-contain print:max-h-[34px] print:max-w-[190px]"
+                />
               </div>
 
-              <p className="text-xs font-bold text-[#596579] print:text-black">
-                Gerado pelo Painel AAD Direito 2028
+              <div className="text-left md:text-right">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#a98246] print:text-black">
+                  Prestação de contas
+                </p>
+
+                <p className="mt-1 text-xs font-bold text-[#596579] print:text-black">
+                  Gerado pelo Painel AAD Direito 2028
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-3 rounded-xl bg-[#f7f8fa] px-3 py-2 print:bg-white print:px-0 print:py-2">
+              <h1 className="text-lg font-black tracking-[-0.04em] text-[#13233a] print:text-xl print:text-black">
+                Prestação de Contas Mensal
+              </h1>
+
+              <p className="mt-1 text-sm font-bold text-[#596579] print:text-black">
+                Referência: {formatMonth(month)}
               </p>
             </div>
           </div>

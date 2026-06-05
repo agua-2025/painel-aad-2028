@@ -82,7 +82,7 @@ export function DashboardLayout({
 
   return (
     <main className="min-h-screen bg-[#f7f8fa] text-[#13233a]">
-      <header className="sticky top-0 z-40 border-b border-[#e8dccb] bg-white/95 backdrop-blur-xl lg:hidden">
+      <header className="sticky top-0 z-40 border-b border-[#e8dccb] bg-white/95 backdrop-blur-xl print:hidden lg:hidden">
         <div className="flex items-center justify-between gap-4 px-5 py-4">
           <Link href="/dashboard" className="flex items-center">
             <img
@@ -159,7 +159,7 @@ export function DashboardLayout({
       </header>
 
       <div className="mx-auto grid min-h-screen max-w-[1600px] lg:grid-cols-[260px_1fr]">
-        <aside className="sticky top-0 hidden h-screen flex-col overflow-hidden border-r border-[#e8dccb] bg-white px-4 py-4 lg:flex">
+        <aside className="sticky top-0 hidden h-screen flex-col overflow-hidden border-r border-[#e8dccb] bg-white px-4 py-4 print:hidden lg:flex">
           <Link
           href="/dashboard"
           className="flex items-center justify-center rounded-3xl bg-[#f7f8fa] px-4 py-3"

@@ -596,17 +596,29 @@ export default function DashboardRelatoriosPage() {
     <ProtectedDashboard>
       <div className="space-y-5">
         <section className="rounded-[2rem] bg-[#13233a] p-6 text-white shadow-xl shadow-slate-900/10">
-          <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
-            Administração
-          </p>
+          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
+                Administração
+              </p>
 
-          <h1 className="mt-3 text-3xl font-black tracking-[-0.04em] md:text-4xl">
-            Relatórios
-          </h1>
+              <h1 className="mt-3 text-3xl font-black tracking-[-0.04em] md:text-4xl">
+                Relatórios
+              </h1>
 
-          <p className="mt-3 max-w-3xl leading-7 text-white/75">
-            Consulte informações consolidadas da Associação e exporte dados para conferência, controle interno e apoio à gestão.
-          </p>
+              <p className="mt-3 max-w-3xl leading-7 text-white/75">
+                Consulte informações consolidadas da Associação e exporte dados para conferência, controle interno e apoio à gestão.
+              </p>
+            </div>
+
+            <div className="flex w-fit items-center justify-center rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-white/20">
+              <img
+                src="/brand/aad-login-logo.png"
+                alt="AAD Direito 2028"
+                className="h-auto max-h-[46px] w-full max-w-[260px] object-contain"
+              />
+            </div>
+          </div>
         </section>
 
         <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
