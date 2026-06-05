@@ -65,19 +65,12 @@ export function AreaLayout({
     <main className="min-h-screen bg-[#f7f8fa] text-[#13233a]">
       <header className="sticky top-0 z-40 border-b border-[#e8dccb] bg-white/95 backdrop-blur-xl lg:hidden">
         <div className="flex items-center justify-between gap-4 px-5 py-4">
-          <Link href="/area" className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#13233a] text-xs font-black text-[#c7a56b]">
-              AAD
-            </div>
-
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#c7a56b]">
-                Minha área
-              </p>
-              <h1 className="text-lg font-black tracking-[-0.04em]">
-                Associado
-              </h1>
-            </div>
+          <Link href="/area" className="flex items-center">
+            <img
+              src="/brand/aad-logo-horizontal.png"
+              alt="AAD Direito 2028"
+              className="h-auto max-h-[46px] w-auto max-w-[205px] object-contain"
+            />
           </Link>
 
           <button
@@ -143,20 +136,13 @@ export function AreaLayout({
         <aside className="sticky top-0 hidden h-screen flex-col border-r border-[#e8dccb] bg-white px-4 py-4 lg:flex">
           <Link
             href="/area"
-            className="flex items-center gap-3 rounded-3xl bg-[#f7f8fa] px-3 py-3"
+            className="flex items-center justify-center rounded-3xl bg-[#f7f8fa] px-4 py-3"
           >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#13233a] text-xs font-black text-[#c7a56b]">
-              AAD
-            </div>
-
-            <div>
-              <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#c7a56b]">
-                Minha área
-              </p>
-              <h1 className="text-lg font-black tracking-[-0.04em]">
-                Associado
-              </h1>
-            </div>
+            <img
+              src="/brand/aad-logo-horizontal.png"
+              alt="AAD Direito 2028"
+              className="h-auto max-h-[52px] w-full max-w-[205px] object-contain"
+            />
           </Link>
 
           <nav className="mt-5 flex flex-col gap-1">
