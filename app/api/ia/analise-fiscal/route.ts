@@ -28,6 +28,18 @@ function formatCurrency(value: number | undefined) {
   });
 }
 
+function cleanAiText(value: string) {
+  return value
+    .replace(/^```[a-zA-Z]*\s*/g, "")
+    .replace(/```$/g, "")
+    .replace(/^#{1,6}\s*/gm, "")
+    .replace(/\*\*/g, "")
+    .replace(/\*/g, "")
+    .replace(/^---+$/gm, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 export async function POST(request: Request) {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
@@ -81,7 +93,23 @@ Estruture a resposta exatamente com estes tópicos:
 3. Recomendações de conferência
 4. Conclusão preliminar
 
-No final, inclua a frase:
+Regras obrigatórias de estilo:
+- Não use Markdown.
+- Não use asteriscos.
+- Não use cerquilhas ou títulos com #.
+- Não use linhas separadoras.
+- Não use saudação inicial.
+- Não use expressão como "Prezados(as)".
+- Escreva de forma natural, institucional, objetiva e moderada.
+- Use tópicos numerados simples, apenas com o número e o título.
+- Evite linguagem excessivamente conclusiva.
+- Evite expressões fortes como "aumento patrimonial", "irregularidade", "falha", "risco grave" ou "revisão aprofundada", salvo se os dados indicarem claramente necessidade.
+- Prefira termos como "resultado positivo", "ponto de atenção", "recomenda-se conferir" e "sugere-se verificar".
+- Evite texto longo.
+- Cada tópico deve ter no máximo um parágrafo curto.
+- Não ultrapasse aproximadamente 1.300 caracteres.
+
+No final, inclua exatamente a frase:
 "Esta análise tem caráter auxiliar e deve ser conferida pela Tesouraria, Presidência e Comissão Fiscal."
 `;
 
@@ -92,7 +120,7 @@ No final, inclua a frase:
       contents: prompt,
     });
 
-    const analysis = response.text?.trim();
+    const analysis = cleanAiText(response.text || "");
 
     if (!analysis) {
       return NextResponse.json(

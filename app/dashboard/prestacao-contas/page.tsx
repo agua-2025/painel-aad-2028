@@ -693,7 +693,7 @@ export default function DashboardPrestacaoContasPage() {
           )}
 
           {aiAnalysis && (
-            <div className="mt-3 whitespace-pre-line rounded-xl border border-[#e8dccb] bg-[#f7f8fa] p-3 text-sm font-bold leading-6 text-[#13233a] print:rounded-none print:border-black print:bg-white print:p-2 print:text-[10px] print:leading-5 print:text-black">
+            <div className="mt-3 whitespace-pre-line rounded-xl border border-[#e8dccb] bg-[#f7f8fa] p-3 text-sm font-medium leading-6 text-[#13233a] print:rounded-none print:border-black print:bg-white print:p-2 print:text-[10px] print:font-normal print:leading-5 print:text-black">
               {aiAnalysis}
             </div>
           )}
