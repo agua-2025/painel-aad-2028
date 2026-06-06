@@ -249,6 +249,9 @@ export default function DashboardPrestacaoContasPage() {
   const [cashBalance, setCashBalance] = useState<CashMonthlyBalance | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState("");
+  const [aiMessage, setAiMessage] = useState("");
 
   const filteredPayments = useMemo(() => {
     return payments.filter((payment) => getMonthFromDate(payment.paid_at) === month);
@@ -450,6 +453,78 @@ export default function DashboardPrestacaoContasPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [month]);
 
+  async function generateAiAnalysis() {
+    setAiLoading(true);
+    setAiMessage("");
+    setAiAnalysis("");
+
+    const alerts: string[] = [];
+
+    if (!cashBalance) {
+      alerts.push(
+        "Não há saldo inicial cadastrado para este mês. O relatório considera saldo inicial igual a R$ 0,00."
+      );
+    }
+
+    if (summary.expensesWithoutReceipt.length > 0) {
+      alerts.push(
+        `${summary.expensesWithoutReceipt.length} despesa(s) paga(s) não possuem comprovante anexado.`
+      );
+    }
+
+    if (summary.movementsCount === 0) {
+      alerts.push("Não há movimentações financeiras registradas no período.");
+    }
+
+    if (summary.periodResult < 0) {
+      alerts.push("O resultado do mês foi negativo, com saídas superiores às entradas.");
+    }
+
+    if (summary.periodResult > 0) {
+      alerts.push("O resultado do mês foi positivo, com entradas superiores às saídas.");
+    }
+
+    try {
+      const response = await fetch("/api/ia/analise-fiscal", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          monthLabel: formatMonth(month),
+          summary: {
+            openingBalance: summary.openingBalance,
+            totalEntries: summary.totalEntries,
+            totalExpenses: summary.totalExpenses,
+            periodResult: summary.periodResult,
+            finalBalance: summary.finalBalance,
+            totalMonthly: summary.totalMonthly,
+            totalExtra: summary.totalExtra,
+            entriesCount: summary.entriesCount,
+            expensesCount: summary.expensesCount,
+            movementsCount: summary.movementsCount,
+            expensesWithoutReceiptCount: summary.expensesWithoutReceipt.length,
+          },
+          alerts,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setAiMessage(data.error || "Não foi possível gerar a análise com IA.");
+        return;
+      }
+
+      setAiAnalysis(data.analysis || "");
+    } catch (error) {
+      console.error("Erro ao chamar análise fiscal com IA:", error);
+      setAiMessage("Não foi possível conectar ao serviço de IA.");
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
   return (
     <ProtectedDashboard>
       <style jsx global>{`
@@ -581,6 +656,45 @@ export default function DashboardPrestacaoContasPage() {
           {!cashBalance && (
             <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm font-bold text-amber-900 print:border-black print:bg-white print:text-black">
               Atenção: não há saldo inicial cadastrado para este mês. O relatório considera saldo inicial igual a R$ 0,00.
+            </div>
+          )}
+        </section>
+
+        <section className={`rounded-xl border border-[#e8dccb] bg-white p-3 shadow-sm print:rounded-none print:border-black print:p-2 print:shadow-none ${aiAnalysis ? "" : "print:hidden"}`}>
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#a98246] print:text-black">
+                Análise fiscal com IA
+              </p>
+
+              <h2 className="mt-1 text-sm font-black uppercase tracking-[0.08em] text-[#13233a] print:text-sm print:text-black">
+                Análise sugerida para apoio à Comissão Fiscal
+              </h2>
+
+              <p className="mt-1 max-w-3xl text-xs font-bold leading-5 text-[#596579] print:text-[10px] print:text-black">
+                Texto gerado automaticamente com base nos dados consolidados da prestação de contas. A conferência final permanece sob responsabilidade da Tesouraria, Presidência e Comissão Fiscal.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={generateAiAnalysis}
+              disabled={aiLoading}
+              className="w-fit rounded-full bg-[#13233a] px-5 py-2.5 text-xs font-black uppercase tracking-[0.08em] text-white transition hover:bg-[#0d1a2d] disabled:cursor-not-allowed disabled:opacity-70 print:hidden"
+            >
+              {aiLoading ? "Gerando..." : "Gerar análise com IA"}
+            </button>
+          </div>
+
+          {aiMessage && (
+            <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-700 print:border-black print:bg-white print:text-black">
+              {aiMessage}
+            </div>
+          )}
+
+          {aiAnalysis && (
+            <div className="mt-3 whitespace-pre-line rounded-xl border border-[#e8dccb] bg-[#f7f8fa] p-3 text-sm font-bold leading-6 text-[#13233a] print:rounded-none print:border-black print:bg-white print:p-2 print:text-[10px] print:leading-5 print:text-black">
+              {aiAnalysis}
             </div>
           )}
         </section>
