@@ -20,6 +20,7 @@ const baseMenuItems = [
   { label: "Documentos", href: "/area/documentos", icon: "📄" },
   { label: "Avisos", href: "/area/avisos", icon: "📢" },
   { label: "Suporte", href: "/area/suporte", icon: "💬" },
+  { label: "Assistente IA", href: "/area/assistente", icon: "🤖" },
 ];
 
 const associateMenuItems = [
@@ -50,6 +51,7 @@ export function AreaLayout({
   canAccessDashboard = false,
 }: AreaLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [assistantBubbleHidden, setAssistantBubbleHidden] = useState(false);
 
   const menuItems = isAssociate
     ? [...baseMenuItems, ...associateMenuItems]
@@ -197,8 +199,31 @@ export function AreaLayout({
           </div>
         </aside>
 
-        <section className="min-w-0 px-5 py-6 md:px-8 lg:px-9 lg:py-7">
+        <section className="relative min-w-0 px-5 py-6 md:px-8 lg:px-9 lg:py-7">
           {children}
+
+          {!assistantBubbleHidden && (
+            <div className="fixed bottom-4 right-4 z-50 flex items-end gap-2 print:hidden">
+              <button
+                type="button"
+                onClick={() => setAssistantBubbleHidden(true)}
+                className="mb-9 flex h-7 w-7 items-center justify-center rounded-full border border-[#e8dccb] bg-white text-sm font-black text-[#596579] shadow-lg shadow-slate-900/15 transition hover:bg-[#f7f8fa] hover:text-[#13233a]"
+                aria-label="Fechar Assistente IA"
+                title="Fechar Assistente IA"
+              >
+                ×
+              </button>
+
+              <Link
+                href="/area/assistente"
+                title="Acessar Assistente IA"
+                aria-label="Acessar Assistente IA"
+                className="flex h-14 w-14 items-center justify-center rounded-full border border-[#e8dccb] bg-[#13233a] text-2xl text-white shadow-2xl shadow-slate-900/25 transition hover:-translate-y-1 hover:bg-[#0d1a2d]"
+              >
+                <span className="animate-bounce">🤖</span>
+              </Link>
+            </div>
+          )}
         </section>
       </div>
     </main>
