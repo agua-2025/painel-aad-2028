@@ -66,7 +66,7 @@ export default function AssistenteSistemaPage() {
 
   return (
     <ProtectedDashboard>
-      <div className="flex h-[calc(100vh-3.5rem)] min-h-[620px] flex-col gap-3 overflow-hidden">
+      <div className="flex min-h-[calc(100vh-5rem)] flex-col gap-3 overflow-visible lg:h-[calc(100vh-5rem)] lg:min-h-[620px] lg:overflow-hidden">
         <section className="flex shrink-0 items-center justify-between gap-4 rounded-2xl border border-[#e8dccb] bg-white px-4 py-3 shadow-sm">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#a98246]">
@@ -144,11 +144,11 @@ export default function AssistenteSistemaPage() {
               </p>
 
               {answer ? (
-                <div className="mt-2 min-h-0 flex-1 overflow-y-auto pr-2 text-sm font-medium leading-6 text-[#13233a]">
+                <div className="mt-2 max-h-[45vh] min-h-[220px] overflow-y-auto pr-2 text-sm font-medium leading-6 text-[#13233a] lg:min-h-0 lg:flex-1">
                   <div className="whitespace-pre-line">{answer}</div>
                 </div>
               ) : (
-                <div className="mt-2 flex min-h-0 flex-1 items-center justify-center rounded-xl bg-white px-4 py-4 text-center text-sm font-medium leading-6 text-[#596579]">
+                <div className="mt-2 flex min-h-[220px] items-center justify-center rounded-xl bg-white px-4 py-4 text-center text-sm font-medium leading-6 text-[#596579] lg:min-h-0 lg:flex-1">
                   A resposta aparecerá aqui. Se o texto for maior, apenas esta área terá rolagem.
                 </div>
               )}
