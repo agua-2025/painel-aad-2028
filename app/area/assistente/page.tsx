@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ProtectedArea } from "@/components/ProtectedArea";
 import { createClient } from "@/lib/supabase/client";
 
@@ -259,6 +259,7 @@ export default function AreaAssistentePage() {
   const [answer, setAnswer] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const answerRef = useRef<HTMLDivElement | null>(null);
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -460,6 +461,15 @@ export default function AreaAssistentePage() {
     loadFinancialContext();
   }, []);
 
+  function scrollToAnswer() {
+    window.setTimeout(() => {
+      answerRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 120);
+  }
+
   async function askAssistant(selectedQuestion?: string) {
     const finalQuestion = (selectedQuestion || question).trim();
 
@@ -471,6 +481,7 @@ export default function AreaAssistentePage() {
     setLoading(true);
     setMessage("");
     setAnswer("");
+    scrollToAnswer();
 
     try {
       const response = await fetch("/api/ia/assistente-sistema", {
@@ -505,6 +516,7 @@ export default function AreaAssistentePage() {
 
       setAnswer(data.answer || "");
       setQuestion(finalQuestion);
+      scrollToAnswer();
     } catch (error) {
       console.error("Erro ao consultar assistente do associado:", error);
       setMessage("Não foi possível conectar ao assistente no momento.");
@@ -593,7 +605,7 @@ export default function AreaAssistentePage() {
               </div>
             )}
 
-            <div className="mt-4 rounded-2xl border border-[#e8dccb] bg-[#f7f8fa] p-3">
+            <div ref={answerRef} className="mt-4 rounded-2xl border border-[#e8dccb] bg-[#f7f8fa] p-3">
               <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#a98246]">
                 Resposta do assistente
               </p>

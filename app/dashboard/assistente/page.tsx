@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 
 const quickQuestions = [
@@ -21,6 +21,16 @@ export default function AssistenteSistemaPage() {
   const [answer, setAnswer] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const answerRef = useRef<HTMLDivElement | null>(null);
+
+  function scrollToAnswer() {
+    window.setTimeout(() => {
+      answerRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 120);
+  }
 
   async function askAssistant(selectedQuestion?: string) {
     const finalQuestion = (selectedQuestion || question).trim();
@@ -33,6 +43,7 @@ export default function AssistenteSistemaPage() {
     setLoading(true);
     setMessage("");
     setAnswer("");
+    scrollToAnswer();
 
     try {
       const response = await fetch("/api/ia/assistente-sistema", {
@@ -56,6 +67,7 @@ export default function AssistenteSistemaPage() {
 
       setAnswer(data.answer || "");
       setQuestion(finalQuestion);
+      scrollToAnswer();
     } catch (error) {
       console.error("Erro ao consultar assistente:", error);
       setMessage("Não foi possível conectar ao assistente no momento.");
@@ -138,7 +150,7 @@ export default function AssistenteSistemaPage() {
               )}
             </div>
 
-            <div className="mt-3 flex min-h-0 flex-1 flex-col rounded-2xl border border-[#e8dccb] bg-[#f7f8fa] p-3">
+            <div ref={answerRef} className="mt-3 flex min-h-0 flex-1 flex-col rounded-2xl border border-[#e8dccb] bg-[#f7f8fa] p-3">
               <p className="shrink-0 text-[10px] font-black uppercase tracking-[0.18em] text-[#a98246]">
                 Resposta do assistente
               </p>
