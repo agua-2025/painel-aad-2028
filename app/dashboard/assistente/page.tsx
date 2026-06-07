@@ -104,8 +104,8 @@ export default function AssistenteSistemaPage() {
                 value={question}
                 onChange={(event) => setQuestion(event.target.value)}
                 rows={2}
-                placeholder="Ex.: Qual a função do Pedro Fatini?"
-                className="mt-2 w-full resize-none rounded-xl border border-[#e8dccb] bg-[#f8fafc] px-3 py-2 text-sm font-semibold leading-5 text-[#13233a] outline-none transition focus:border-[#c7a56b] focus:bg-white"
+                placeholder=""
+                className="mt-2 w-full resize-none rounded-xl border border-[#e8dccb] bg-white px-3 py-2 text-sm font-semibold leading-5 text-[#13233a] outline-none transition focus:border-[#c7a56b]"
               />
 
               <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
