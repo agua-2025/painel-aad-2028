@@ -259,7 +259,7 @@ export default function AreaAssistentePage() {
   const [answer, setAnswer] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const answerRef = useRef<HTMLDivElement | null>(null);
+  const questionCardRef = useRef<HTMLDivElement | null>(null);
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -461,13 +461,20 @@ export default function AreaAssistentePage() {
     loadFinancialContext();
   }, []);
 
-  function scrollToAnswer() {
+
+  function scrollToQuestionCard() {
     window.setTimeout(() => {
-      answerRef.current?.scrollIntoView({
+      const element = questionCardRef.current;
+
+      if (!element) return;
+
+      const top = element.getBoundingClientRect().top + window.scrollY - 90;
+
+      window.scrollTo({
+        top: Math.max(top, 0),
         behavior: "smooth",
-        block: "start",
       });
-    }, 120);
+    }, 80);
   }
 
   async function askAssistant(selectedQuestion?: string) {
@@ -481,7 +488,7 @@ export default function AreaAssistentePage() {
     setLoading(true);
     setMessage("");
     setAnswer("");
-    scrollToAnswer();
+    scrollToQuestionCard();
 
     try {
       const response = await fetch("/api/ia/assistente-sistema", {
@@ -516,7 +523,7 @@ export default function AreaAssistentePage() {
 
       setAnswer(data.answer || "");
       setQuestion(finalQuestion);
-      scrollToAnswer();
+      scrollToQuestionCard();
     } catch (error) {
       console.error("Erro ao consultar assistente do associado:", error);
       setMessage("Não foi possível conectar ao assistente no momento.");
@@ -559,7 +566,7 @@ export default function AreaAssistentePage() {
         </section>
 
         <section className="grid gap-4 xl:grid-cols-[1fr_360px]">
-          <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+          <div ref={questionCardRef} className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <h2 className="text-base font-black tracking-[-0.03em] text-[#13233a]">
               Faça uma pergunta
             </h2>
@@ -605,7 +612,7 @@ export default function AreaAssistentePage() {
               </div>
             )}
 
-            <div ref={answerRef} className="mt-4 rounded-2xl border border-[#e8dccb] bg-[#f7f8fa] p-3">
+            <div className="mt-4 rounded-2xl border border-[#e8dccb] bg-[#f7f8fa] p-3">
               <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#a98246]">
                 Resposta do assistente
               </p>

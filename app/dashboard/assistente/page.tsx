@@ -21,15 +21,22 @@ export default function AssistenteSistemaPage() {
   const [answer, setAnswer] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const answerRef = useRef<HTMLDivElement | null>(null);
+  const questionCardRef = useRef<HTMLDivElement | null>(null);
 
-  function scrollToAnswer() {
+
+  function scrollToQuestionCard() {
     window.setTimeout(() => {
-      answerRef.current?.scrollIntoView({
+      const element = questionCardRef.current;
+
+      if (!element) return;
+
+      const top = element.getBoundingClientRect().top + window.scrollY - 90;
+
+      window.scrollTo({
+        top: Math.max(top, 0),
         behavior: "smooth",
-        block: "start",
       });
-    }, 120);
+    }, 80);
   }
 
   async function askAssistant(selectedQuestion?: string) {
@@ -43,7 +50,7 @@ export default function AssistenteSistemaPage() {
     setLoading(true);
     setMessage("");
     setAnswer("");
-    scrollToAnswer();
+    scrollToQuestionCard();
 
     try {
       const response = await fetch("/api/ia/assistente-sistema", {
@@ -67,7 +74,7 @@ export default function AssistenteSistemaPage() {
 
       setAnswer(data.answer || "");
       setQuestion(finalQuestion);
-      scrollToAnswer();
+      scrollToQuestionCard();
     } catch (error) {
       console.error("Erro ao consultar assistente:", error);
       setMessage("Não foi possível conectar ao assistente no momento.");
@@ -102,7 +109,7 @@ export default function AssistenteSistemaPage() {
         </section>
 
         <section className="grid min-h-0 flex-1 gap-3 xl:grid-cols-[1fr_0.72fr]">
-          <div className="flex min-h-0 flex-col rounded-2xl border border-[#e8dccb] bg-white p-3 shadow-sm">
+          <div ref={questionCardRef} className="flex min-h-0 flex-col rounded-2xl border border-[#e8dccb] bg-white p-3 shadow-sm">
             <div className="shrink-0">
               <h2 className="text-base font-black tracking-[-0.03em] text-[#13233a]">
                 Faça uma pergunta
@@ -150,7 +157,7 @@ export default function AssistenteSistemaPage() {
               )}
             </div>
 
-            <div ref={answerRef} className="mt-3 flex min-h-0 flex-1 flex-col rounded-2xl border border-[#e8dccb] bg-[#f7f8fa] p-3">
+            <div className="mt-3 flex min-h-0 flex-1 flex-col rounded-2xl border border-[#e8dccb] bg-[#f7f8fa] p-3">
               <p className="shrink-0 text-[10px] font-black uppercase tracking-[0.18em] text-[#a98246]">
                 Resposta do assistente
               </p>
