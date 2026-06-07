@@ -11,6 +11,23 @@ type AssistantPayload = {
   question?: string;
   userProfile?: string;
   allowedModules?: string[];
+  memberContext?: {
+    associateName?: string;
+    financialStatus?: string | null;
+    openMonthlyFeesCount?: number;
+    openMonthlyFeesTotal?: number;
+    overdueMonthlyFeesCount?: number;
+    openMonthlyFees?: string[];
+    openExtraContributionsCount?: number;
+    openExtraContributionsTotal?: number;
+    openExtraContributions?: string[];
+    totalPaid?: number;
+    lastPayments?: string[];
+    pendingPaymentReportsCount?: number;
+    approvedPaymentReportsCount?: number;
+    rejectedPaymentReportsCount?: number;
+    lastPaymentReports?: string[];
+  };
 };
 
 function cleanAiText(value: string) {
@@ -56,6 +73,7 @@ export async function POST(request: Request) {
 
     const userProfile = body.userProfile?.trim() || "perfil não informado";
     const allowedModules = body.allowedModules ?? [];
+    const memberContext = body.memberContext;
 
     const prompt = `
 ${SYSTEM_HELP_ASSISTANT_RULES}
@@ -65,6 +83,13 @@ ${userProfile}
 
 Módulos permitidos informados:
 ${allowedModules.length > 0 ? allowedModules.join(", ") : "não informado"}
+
+Contexto financeiro do associado logado:
+${
+  memberContext
+    ? JSON.stringify(memberContext, null, 2)
+    : "nenhum contexto financeiro informado"
+}
 
 Base de conhecimento do sistema:
 ${SYSTEM_HELP_KNOWLEDGE}
@@ -89,6 +114,14 @@ Responda agora seguindo estas regras:
 - Se a pergunta envolver composição da Diretoria ou Comissão Fiscal, diga que a informação vem da Ata de Constituição e recomende confirmar a composição atual nos registros da Associação, se necessário.
 - Se o perfil informado não puder executar a ação, explique isso de forma simples e oriente procurar o perfil responsável.
 - Se o perfil informado for "associado" ou "interessado", responda somente sobre área do associado, cadastro, solicitação, termo, pagamentos do próprio associado, documentos, avisos, suporte, Estatuto e Ata.
+- Se houver contexto financeiro do associado logado, use esses dados para responder perguntas sobre mensalidades em aberto, contribuições extras, pagamentos realizados e informes pendentes.
+- Se o associado perguntar se um pagamento foi aprovado, verifique primeiro lastPaymentReports, approvedPaymentReportsCount, pendingPaymentReportsCount e rejectedPaymentReportsCount.
+- Se houver informe pendente, explique que ainda aguarda análise da Tesouraria.
+- Se houver informe aprovado, diga que consta informe aprovado/baixado no histórico, usando a informação disponível.
+- Se não houver informe pendente nem cobrança em aberto, explique de forma simples que, pelo contexto atual, não há pendência financeira registrada.
+- Se não houver informação suficiente sobre o informe específico, oriente consultar a seção Pagamentos e, se necessário, falar com a Tesouraria.
+- Se o associado perguntar quanto está devendo e houver dados financeiros no contexto, responda com quantidade e valor total, separando mensalidades e contribuições extras quando possível.
+- Se não houver dados financeiros no contexto, oriente o associado a consultar a área Financeiro ou Contribuições Extras.
 - Se o perfil informado for "associado" ou "interessado" e a pergunta envolver rotinas internas do dashboard, como aprovar pagamento, gerar mensalidades, lançar despesas, backup, auditoria, fechamento mensal ou configurações, explique que essas rotinas são administrativas e devem ser tratadas pela Diretoria, Tesouraria ou Secretaria.
 - Não invente funcionalidade.
 - Não diga que executou algo.
