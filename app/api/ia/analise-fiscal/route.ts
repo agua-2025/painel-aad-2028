@@ -115,17 +115,37 @@ No final, inclua exatamente a frase:
 
     const ai = new GoogleGenAI({ apiKey });
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-    });
+    const models = ["gemini-3.1-flash-lite", "gemini-3.5-flash", "gemini-2.5-flash"];
+    let analysis = "";
+    let lastError: unknown = null;
 
-    const analysis = cleanAiText(response.text || "");
+    for (const model of models) {
+      try {
+        const response = await ai.models.generateContent({
+          model,
+          contents: prompt,
+        });
+
+        analysis = cleanAiText(response.text || "");
+
+        if (analysis) {
+          break;
+        }
+      } catch (error) {
+        lastError = error;
+        console.error(`Erro ao consultar o modelo ${model}:`, error);
+      }
+    }
 
     if (!analysis) {
+      console.error("Falha em todos os modelos da análise fiscal:", lastError);
+
       return NextResponse.json(
-        { error: "A IA não retornou uma análise válida." },
-        { status: 502 }
+        {
+          error:
+            "A análise com IA está temporariamente indisponível. Aguarde alguns instantes e tente novamente.",
+        },
+        { status: 503 }
       );
     }
 

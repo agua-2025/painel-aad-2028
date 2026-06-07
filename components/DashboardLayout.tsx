@@ -19,6 +19,7 @@ const menuItems = [
   { label: "Auditoria", href: "/dashboard/auditoria", icon: "📋" },
   { label: "Avisos", href: "/dashboard/avisos", icon: "📢" },
   { label: "Comunicações", href: "/dashboard/comunicacoes", icon: "💬" },
+  { label: "Assistente IA", href: "/dashboard/assistente", icon: "🤖" },
   { label: "Regras Financeiras", href: "/dashboard/financeiro", icon: "⚖️" },
   { label: "Mensalidades", href: "/dashboard/mensalidades", icon: "📅" },
   {
@@ -222,8 +223,17 @@ export function DashboardLayout({
           </div>
         </aside>
 
-        <section className="min-w-0 px-5 py-6 md:px-8 lg:px-9 lg:py-7">
+        <section className="relative min-w-0 px-5 py-6 md:px-8 lg:px-9 lg:py-7">
           {children}
+
+          <Link
+            href="/dashboard/assistente"
+            title="Acessar Assistente IA"
+            aria-label="Acessar Assistente IA"
+            className="fixed bottom-5 right-5 z-50 hidden h-14 w-14 items-center justify-center rounded-full border border-[#e8dccb] bg-[#13233a] text-2xl text-white shadow-2xl shadow-slate-900/25 transition hover:-translate-y-1 hover:bg-[#0d1a2d] md:flex"
+          >
+            <span className="animate-bounce">🤖</span>
+          </Link>
         </section>
       </div>
     </main>
