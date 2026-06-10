@@ -308,6 +308,7 @@ export default function SolicitacoesPage() {
       city: request.city,
       state: request.state || "MT",
       zip_code: request.zip_code,
+      semester: request.semester,
       joined_at: todayISO(),
       status: "ativo",
       financial_status: "em_dia",

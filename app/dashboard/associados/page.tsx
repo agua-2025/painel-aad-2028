@@ -18,6 +18,7 @@ type Associate = {
   city: string | null;
   state: string | null;
   zip_code: string | null;
+  semester: string | null;
   status: string;
   financial_status: string;
   joined_at: string | null;
@@ -95,6 +96,7 @@ export default function AssociadosPage() {
     city: "",
     state: "",
     zip_code: "",
+    semester: "",
     status: "ativo",
     financial_status: "em_dia",
     joined_at: "",
@@ -127,7 +129,7 @@ export default function AssociadosPage() {
     const { data, error } = await supabase
       .from("associates")
       .select(
-        "id, full_name, cpf, rg, birth_date, phone, email, address, city, state, zip_code, status, financial_status, joined_at, notes, created_at"
+        "id, full_name, cpf, rg, birth_date, phone, email, address, city, state, zip_code, semester, status, financial_status, joined_at, notes, created_at"
       )
       .order("full_name", { ascending: true });
 
@@ -175,6 +177,7 @@ export default function AssociadosPage() {
       city: associate.city || "",
       state: associate.state || "",
       zip_code: associate.zip_code || "",
+      semester: associate.semester || "",
       status: associate.status || "ativo",
       financial_status: associate.financial_status || "em_dia",
       joined_at: associate.joined_at || "",
@@ -203,7 +206,8 @@ export default function AssociadosPage() {
       city: "",
       state: "",
       zip_code: "",
-        status: "ativo",
+      semester: "",
+      status: "ativo",
       financial_status: "em_dia",
       joined_at: "",
       notes: "",
@@ -247,6 +251,7 @@ export default function AssociadosPage() {
       city: normalizeNullableText(editForm.city),
       state: normalizeNullableText(editForm.state),
       zip_code: normalizeNullableText(editForm.zip_code),
+      semester: normalizeNullableText(editForm.semester),
       status: editForm.status,
       financial_status: editForm.financial_status,
       joined_at: editForm.joined_at || null,
@@ -264,6 +269,7 @@ export default function AssociadosPage() {
       city: editingAssociate.city,
       state: editingAssociate.state,
       zip_code: editingAssociate.zip_code,
+      semester: editingAssociate.semester,
       status: editingAssociate.status,
       financial_status: editingAssociate.financial_status,
       joined_at: editingAssociate.joined_at,
@@ -488,6 +494,19 @@ export default function AssociadosPage() {
                     value={editForm.joined_at}
                     disabled={saving}
                     onChange={(event) => updateEditField("joined_at", event.target.value)}
+                    className="w-full rounded-lg border border-[#e8dccb] px-3 py-2 text-sm font-medium text-[#13233a] outline-none focus:border-[#c7a56b]"
+                  />
+                </label>
+
+                <label className="grid gap-1.5">
+                  <span className="text-xs font-semibold text-[#13233a]">
+                    Semestre
+                  </span>
+                  <input
+                    value={editForm.semester}
+                    disabled={saving}
+                    onChange={(event) => updateEditField("semester", event.target.value)}
+                    placeholder="Ex.: 5º semestre"
                     className="w-full rounded-lg border border-[#e8dccb] px-3 py-2 text-sm font-medium text-[#13233a] outline-none focus:border-[#c7a56b]"
                   />
                 </label>
@@ -716,6 +735,10 @@ export default function AssociadosPage() {
 
                       <p className="mt-0.5 text-xs font-bold text-[#596579]">
                         CPF: {associate.cpf || "Não informado"}
+                      </p>
+
+                      <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                        Semestre: {associate.semester || "Não informado"}
                       </p>
                     </div>
 
