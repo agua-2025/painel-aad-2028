@@ -146,6 +146,18 @@ function getPresenceAvailability(meeting: Meeting) {
   };
 }
 
+function buildMeetingOptionLabel(meeting: Meeting) {
+  const title =
+    meeting.title.length > 72 ? `${meeting.title.slice(0, 72)}...` : meeting.title;
+
+  const time = meeting.start_time ? ` às ${meeting.start_time.slice(0, 5)}` : "";
+
+  return `${title} — ${formatDate(meeting.meeting_date)}${time} — ${formatStatus(
+    meeting.status
+  )}`;
+}
+
+
 export default function AreaReunioesPage() {
   const [associate, setAssociate] = useState<Associate | null>(null);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
@@ -349,7 +361,7 @@ export default function AreaReunioesPage() {
 
     if (!presenceAvailability.canConfirm) {
       setMessage(
-        `A confirmação de presença será liberada somente a partir de ${formatDateTime(
+        `A presença poderá ser confirmada a partir de ${formatDateTime(
           presenceAvailability.startDate.toISOString()
         )}.`
       );
@@ -392,7 +404,7 @@ export default function AreaReunioesPage() {
     }
 
     setAttendance((current) => [...current, data as Attendance]);
-    setMessage("Presença confirmada. Você está apto a votar nas pautas abertas.");
+    setMessage("Presença confirmada. Você poderá votar nas pautas quando a votação estiver aberta.");
     setSavingPresence(false);
   }
 
@@ -403,19 +415,19 @@ export default function AreaReunioesPage() {
     }
 
     if (!selectedMeetingAttendance) {
-      setMessage("Confirme sua presença antes de votar.");
+      setMessage("Confirme sua presença nesta reunião antes de votar.");
       return;
     }
 
     if (!isVotingOpen(agendaItem)) {
-      setMessage("A votação desta pauta não está aberta ou o prazo já encerrou.");
+      setMessage("A votação desta pauta não está aberta no momento.");
       return;
     }
 
     const existingVote = getVoteForAgenda(agendaItem.id);
 
     if (existingVote) {
-      setMessage("Você já registrou voto nesta pauta.");
+      setMessage("Seu voto nesta pauta já foi registrado.");
       return;
     }
 
@@ -457,7 +469,7 @@ export default function AreaReunioesPage() {
       console.error(error);
 
       if (String(error.message || "").toLowerCase().includes("duplicate")) {
-        setMessage("Você já registrou voto nesta pauta.");
+        setMessage("Seu voto nesta pauta já foi registrado.");
         await loadData();
         setSavingVote(false);
         return;
@@ -481,119 +493,84 @@ export default function AreaReunioesPage() {
   return (
     <ProtectedArea>
       <div className="space-y-4">
-        <section className="rounded-2xl bg-[#13233a] p-5 text-white shadow-xl shadow-slate-900/10">
-          <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
-            Participação do associado
+        <section className="rounded-xl bg-[#13233a] p-4 text-white shadow-sm">
+          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#c7a56b]">
+            Participação
           </p>
 
-          <h1 className="mt-2 text-2xl font-black tracking-[-0.04em]">
-            Reuniões e Votações
+          <h1 className="mt-1 text-xl font-black tracking-[-0.03em]">
+            Reuniões
           </h1>
 
-          <p className="mt-2 max-w-4xl text-sm leading-6 text-white/75">
-            Acompanhe reuniões convocadas, confirme presença e vote nas pautas
-            abertas durante a reunião.
+          <p className="mt-1 text-sm leading-5 text-white/70">
+            Confirme presença e vote nas pautas abertas.
           </p>
         </section>
 
         {message && (
-          <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 text-sm font-bold text-[#596579] shadow-sm">
+          <section className="rounded-xl border border-[#e8dccb] bg-white px-3 py-2 text-sm font-bold text-[#596579] shadow-sm">
             {message}
           </section>
         )}
 
-        <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-900">
-          A confirmação de presença e o voto registrados no sistema servem para
-          documentar a participação na reunião. As deliberações formais continuam
-          sujeitas ao Estatuto Social, quórum e registro em ata.
-        </section>
-
         {loading ? (
-          <section className="rounded-2xl border border-[#e8dccb] bg-white p-5 shadow-sm">
-            <p className="font-bold text-[#596579]">Carregando reuniões...</p>
+          <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+            <p className="text-sm font-bold text-[#596579]">Carregando reuniões...</p>
           </section>
         ) : meetings.length === 0 ? (
-          <section className="rounded-2xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+          <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
             <h2 className="font-black text-[#13233a]">
               Nenhuma reunião disponível
             </h2>
-            <p className="mt-2 text-sm leading-6 text-[#596579]">
-              No momento não há reuniões convocadas ou em andamento para
-              acompanhamento.
+            <p className="mt-1 text-sm leading-5 text-[#596579]">
+              No momento não há reuniões convocadas ou em andamento.
             </p>
           </section>
         ) : (
-          <div className="grid gap-4 xl:grid-cols-[360px_1fr]">
-            <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
-                    Reuniões
-                  </h2>
-                  <p className="text-xs font-bold text-[#596579]">
-                    Selecione uma reunião.
-                  </p>
-                </div>
+          <div className="space-y-3">
+            <section className="rounded-xl border border-[#e8dccb] bg-white p-3 shadow-sm">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <label className="grid min-w-0 flex-1 gap-1.5">
+                  <span className="text-xs font-semibold text-[#13233a]">
+                    Reunião
+                  </span>
+
+                  <select
+                    value={selectedMeetingId}
+                    onChange={(event) => setSelectedMeetingId(event.target.value)}
+                    className="w-full min-w-0 truncate rounded-lg border border-[#e8dccb] bg-white px-3 py-2 text-sm font-bold text-[#13233a] outline-none focus:border-[#c7a56b]"
+                  >
+                    {meetings.map((meeting) => (
+                      <option key={meeting.id} value={meeting.id}>
+                        {buildMeetingOptionLabel(meeting)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
                 <button
                   type="button"
                   onClick={loadData}
-                  className="rounded-full border border-[#e8dccb] bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.08em] text-[#13233a]"
+                  className="w-fit rounded-full border border-[#e8dccb] bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.08em] text-[#13233a]"
                 >
                   Atualizar
                 </button>
               </div>
-
-              <div className="mt-4 grid gap-2">
-                {meetings.map((meeting) => (
-                  <button
-                    key={meeting.id}
-                    type="button"
-                    onClick={() => setSelectedMeetingId(meeting.id)}
-                    className={`rounded-xl border px-4 py-3 text-left transition ${
-                      selectedMeetingId === meeting.id
-                        ? "border-[#c7a56b] bg-[#fff9ef]"
-                        : isToday(meeting.meeting_date)
-                          ? "border-green-200 bg-green-50 hover:bg-green-50"
-                          : "border-[#e8dccb] bg-white hover:bg-[#f7f8fa]"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="font-black text-[#13233a]">{meeting.title}</p>
-
-                      {isToday(meeting.meeting_date) && (
-                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.06em] text-green-800">
-                          Hoje
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="mt-1 text-xs font-bold leading-5 text-[#596579]">
-                      {formatDate(meeting.meeting_date)}
-                      {meeting.start_time
-                        ? ` às ${meeting.start_time.slice(0, 5)}`
-                        : ""}
-                      {" • "}
-                      {formatStatus(meeting.status)}
-                    </p>
-                  </button>
-                ))}
-              </div>
             </section>
 
             {selectedMeeting && (
-              <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+              <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#b28743]">
                       Reunião selecionada
                     </p>
 
-                    <h2 className="mt-1 text-xl font-black tracking-[-0.04em] text-[#13233a]">
+                    <h2 className="mt-1 text-lg font-black tracking-[-0.03em] text-[#13233a]">
                       {selectedMeeting.title}
                     </h2>
 
-                    <p className="mt-1 text-sm font-semibold leading-6 text-[#596579]">
+                    <p className="mt-1 text-sm font-semibold leading-5 text-[#596579]">
                       {formatDate(selectedMeeting.meeting_date)}
                       {selectedMeeting.start_time
                         ? ` às ${selectedMeeting.start_time.slice(0, 5)}`
@@ -608,11 +585,11 @@ export default function AreaReunioesPage() {
                   </div>
 
                   {selectedMeetingAttendance ? (
-                    <div className="rounded-2xl border border-green-200 bg-green-50 px-4 py-3">
+                    <div className="rounded-xl border border-green-200 bg-green-50 px-3 py-2">
                       <p className="text-sm font-black text-green-800">
                         Presença confirmada
                       </p>
-                      <p className="mt-1 text-xs font-bold text-green-700">
+                      <p className="mt-0.5 text-[11px] font-bold text-green-700">
                         {formatDateTime(selectedMeetingAttendance.confirmed_at)}
                       </p>
                     </div>

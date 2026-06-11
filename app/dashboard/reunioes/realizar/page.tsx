@@ -283,21 +283,24 @@ export default function RealizarReuniaoPage() {
     let detail = "";
 
     if (beforeStart) {
-      detail = `Presença e operação liberadas a partir de ${formatDateTime(
+      statusText = "Aguardando horário";
+      detail = `A reunião ainda não pode ser iniciada. A presença e a operação serão liberadas a partir de ${formatDateTime(
         startDate.toISOString()
       )}.`;
     } else if (hasFirstCallQuorum) {
-      statusText = "Apta";
-      detail = "Quórum de primeira convocação atingido.";
+      statusText = "Apta para início";
+      detail = `Quórum de primeira chamada atingido: ${presentCount} presença(s) registrada(s), de ${requiredFirstCall} necessária(s).`;
     } else if (secondCallAvailable && presentCount > 0) {
-      statusText = "Apta";
-      detail = "Segunda convocação disponível. Pode iniciar com os presentes.";
+      statusText = "Apta em segunda chamada";
+      detail = `Decorridos ${SECOND_CALL_WAIT_MINUTES} minutos do horário previsto, a reunião pode ser iniciada em segunda chamada com os presentes.`;
     } else if (secondCallAvailable && presentCount === 0) {
-      detail = "Segunda convocação disponível, mas ainda não há presença confirmada.";
+      statusText = "Aguardando presença";
+      detail = "A segunda chamada já está disponível, mas ainda não há presença registrada. Registre ao menos uma presença para iniciar.";
     } else {
-      detail = `Aguardando quórum ou segunda convocação às ${formatDateTime(
+      statusText = "Aguardando quórum";
+      detail = `Ainda não há quórum de primeira chamada. A reunião ficará liberada em segunda chamada às ${formatDateTime(
         secondCallDate.toISOString()
-      )}.`;
+      )}, com os presentes.`;
     }
 
     return {

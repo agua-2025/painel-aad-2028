@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
@@ -106,6 +106,17 @@ function normalizeNullableText(value: string) {
   return trimmed ? trimmed : null;
 }
 
+function buildMeetingOptionLabel(meeting: Meeting, minute?: Minute | null) {
+  const title =
+    meeting.title.length > 70 ? `${meeting.title.slice(0, 70)}...` : meeting.title;
+
+  const time = meeting.start_time ? ` às ${meeting.start_time.slice(0, 5)}` : "";
+  const minuteStatus = minute ? formatStatus(minute.status) : "Pendente";
+
+  return `${title} — ${formatDate(meeting.meeting_date)}${time} — Ata: ${minuteStatus}`;
+}
+
+
 export default function AtasReunioesPage() {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
@@ -116,7 +127,16 @@ export default function AtasReunioesPage() {
 
   const [selectedMeetingId, setSelectedMeetingId] = useState("");
   const [additionalInfo, setAdditionalInfo] = useState("");
+  const [presidentName, setPresidentName] = useState("Aline Novakc Locate");
+  const [secretaryName, setSecretaryName] = useState(
+    "Claudia Braga Babilônia Faria dos Santos"
+  );
   const [draftText, setDraftText] = useState("");
+
+  const [filters, setFilters] = useState({
+    search: "",
+    minuteStatus: "todos",
+  });
 
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState(false);
@@ -132,6 +152,28 @@ export default function AtasReunioesPage() {
     () => minutes.find((minute) => minute.meeting_id === selectedMeetingId) ?? null,
     [minutes, selectedMeetingId]
   );
+
+  const selectedMinuteIsFinal = selectedMinute?.status === "final";
+
+  const filteredMeetings = useMemo(() => {
+    const searchTerm = filters.search.trim().toLowerCase();
+
+    return meetings.filter((meeting) => {
+      const minute = minutes.find((item) => item.meeting_id === meeting.id);
+      const minuteStatus = minute?.status || "pendente";
+
+      const matchesStatus =
+        filters.minuteStatus === "todos" ||
+        filters.minuteStatus === minuteStatus;
+
+      const matchesSearch =
+        !searchTerm ||
+        meeting.title.toLowerCase().includes(searchTerm) ||
+        formatDate(meeting.meeting_date).toLowerCase().includes(searchTerm);
+
+      return matchesStatus && matchesSearch;
+    });
+  }, [filters.minuteStatus, filters.search, meetings, minutes]);
 
   const selectedAgenda = useMemo(
     () =>
@@ -160,6 +202,26 @@ export default function AtasReunioesPage() {
     setDraftText("");
     setAdditionalInfo("");
   }, [selectedMinute, selectedMeetingId]);
+
+  function updateFilter(field: string, value: string) {
+    setFilters((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  }
+
+  function applyFilters(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const firstMeeting = filteredMeetings[0];
+
+    if (firstMeeting) {
+      setSelectedMeetingId(firstMeeting.id);
+      return;
+    }
+
+    setSelectedMeetingId("");
+  }
 
   async function loadData() {
     setLoading(true);
@@ -341,6 +403,11 @@ export default function AtasReunioesPage() {
       return;
     }
 
+    if (selectedMinuteIsFinal) {
+      setErrorMessage("Esta ata já foi salva como final e está bloqueada para edição.");
+      return;
+    }
+
     setWorking(true);
     setErrorMessage("");
     setMessage("Gerando minuta com IA...");
@@ -382,6 +449,8 @@ export default function AtasReunioesPage() {
         attendance: selectedAttendance,
         agendaItems: agendaPayload,
         additionalInfo,
+        presidentName,
+        secretaryName,
       }),
     });
 
@@ -395,7 +464,7 @@ export default function AtasReunioesPage() {
     }
 
     setDraftText(result.minuteText || "");
-    setMessage("Minuta gerada com IA. Revise o texto antes de salvar.");
+    setMessage("Ata gerada com IA. Revise cuidadosamente antes de salvar como minuta ou versão final.");
     setWorking(false);
   }
 
@@ -407,6 +476,11 @@ export default function AtasReunioesPage() {
 
     if (!draftText.trim()) {
       setErrorMessage("A ata/minuta não pode ser salva vazia.");
+      return;
+    }
+
+    if (selectedMinuteIsFinal) {
+      setErrorMessage("Esta ata já foi salva como final e não pode ser alterada.");
       return;
     }
 
@@ -517,7 +591,7 @@ export default function AtasReunioesPage() {
       },
     });
 
-    setMessage(status === "final" ? "Ata final salva." : "Minuta salva.");
+    setMessage(status === "final" ? "Ata final salva com sucesso." : "Minuta salva com sucesso.");
     setWorking(false);
   }
 
@@ -536,8 +610,8 @@ export default function AtasReunioesPage() {
               </h1>
 
               <p className="mt-2 max-w-4xl text-sm leading-6 text-white/75">
-                Gere minuta somente após o encerramento da reunião, complemente,
-                revise e salve a versão final.
+                Elabore atas formais a partir das reuniões encerradas, com apoio
+                da IA, revisão humana e salvamento da versão final.
               </p>
             </div>
 
@@ -580,60 +654,94 @@ export default function AtasReunioesPage() {
             </p>
           </section>
         ) : (
-          <div className="grid items-start gap-4 xl:grid-cols-[340px_1fr]">
-            <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-base font-black text-[#13233a]">
-                    Reuniões encerradas
-                  </h2>
-                  <p className="text-xs font-bold text-[#596579]">
-                    Selecione uma reunião.
-                  </p>
+          <div className="space-y-4">
+            <form
+              onSubmit={applyFilters}
+              className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm"
+            >
+              <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px_minmax(0,2fr)_auto]">
+                <label className="grid min-w-0 gap-1.5">
+                  <span className="text-xs font-semibold text-[#13233a]">
+                    Buscar reunião
+                  </span>
+                  <input
+                    value={filters.search}
+                    onChange={(event) => updateFilter("search", event.target.value)}
+                    placeholder="Ex.: mensalidade, assembleia..."
+                    className="w-full min-w-0 rounded-lg border border-[#e8dccb] px-3 py-2 text-sm font-medium text-[#13233a] outline-none focus:border-[#c7a56b]"
+                  />
+                </label>
+
+                <label className="grid min-w-0 gap-1.5">
+                  <span className="text-xs font-semibold text-[#13233a]">
+                    Status da ata
+                  </span>
+                  <select
+                    value={filters.minuteStatus}
+                    onChange={(event) =>
+                      updateFilter("minuteStatus", event.target.value)
+                    }
+                    className="w-full min-w-0 rounded-lg border border-[#e8dccb] px-3 py-2 text-sm font-medium text-[#13233a] outline-none focus:border-[#c7a56b]"
+                  >
+                    <option value="todos">Todos</option>
+                    <option value="pendente">Pendente</option>
+                    <option value="minuta">Minuta</option>
+                    <option value="final">Final</option>
+                  </select>
+                </label>
+
+                <label className="grid min-w-0 gap-1.5">
+                  <span className="text-xs font-semibold text-[#13233a]">
+                    Reunião encerrada
+                  </span>
+                  <select
+                    value={selectedMeetingId}
+                    onChange={(event) => setSelectedMeetingId(event.target.value)}
+                    className="w-full min-w-0 truncate rounded-lg border border-[#e8dccb] px-3 py-2 text-sm font-bold text-[#13233a] outline-none focus:border-[#c7a56b]"
+                  >
+                    {filteredMeetings.length === 0 ? (
+                      <option value="">Nenhuma reunião encontrada</option>
+                    ) : (
+                      filteredMeetings.map((meeting) => {
+                        const minute = minutes.find(
+                          (item) => item.meeting_id === meeting.id
+                        );
+
+                        return (
+                          <option key={meeting.id} value={meeting.id}>
+                            {buildMeetingOptionLabel(meeting, minute)}
+                          </option>
+                        );
+                      })
+                    )}
+                  </select>
+                </label>
+
+                <div className="flex min-w-0 items-end">
+                  <button
+                    type="submit"
+                    className="w-full rounded-full bg-[#13233a] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-white"
+                  >
+                    Aplicar
+                  </button>
                 </div>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[#e8dccb] pt-3">
+                <p className="text-xs font-bold text-[#596579]">
+                  {filteredMeetings.length} reunião(ões) encontrada(s). A ata
+                  exibida abaixo está vinculada à reunião selecionada.
+                </p>
 
                 <button
                   type="button"
                   onClick={loadData}
-                  className="rounded-full border border-[#e8dccb] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.08em] text-[#13233a]"
+                  className="rounded-full border border-[#e8dccb] px-4 py-2 text-[10px] font-black uppercase tracking-[0.08em] text-[#13233a]"
                 >
                   Atualizar
                 </button>
               </div>
-
-              <div className="mt-3 grid gap-1.5">
-                {meetings.map((meeting) => {
-                  const minute = minutes.find(
-                    (item) => item.meeting_id === meeting.id
-                  );
-
-                  return (
-                    <button
-                      key={meeting.id}
-                      type="button"
-                      onClick={() => setSelectedMeetingId(meeting.id)}
-                      className={`rounded-lg border px-3 py-2 text-left ${
-                        selectedMeetingId === meeting.id
-                          ? "border-[#c7a56b] bg-[#fff9ef]"
-                          : "border-[#e8dccb] bg-white hover:bg-[#f7f8fa]"
-                      }`}
-                    >
-                      <p className="text-sm font-black leading-5 text-[#13233a]">
-                        {meeting.title}
-                      </p>
-
-                      <p className="mt-1 text-[11px] font-bold leading-4 text-[#596579]">
-                        {formatDate(meeting.meeting_date)}
-                        {meeting.start_time
-                          ? ` às ${meeting.start_time.slice(0, 5)}`
-                          : ""}{" "}
-                        • Ata: {minute ? formatStatus(minute.status) : "Pendente"}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
+            </form>
 
             {selectedMeeting && (
               <section className="space-y-4">
@@ -695,20 +803,20 @@ export default function AtasReunioesPage() {
 
                 <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
                   <h2 className="text-base font-black text-[#13233a]">
-                    Informações complementares para a ata
+                    Complemento para elaboração da ata
                   </h2>
 
                   <p className="mt-1 text-xs font-bold leading-5 text-[#596579]">
-                    Use este campo para incluir detalhes que o sistema não captou,
-                    como debates, observações, justificativas, encaminhamentos ou
-                    falas relevantes.
+                    Registre aqui apenas informações relevantes que não aparecem
+                    automaticamente no sistema, como debates, encaminhamentos,
+                    justificativas, responsáveis, prazos ou observações necessárias.
                   </p>
 
                   <textarea
                     value={additionalInfo}
                     onChange={(event) => setAdditionalInfo(event.target.value)}
                     rows={4}
-                    placeholder="Ex.: A Diretoria destacou que os valores deverão ser confirmados antes da campanha..."
+                    placeholder="Ex.: Após breve debate, ficou encaminhado que a Diretoria apresentará levantamento de custos na próxima reunião..."
                     className="mt-3 w-full resize-none rounded-lg border border-[#e8dccb] px-3 py-2 text-sm font-medium text-[#13233a] outline-none focus:border-[#c7a56b]"
                   />
 
@@ -726,12 +834,12 @@ export default function AtasReunioesPage() {
                   <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                     <div>
                       <h2 className="text-base font-black text-[#13233a]">
-                        Minuta / Ata
+                        Texto da ata
                       </h2>
 
                       <p className="text-xs font-bold text-[#596579]">
-                        Revise o texto antes de salvar. A ata final deve ser
-                        conferida pela Diretoria/Secretaria.
+                        Revise com atenção antes de salvar. A minuta e a ata final
+                        ficam vinculadas à reunião selecionada na tabela de atas do sistema.
                       </p>
                     </div>
 
@@ -739,16 +847,16 @@ export default function AtasReunioesPage() {
                       <button
                         type="button"
                         onClick={() => saveMinute("minuta")}
-                        disabled={working || !draftText.trim()}
+                        disabled={working || !draftText.trim() || selectedMinuteIsFinal}
                         className="rounded-full border border-[#e8dccb] bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.08em] text-[#13233a] disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        Salvar minuta
+                        Salvar como minuta
                       </button>
 
                       <button
                         type="button"
                         onClick={() => saveMinute("final")}
-                        disabled={working || !draftText.trim()}
+                        disabled={working || !draftText.trim() || selectedMinuteIsFinal}
                         className="rounded-full bg-[#13233a] px-4 py-2 text-[10px] font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Salvar ata final
@@ -756,13 +864,26 @@ export default function AtasReunioesPage() {
                     </div>
                   </div>
 
-                  <textarea
-                    value={draftText}
-                    onChange={(event) => setDraftText(event.target.value)}
-                    rows={22}
-                    placeholder="A minuta gerada aparecerá aqui..."
-                    className="mt-4 w-full resize-y rounded-lg border border-[#e8dccb] bg-[#fdfcf9] px-4 py-3 font-mono text-sm leading-6 text-[#13233a] outline-none focus:border-[#c7a56b]"
-                  />
+                  {selectedMinuteIsFinal && (
+                    <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-bold text-green-800">
+                      Ata final salva e bloqueada para edição. Alterações posteriores
+                      devem ser tratadas como novo procedimento administrativo ou
+                      retificação formal.
+                    </div>
+                  )}
+
+                  <div className="mt-4 rounded-2xl border border-[#e8dccb] bg-[#eee7dc] p-4">
+                    <div className="mx-auto max-w-[850px] rounded-sm bg-white shadow-sm ring-1 ring-black/5">
+                      <textarea
+                        value={draftText}
+                        onChange={(event) => setDraftText(event.target.value)}
+                        rows={32}
+                        readOnly={selectedMinuteIsFinal}
+                        placeholder="A ata gerada pela IA aparecerá aqui para revisão..."
+                        className="min-h-[900px] w-full resize-y border-0 bg-white px-10 py-9 font-serif text-[15px] leading-8 text-[#111827] outline-none placeholder:text-[#9ca3af] text-justify read-only:bg-white read-only:cursor-default"
+                      />
+                    </div>
+                  </div>
                 </section>
               </section>
             )}

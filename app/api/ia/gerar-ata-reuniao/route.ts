@@ -49,6 +49,8 @@ export async function POST(request: Request) {
     const attendance = (body.attendance ?? []) as AttendancePayload[];
     const agendaItems = (body.agendaItems ?? []) as AgendaItemPayload[];
     const additionalInfo = String(body.additionalInfo ?? "").trim();
+    const presidentName = String(body.presidentName ?? "").trim();
+    const secretaryName = String(body.secretaryName ?? "").trim();
 
     if (!meeting?.title || !meeting?.meeting_date) {
       return NextResponse.json(
@@ -58,43 +60,82 @@ export async function POST(request: Request) {
     }
 
     const prompt = `
-Você é responsável por redigir uma ata formal para a Associação dos Acadêmicos do Curso de Direito – Turma de Formatura 2028 – AAD Direito 2028.
+Você é responsável por redigir atas formais da Associação dos Acadêmicos do Curso de Direito – Turma de Formatura 2028 – AAD Direito 2028.
 
-Elabore uma ATA em texto corrido, formal, limpa e pronta para revisão, usando exclusivamente os dados fornecidos.
+Elabore uma ATA em padrão formal tradicional, semelhante a atas de associações civis, usando exclusivamente os dados fornecidos pelo sistema.
 
-REGRAS DE FORMATAÇÃO:
-- Não use markdown.
-- Não use asteriscos.
-- Não use títulos em negrito.
-- Não use listas com bullet points, salvo se realmente necessário.
-- Não use expressões como "informação não completa no sistema".
-- Não escreva campos artificiais como "Reunião encerrada: sim".
-- Não invente nomes de Presidente ou Secretário.
-- No final, use apenas linhas de assinatura genéricas:
-  Presidência
-  Secretaria/Diretoria responsável
+A ata deve seguir este estilo:
+- texto corrido;
+- parágrafos objetivos;
+- sem aparência de relatório;
+- sem tópicos;
+- sem markdown;
+- sem negrito;
+- sem asteriscos;
+- sem emojis;
+- sem colchetes;
+- sem cabeçalhos como "1. ABERTURA", "2. PRESENÇAS" ou "3. PAUTAS";
+- sem frases artificiais como "Reunião encerrada: sim", "informação não completa no sistema" ou "dados insuficientes";
+- sem linguagem de chatbot;
+- sem comentários antes ou depois da ata.
+
+MODELO DE REDAÇÃO A SER SEGUIDO:
+ATA DE REUNIÃO ORDINÁRIA DA ASSOCIAÇÃO DOS ACADÊMICOS DO CURSO DE DIREITO – AAD DIREITO 2028
+
+Aos dez dias do mês de junho do ano de dois mil e vinte e seis, às dezenove horas, em modalidade online, por meio de link previamente disponibilizado aos associados, foi aberta a Reunião Ordinária da Associação dos Acadêmicos do Curso de Direito – AAD Direito 2028.
+
+A Presidente, Sra. Aline Novakc Locate, iniciou os trabalhos saudando os membros presentes e, em seguida, declarou aberta a reunião.
+
+Conforme registro e confirmação no sistema da Associação, esteve presente o associado Márcio Luiz Pereira.
+
+Aberta a reunião, passou-se à apreciação da pauta prevista, consistente na definição do valor da mensalidade da Associação para o ano de 2026.
+
+Submetida a matéria à votação, foram apresentadas as seguintes opções: R$ 40,00, R$ 50,00, R$ 60,00 e abstenção. Encerrada a votação, foi registrado o total de 1 voto, com o seguinte resultado: R$ 40,00, com 1 voto; R$ 50,00, com 0 votos; R$ 60,00, com 0 votos; e abstenção, com 0 votos.
+
+Dessa forma, restou aprovada a fixação da mensalidade da Associação dos Acadêmicos do Curso de Direito – AAD Direito 2028, para o ano de 2026, no valor de R$ 40,00.
+
+Nada mais havendo a tratar, a Presidente declarou encerrada a reunião, ocasião em que a Secretária, Sra. Claudia Braga Babilônia Faria dos Santos, lavrou a presente ata, que, após lida e aprovada, será assinada pelos responsáveis.
+
+____________________________________
+Aline Novakc Locate
+Presidente
+
+____________________________________
+Claudia Braga Babilônia Faria dos Santos
+Secretária
 
 REGRAS DE CONTEÚDO:
-- Não invente fatos, nomes, horários, quórum, deliberações ou resultados.
-- Se algum dado estiver ausente, simplesmente omita ou registre de forma discreta.
-- Se houver votos nas opções, informe o resultado com base nos votos enviados.
-- Se todas as opções estiverem com zero votos, diga apenas que não houve voto registrado.
-- Se houver apenas uma presença registrada, redija naturalmente, sem destacar como problema.
-- Não diga que o texto foi feito por IA.
-- Não faça comentários fora da ata.
-- Use linguagem institucional, objetiva e elegante.
-- A ata deve ter aparência parecida com documento oficial, não com relatório de sistema.
-
-ESTRUTURA DESEJADA:
-1. Título simples: ATA DE REUNIÃO DA ASSOCIAÇÃO DOS ACADÊMICOS DO CURSO DE DIREITO – AAD DIREITO 2028
-2. Abertura em texto corrido, com data, horário, formato e local/link.
-3. Registro de presença.
-4. Pautas tratadas e deliberações.
-5. Encerramento.
-6. Assinaturas.
+- Use o modelo acima apenas como referência de estilo, não copie os dados do exemplo.
+- Use os dados reais enviados pelo sistema.
+- A ata deve começar diretamente pelo título.
+- O título deve ser em caixa alta.
+- Se a reunião tiver nome ou tipo que indique "ordinária", use "ATA DE REUNIÃO ORDINÁRIA...".
+- Se a reunião indicar "extraordinária", use "ATA DE REUNIÃO EXTRAORDINÁRIA...".
+- Se não for possível identificar se é ordinária ou extraordinária, use "ATA DE REUNIÃO DA ASSOCIAÇÃO...".
+- A abertura deve informar data, horário, modalidade e local/link.
+- A Presidente deve ser descrita como quem iniciou os trabalhos e declarou aberta a reunião, quando houver nome informado.
+- A Secretária deve ser descrita como quem lavrou a ata, quando houver nome informado.
+- As presenças devem ser registradas em parágrafo próprio.
+- Se houver apenas uma pessoa presente, escreva "esteve presente o associado..." ou "esteve presente a associada...", conforme o nome não indicar claramente gênero, prefira "esteve presente o(a) associado(a)" apenas se necessário.
+- Não invente quórum.
+- Não invente debates.
+- Não invente deliberações.
+- Se houver informações complementares, incorpore naturalmente ao texto.
+- Em votação, informe opções e votos no mesmo padrão do modelo.
+- Se houver opção vencedora, registre a aprovação decorrente da votação.
+- Se não houver voto registrado, diga de forma simples que não houve voto registrado para a pauta.
+- No encerramento, use a fórmula "Nada mais havendo a tratar...".
+- Finalize com assinatura da Presidência e da Secretaria.
+- Use exatamente os nomes informados quando existirem.
 
 DADOS DA REUNIÃO:
 ${JSON.stringify(meeting, null, 2)}
+
+NOME DA PRESIDENTE/CONDUTORA DA REUNIÃO:
+${presidentName || "Não informado"}
+
+NOME DA SECRETÁRIA/RESPONSÁVEL PELA LAVRATURA:
+${secretaryName || "Não informado"}
 
 PRESENÇAS CONFIRMADAS:
 ${JSON.stringify(attendance, null, 2)}
@@ -105,7 +146,7 @@ ${JSON.stringify(agendaItems, null, 2)}
 INFORMAÇÕES COMPLEMENTARES:
 ${additionalInfo || "Não foram informadas informações complementares."}
 
-Gere somente o texto da ata, em português do Brasil.
+Gere somente o texto da ata, em português do Brasil, seguindo rigorosamente o padrão formal acima.
 `;
 
     const ai = new GoogleGenAI({ apiKey });

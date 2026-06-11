@@ -19,6 +19,7 @@ const menuItems = [
   { label: "Auditoria", href: "/dashboard/auditoria", icon: "📋" },
   { label: "Avisos", href: "/dashboard/avisos", icon: "📢" },
   { label: "Comunicações", href: "/dashboard/comunicacoes", icon: "💬" },
+  { label: "Reuniões e Atas", href: "/dashboard/reunioes", icon: "🗳️" },
   { label: "Assistente IA", href: "/dashboard/assistente", icon: "🤖" },
   { label: "Regras Financeiras", href: "/dashboard/financeiro", icon: "⚖️" },
   { label: "Mensalidades", href: "/dashboard/mensalidades", icon: "📅" },

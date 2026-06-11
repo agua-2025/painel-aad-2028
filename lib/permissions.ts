@@ -17,6 +17,7 @@ export type DashboardModule =
   | "solicitacoes"
   | "avisos"
   | "comunicacoes"
+  | "reunioes"
   | "financeiro"
   | "mensalidades"
   | "contribuicoes_extras"
@@ -50,6 +51,7 @@ const moduleByPath: { path: string; module: DashboardModule }[] = [
   { path: "/dashboard/solicitacoes", module: "solicitacoes" },
   { path: "/dashboard/avisos", module: "avisos" },
   { path: "/dashboard/comunicacoes", module: "comunicacoes" },
+  { path: "/dashboard/reunioes", module: "reunioes" },
   { path: "/dashboard/financeiro", module: "financeiro" },
   { path: "/dashboard/mensalidades", module: "mensalidades" },
   { path: "/dashboard/contribuicoes-extras", module: "contribuicoes_extras" },
@@ -78,6 +80,7 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
     "avisos",
     "assistente",
     "comunicacoes",
+    "reunioes",
     "financeiro",
     "mensalidades",
     "contribuicoes_extras",
@@ -104,6 +107,7 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
     "avisos",
     "assistente",
     "comunicacoes",
+    "reunioes",
     "financeiro",
     "mensalidades",
     "contribuicoes_extras",
@@ -130,6 +134,7 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
     "avisos",
     "assistente",
     "comunicacoes",
+    "reunioes",
     "financeiro",
     "mensalidades",
     "contribuicoes_extras",
@@ -154,6 +159,7 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
     "avisos",
     "assistente",
     "comunicacoes",
+    "reunioes",
     "relatorios",
   ],
 
@@ -199,6 +205,7 @@ const roleModuleAccess: Record<AppRole, DashboardModule[]> = {
 };
 
 const writePermissions: Partial<Record<DashboardModule, AppRole[]>> = {
+  reunioes: ["administrador", "presidente", "vice_presidente", "secretaria"],
   associados: ["administrador", "presidente", "secretaria"],
   solicitacoes: ["administrador", "presidente", "vice_presidente", "secretaria"],
   avisos: ["administrador", "presidente", "vice_presidente", "secretaria"],

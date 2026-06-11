@@ -19,6 +19,7 @@ const baseMenuItems = [
   { label: "Meus dados", href: "/area/dados", icon: "👤" },
   { label: "Documentos", href: "/area/documentos", icon: "📄" },
   { label: "Avisos", href: "/area/avisos", icon: "📢" },
+  { label: "Reuniões", href: "/area/reunioes", icon: "🗳️" },
   { label: "Suporte", href: "/area/suporte", icon: "💬" },
   { label: "Assistente IA", href: "/area/assistente", icon: "🤖" },
 ];
