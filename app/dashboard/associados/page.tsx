@@ -78,6 +78,7 @@ export default function AssociadosPage() {
   const [associates, setAssociates] = useState<Associate[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -119,6 +120,31 @@ export default function AssociadosPage() {
       overdueCount,
     };
   }, [associates]);
+
+  const filteredAssociates = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+
+    if (!term) return associates;
+
+    return associates.filter((associate) => {
+      const searchableText = [
+        associate.full_name,
+        associate.email,
+        associate.cpf,
+        associate.phone,
+        associate.city,
+        associate.state,
+        associate.semester,
+        formatStatus(associate.status),
+        formatStatus(associate.financial_status),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return searchableText.includes(term);
+    });
+  }, [associates, searchTerm]);
 
   async function loadAssociates() {
     setLoading(true);
@@ -183,14 +209,14 @@ export default function AssociadosPage() {
       joined_at: associate.joined_at || "",
       notes: associate.notes || "",
     });
-  }
 
-  setTimeout(() => {
-  editSectionRef.current?.scrollIntoView({
-    behavior: "smooth",
-    block: "start",
-  });
-}, 100);
+    setTimeout(() => {
+      editSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
+  }
 
   function closeEditAssociate() {
     setEditingAssociate(null);
@@ -692,8 +718,36 @@ export default function AssociadosPage() {
             </div>
 
             <p className="text-xs font-bold text-[#596579]">
-              {associates.length} registro(s)
+              {searchTerm.trim()
+                ? `${filteredAssociates.length} de ${associates.length} registro(s)`
+                : `${associates.length} registro(s)`}
             </p>
+          </div>
+
+          <div className="mt-4 grid gap-2 md:grid-cols-[1fr_auto] md:items-center">
+            <label className="grid gap-1.5">
+              <span className="text-xs font-black uppercase tracking-[0.08em] text-[#596579]">
+                Pesquisar associado
+              </span>
+
+              <input
+                type="search"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Buscar por nome, e-mail, CPF, telefone, cidade, semestre ou situação..."
+                className="w-full rounded-xl border border-[#e8dccb] bg-white px-4 py-2.5 text-sm font-semibold text-[#13233a] outline-none placeholder:text-[#596579]/60 focus:border-[#c7a56b]"
+              />
+            </label>
+
+            {searchTerm.trim() && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm("")}
+                className="mt-5 w-fit rounded-full border border-[#e8dccb] bg-white px-4 py-2 text-[11px] font-black uppercase tracking-[0.08em] text-[#13233a] hover:bg-[#f7f8fa]"
+              >
+                Limpar busca
+              </button>
+            )}
           </div>
 
           {loading ? (
@@ -710,6 +764,16 @@ export default function AssociadosPage() {
                 O próximo passo será cadastrar o primeiro associado pelo botão “Novo associado”.
               </p>
             </div>
+          ) : filteredAssociates.length === 0 ? (
+            <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-4">
+              <h3 className="text-base font-black tracking-[-0.03em] text-[#13233a]">
+                Nenhum associado encontrado
+              </h3>
+
+              <p className="mt-1 text-sm leading-6 text-[#596579]">
+                Tente buscar por outro nome, e-mail, CPF, telefone, cidade, semestre ou situação.
+              </p>
+            </div>
           ) : (
             <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
               <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#596579] lg:grid">
@@ -723,7 +787,7 @@ export default function AssociadosPage() {
               </div>
 
               <div className="divide-y divide-[#eee7db]">
-                {associates.map((associate) => (
+                {filteredAssociates.map((associate) => (
                   <article
                     key={associate.id}
                     className="grid gap-3 px-3 py-3 text-sm lg:grid-cols-12 lg:items-center"
