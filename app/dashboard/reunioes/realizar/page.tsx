@@ -332,6 +332,7 @@ export default function RealizarReuniaoPage() {
   }
 
   async function startMeeting() {
+    const startedAt = new Date().toISOString();
     if (!selectedMeeting) return;
 
     if (selectedMeeting.status === "encerrada") {
@@ -354,7 +355,7 @@ export default function RealizarReuniaoPage() {
 
     const { error } = await supabase
       .from("meetings")
-      .update({ status: "em_andamento" })
+      .update({ status: "em_andamento", started_at: startedAt })
       .eq("id", selectedMeeting.id);
 
     if (error) {
@@ -372,13 +373,13 @@ export default function RealizarReuniaoPage() {
       recordId: selectedMeeting.id,
       description: `Iniciou a reunião ${selectedMeeting.title}.`,
       oldData: { status: selectedMeeting.status },
-      newData: { status: "em_andamento" },
+      newData: { status: "em_andamento", started_at: startedAt },
     });
 
     setMeetings((current) =>
       current.map((meeting) =>
         meeting.id === selectedMeeting.id
-          ? { ...meeting, status: "em_andamento" }
+          ? { ...meeting, status: "em_andamento", started_at: startedAt }
           : meeting
       )
     );

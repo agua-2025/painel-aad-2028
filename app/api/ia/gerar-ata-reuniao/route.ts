@@ -32,6 +32,43 @@ function getErrorMessage(error: unknown) {
   }
 }
 
+function buildAttendanceSignatureList(attendance: AttendancePayload[]) {
+  const uniqueNames = Array.from(
+    new Set(
+      attendance
+        .map((item) => String(item.full_name || "").trim())
+        .filter(Boolean)
+    )
+  );
+
+  if (uniqueNames.length === 0) {
+    return "";
+  }
+
+  const lines = uniqueNames
+    .map((name, index) => `${index + 1}. ${name}`)
+    .join("\n");
+
+  return `\n\nRELAÇÃO DOS ASSOCIADOS PRESENTES\n\n${lines}\n\nObservação: as presenças acima foram registradas eletronicamente no sistema da Associação.`;
+}
+
+function ensureAttendanceSignatureList(
+  minuteText: string,
+  attendance: AttendancePayload[]
+) {
+  if (minuteText.toUpperCase().includes("RELAÇÃO DOS ASSOCIADOS PRESENTES")) {
+    return minuteText;
+  }
+
+  const signatureList = buildAttendanceSignatureList(attendance);
+
+  if (!signatureList) {
+    return minuteText;
+  }
+
+  return `${minuteText.trim()}${signatureList}`;
+}
+
 export async function POST(request: Request) {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
@@ -108,6 +145,18 @@ REGRAS DE CONTEÚDO:
 - Use o modelo acima apenas como referência de estilo, não copie os dados do exemplo.
 - Use os dados reais enviados pelo sistema.
 - A ata deve começar diretamente pelo título.
+
+REGRAS IMPORTANTES SOBRE VOTAÇÃO E DELIBERAÇÃO:
+- Não declare automaticamente que uma matéria foi "aprovada" apenas porque existe uma opção com voto.
+- Somente use expressões como "restou aprovada" quando houver uma opção vencedora clara e sem empate.
+- Se houver empate entre duas ou mais opções mais votadas, registre expressamente o empate e diga que não houve deliberação conclusiva sobre a pauta.
+- Se todas as opções estiverem com zero votos, registre que não houve voto registrado para a pauta.
+- Se o número de votos registrados for menor que o número de presenças confirmadas, registre de forma discreta o total de votos apurados, sem criticar os ausentes ou os que não votaram.
+- Em reunião identificada como teste, simulação ou validação do sistema, não trate a decisão como deliberação definitiva da Associação; use expressões como "para fins de teste do sistema", "na simulação realizada" ou "no teste de votação".
+- Não invente regra de desempate.
+- Não invente maioria, quórum especial ou aprovação por aclamação.
+- Quando houver empate, não escolha a primeira opção como vencedora.
+- Quando houver opção vencedora clara, registre como "opção mais votada" ou "resultado apurado", e somente converta em deliberação aprovada se o contexto indicar reunião deliberativa real.
 - O título deve ser em caixa alta.
 - Se a reunião tiver nome ou tipo que indique "ordinária", use "ATA DE REUNIÃO ORDINÁRIA...".
 - Se a reunião indicar "extraordinária", use "ATA DE REUNIÃO EXTRAORDINÁRIA...".
@@ -171,8 +220,13 @@ Gere somente o texto da ata, em português do Brasil, seguindo rigorosamente o p
         const minuteText = response.text?.trim();
 
         if (minuteText) {
-          return NextResponse.json({
+          const finalMinuteText = ensureAttendanceSignatureList(
             minuteText,
+            attendance
+          );
+
+          return NextResponse.json({
+            minuteText: finalMinuteText,
             modelUsed: model,
           });
         }
