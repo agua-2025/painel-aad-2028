@@ -19,6 +19,7 @@ const categoryLabels: Record<string, string> = {
   geral: "Geral",
   financeiro: "Financeiro",
   assembleia: "Assembleia",
+  convocacao: "Convocação",
   evento: "Evento",
   documentos: "Documentos",
 };
@@ -229,6 +230,7 @@ export default function DashboardAvisosPage() {
                     <option value="geral">Geral</option>
                     <option value="financeiro">Financeiro</option>
                     <option value="assembleia">Assembleia</option>
+                    <option value="convocacao">Convocação</option>
                     <option value="evento">Evento</option>
                     <option value="documentos">Documentos</option>
                   </select>

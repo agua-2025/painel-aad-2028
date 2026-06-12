@@ -9,6 +9,12 @@ const modules = [
     icon: "📝",
   },
   {
+    title: "Convocação",
+    description: "Gerar aviso de convocação a partir de reunião cadastrada.",
+    href: "/dashboard/reunioes/convocacao",
+    icon: "📣",
+  },
+  {
     title: "Realizar reunião",
     description: "Acompanhar presença, quórum, votação e encerramento.",
     href: "/dashboard/reunioes/realizar",

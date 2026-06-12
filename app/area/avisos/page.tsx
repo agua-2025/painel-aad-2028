@@ -30,6 +30,7 @@ const categoryLabels: Record<string, string> = {
   geral: "Geral",
   financeiro: "Financeiro",
   assembleia: "Assembleia",
+  convocacao: "Convocação",
   evento: "Evento",
   documentos: "Documentos",
 };
