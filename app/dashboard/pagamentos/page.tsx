@@ -5,6 +5,7 @@ import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
 import { useDashboardPermissions } from "@/lib/useDashboardPermissions";
 import { registerAuditLog } from "@/lib/audit";
+import { calculateExtraContributionAmountDue } from "@/lib/extraContributionCharges";
 
 type AssociateData = {
   full_name: string;
@@ -35,6 +36,10 @@ type ExtraContributionData = {
   description: string | null;
   reason: string | null;
   status: string;
+  apply_late_charges: boolean;
+  late_fee_percent: number;
+  daily_interest_percent: number;
+  late_fee_grace_days: number;
 };
 
 type ExtraContributionItemData = {
@@ -286,22 +291,7 @@ function calculateMonthlyAmountDueAtDate(report: PaymentReport) {
 }
 
 function calculateExtraAmountDue(report: PaymentReport) {
-  const item = getExtraItem(report);
-
-  if (!item) {
-    return {
-      totalDue: 0,
-      remaining: 0,
-    };
-  }
-
-  const totalDue = Number(item.amount ?? 0);
-  const remaining = Math.max(totalDue - Number(item.paid_amount ?? 0), 0);
-
-  return {
-    totalDue,
-    remaining,
-  };
+  return calculateExtraContributionAmountDue(getExtraItem(report), report.paid_at);
 }
 
 function getReportBadgeClass(status: string) {
@@ -347,7 +337,7 @@ export default function DashboardPagamentosPage() {
     const { data, error } = await supabase
       .from("payment_reports")
       .select(
-        "id, associate_id, monthly_fee_id, extra_contribution_item_id, amount, paid_at, payment_method, reference, notes, status, review_notes, created_at, associates(full_name, email, phone), monthly_fees(id, year, month, base_amount, due_date, late_fee_percent, daily_interest_percent, paid_amount, status, financial_settings(late_fee_grace_days)), extra_contribution_items(id, amount, paid_amount, due_date, status, extra_contributions(id, title, description, reason, status))"
+        "id, associate_id, monthly_fee_id, extra_contribution_item_id, amount, paid_at, payment_method, reference, notes, status, review_notes, created_at, associates(full_name, email, phone), monthly_fees(id, year, month, base_amount, due_date, late_fee_percent, daily_interest_percent, paid_amount, status, financial_settings(late_fee_grace_days)), extra_contribution_items(id, amount, paid_amount, due_date, status, extra_contributions(id, title, description, reason, status, apply_late_charges, late_fee_percent, daily_interest_percent, late_fee_grace_days))"
       )
       .eq("status", "pendente")
       .order("created_at", { ascending: false });
@@ -503,10 +493,11 @@ async function approveExtraReport(report: PaymentReport) {
   const supabase = createClient();
   const profileId = await getCurrentProfileId();
 
+  const calculated = calculateExtraAmountDue(report);
   const reportAmount = Number(report.amount ?? 0);
   const paidAmountBefore = Number(item.paid_amount ?? 0);
   const paidAmountAfter = Number((paidAmountBefore + reportAmount).toFixed(2));
-  const totalDue = Number(item.amount ?? 0);
+  const totalDue = Number(calculated.totalDue ?? item.amount ?? 0);
 
   const nextStatus =
     paidAmountAfter >= totalDue ? "paga" : "parcialmente_paga";
@@ -738,22 +729,22 @@ await loadReports();
           )}
         </div>
 
-        <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
-          <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+        <section className="rounded-2xl border border-[#e8dccb] bg-white p-3 shadow-sm">
+          <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
+              <h2 className="text-base font-black tracking-[-0.03em] text-[#13233a]">
                 Informes recebidos
               </h2>
 
               <p className="text-xs font-bold text-[#596579]">
-                Analise os informes pendentes antes de aprovar a baixa no sistema.
+                Conferência e baixa dos informes pendentes.
               </p>
             </div>
 
             <button
               type="button"
               onClick={loadReports}
-              className="w-fit rounded-full border border-[#e8dccb] bg-white px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#13233a] hover:bg-[#f7f8fa]"
+              className="w-fit rounded-full border border-[#e8dccb] bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.08em] text-[#13233a] hover:bg-[#f7f8fa]"
             >
               Atualizar
             </button>
@@ -778,17 +769,8 @@ await loadReports();
               </p>
             </div>
           ) : (
-            <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
-              <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#596579] lg:grid">
-                <div className="col-span-2">Associado</div>
-                <div className="col-span-2">Origem</div>
-                <div className="col-span-2">Pagamento</div>
-                <div className="col-span-2">Cobrança</div>
-                <div className="col-span-2">Conferência</div>
-                <div className="col-span-2 text-right">Ação</div>
-              </div>
-
-              <div className="divide-y divide-[#eee7db]">
+            <div className="mt-3 grid gap-3">
+              <div className="grid gap-3">
                 {reports.map((report) => {
                   const associate = getAssociate(report);
                   const originType = getOriginType(report);
@@ -802,26 +784,26 @@ await loadReports();
                   return (
                     <article
                       key={report.id}
-                      className="grid gap-3 px-3 py-3 text-sm lg:grid-cols-12 lg:items-start"
+                      className="rounded-xl border border-[#e8dccb] bg-white p-3 text-sm shadow-sm xl:grid xl:grid-cols-[1.15fr_1.05fr_0.95fr_0.95fr_minmax(190px,1.2fr)_92px] xl:items-start xl:gap-4"
                     >
-                      <div className="lg:col-span-2">
+                      <div className="min-w-0">
                         <p className="font-black text-[#13233a]">
                           {associate?.full_name ?? "Associado não localizado"}
                         </p>
 
-                        <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                        <p className="mt-0.5 break-words text-[11px] font-bold text-[#596579]">
                           {associate?.email || "E-mail não informado"}
                         </p>
 
                         {associate?.phone && (
-                          <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                          <p className="mt-0.5 break-words text-[11px] font-bold text-[#596579]">
                             {associate.phone}
                           </p>
                         )}
                       </div>
 
-                      <div className="lg:col-span-2">
-                        <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[#b28743]">
+                      <div className="min-w-0">
+                        <p className="break-words text-[10px] font-black uppercase leading-4 tracking-[0.08em] text-[#b28743]">
                           {getOriginLabel(report)}
                         </p>
 
@@ -838,7 +820,7 @@ await loadReports();
                         </div>
                       </div>
 
-                      <div className="font-bold text-[#596579] lg:col-span-2">
+                      <div className="min-w-0 font-bold text-[#596579]">
                         <p className="font-black text-[#13233a]">
                           {formatCurrency(report.amount)}
                         </p>
@@ -858,7 +840,7 @@ await loadReports();
                         </p>
                       </div>
 
-                      <div className="font-bold text-[#596579] lg:col-span-2">
+                      <div className="min-w-0 font-bold text-[#596579]">
                         <p>Venc.: {formatDate(getDueDate(report))}</p>
 
                         <p className="text-xs">
@@ -880,9 +862,9 @@ await loadReports();
                         )}
                       </div>
 
-                      <div className="space-y-2 lg:col-span-2">
+                      <div className="min-w-0 space-y-2">
                         {report.notes && (
-                          <p className="rounded-lg bg-[#f7f8fa] px-3 py-2 text-xs font-bold leading-5 text-[#596579]">
+                          <p className="overflow-hidden rounded-lg bg-[#f7f8fa] px-3 py-2 text-[11px] font-bold leading-5 text-[#596579] [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]">
                             Associado: {report.notes}
                           </p>
                         )}
@@ -893,7 +875,7 @@ await loadReports();
                           </span>
 
                           <textarea
-                            rows={3}
+                            rows={2}
                             value={forms[report.id]?.review_notes ?? ""}
                             disabled={
                               report.status !== "pendente" ||
@@ -905,12 +887,12 @@ await loadReports();
                               updateReviewNotes(report.id, event.target.value)
                             }
                             placeholder="Anotação ou motivo da rejeição."
-                            className="w-full resize-none rounded-xl border border-[#e8dccb] px-3 py-2 text-xs font-bold text-[#13233a] outline-none disabled:bg-slate-50"
+                            className="w-full resize-none rounded-lg border border-[#e8dccb] px-3 py-2 text-xs font-bold text-[#13233a] outline-none disabled:bg-slate-50"
                           />
                         </label>
                       </div>
 
-                      <div className="flex flex-wrap gap-2 lg:col-span-2 lg:justify-end">
+                      <div className="flex flex-row flex-wrap gap-2 xl:flex-col xl:items-end">
                         {report.status === "pendente" && (
                           <>
                             <button
@@ -921,7 +903,7 @@ await loadReports();
                                 permissions.loadingPermissions ||
                                 !permissions.canApprove
                               }
-                              className="rounded-full border border-green-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-50"
+                              className="rounded-full border border-green-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-50 xl:w-[82px]"
                             >
                               {processingId === report.id
                                 ? "Processando..."
@@ -938,7 +920,7 @@ await loadReports();
                                 permissions.loadingPermissions ||
                                 !permissions.canApprove
                               }
-                              className="rounded-full border border-red-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                              className="rounded-full border border-red-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 xl:w-[82px]"
                             >
                               Rejeitar
                             </button>

@@ -31,8 +31,19 @@ type ExtraContribution = {
   due_date: string;
   target_type: string;
   status: string;
+  apply_late_charges: boolean;
+  late_fee_percent: number;
+  daily_interest_percent: number;
+  late_fee_grace_days: number;
   created_at: string;
   extra_contribution_items: ExtraContributionItem[] | null;
+};
+
+type FinancialSetting = {
+  id: string;
+  late_fee_percent: number;
+  daily_interest_percent: number;
+  late_fee_grace_days: number;
 };
 
 const statusLabels: Record<string, string> = {
@@ -100,6 +111,8 @@ export default function DashboardContribuicoesExtrasPage() {
 
   const [associates, setAssociates] = useState<Associate[]>([]);
   const [contributions, setContributions] = useState<ExtraContribution[]>([]);
+  const [activeFinancialSetting, setActiveFinancialSetting] =
+    useState<FinancialSetting | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -113,6 +126,7 @@ export default function DashboardContribuicoesExtrasPage() {
     total_amount: "",
     individual_amount: "",
     due_date: today,
+    apply_late_charges: false,
   });
 
   const preview = useMemo(() => {
@@ -175,6 +189,31 @@ export default function DashboardContribuicoesExtrasPage() {
 
     const supabase = createClient();
 
+    const { data: activeFinancialSettingsData } = await supabase
+      .from("financial_settings")
+      .select("id, late_fee_percent, daily_interest_percent, late_fee_grace_days, status, created_at")
+      .in("status", ["ativa", "ativo"])
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (activeFinancialSettingsData) {
+      setActiveFinancialSetting(
+        activeFinancialSettingsData as unknown as FinancialSetting
+      );
+    } else {
+      const { data: latestFinancialSettingsData } = await supabase
+        .from("financial_settings")
+        .select("id, late_fee_percent, daily_interest_percent, late_fee_grace_days, status, created_at")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      setActiveFinancialSetting(
+        latestFinancialSettingsData as unknown as FinancialSetting
+      );
+    }
+
     const { data: associatesData, error: associatesError } = await supabase
       .from("associates")
       .select("id, full_name, email, status")
@@ -192,7 +231,7 @@ export default function DashboardContribuicoesExtrasPage() {
     const { data: contributionsData, error: contributionsError } = await supabase
       .from("extra_contributions")
       .select(
-        "id, title, description, reason, amount_mode, total_amount, individual_amount, due_date, target_type, status, created_at, extra_contribution_items(id, amount, paid_amount, status)"
+        "id, title, description, reason, amount_mode, total_amount, individual_amount, due_date, target_type, status, apply_late_charges, late_fee_percent, daily_interest_percent, late_fee_grace_days, created_at, extra_contribution_items(id, amount, paid_amount, status)"
       )
       .order("created_at", { ascending: false });
 
@@ -276,6 +315,16 @@ export default function DashboardContribuicoesExtrasPage() {
         due_date: form.due_date,
         target_type: "todos_ativos",
         status: "rascunho",
+        apply_late_charges: form.apply_late_charges,
+        late_fee_percent: form.apply_late_charges
+          ? Number(activeFinancialSetting?.late_fee_percent ?? 0)
+          : 0,
+        daily_interest_percent: form.apply_late_charges
+          ? Number(activeFinancialSetting?.daily_interest_percent ?? 0)
+          : 0,
+        late_fee_grace_days: form.apply_late_charges
+          ? Number(activeFinancialSetting?.late_fee_grace_days ?? 0)
+          : 0,
         created_by: profileId,
       })
       .select("id")
@@ -364,6 +413,16 @@ export default function DashboardContribuicoesExtrasPage() {
         due_date: form.due_date,
         target_type: "todos_ativos",
         status: "ativa",
+        apply_late_charges: form.apply_late_charges,
+        late_fee_percent: form.apply_late_charges
+          ? Number(activeFinancialSetting?.late_fee_percent ?? 0)
+          : 0,
+        daily_interest_percent: form.apply_late_charges
+          ? Number(activeFinancialSetting?.daily_interest_percent ?? 0)
+          : 0,
+        late_fee_grace_days: form.apply_late_charges
+          ? Number(activeFinancialSetting?.late_fee_grace_days ?? 0)
+          : 0,
         generated_items_count: itemsToInsert.length,
         generated_total_amount: itemsToInsert.reduce(
           (sum, item) => sum + Number(item.amount ?? 0),
@@ -388,6 +447,7 @@ export default function DashboardContribuicoesExtrasPage() {
       total_amount: "",
       individual_amount: "",
       due_date: today,
+      apply_late_charges: false,
     });
 
     setSaving(false);
@@ -622,6 +682,40 @@ export default function DashboardContribuicoesExtrasPage() {
               )}
             </div>
 
+            <label className="flex items-start gap-3 rounded-xl border border-[#e8dccb] bg-[#fcfcfd] px-4 py-3">
+              <input
+                type="checkbox"
+                checked={form.apply_late_charges}
+                disabled={
+                  saving ||
+                  permissions.loadingPermissions ||
+                  !permissions.canCreate
+                }
+                onChange={(event) =>
+                  setForm((previous) => ({
+                    ...previous,
+                    apply_late_charges: event.target.checked,
+                  }))
+                }
+                className="mt-1 h-4 w-4 rounded border-[#e8dccb]"
+              />
+
+              <span>
+                <span className="block text-sm font-black text-[#13233a]">
+                  Aplicar multa/juros em caso de atraso
+                </span>
+
+                <span className="mt-1 block text-xs font-bold leading-5 text-[#596579]">
+                  Quando marcado, a contribuição extra usará o próprio vencimento
+                  informado acima e aplicará a regra financeira ativa:
+                  multa de {Number(activeFinancialSetting?.late_fee_percent ?? 0)}%,
+                  juros de {Number(activeFinancialSetting?.daily_interest_percent ?? 0)}%
+                  ao dia e tolerância de{" "}
+                  {Number(activeFinancialSetting?.late_fee_grace_days ?? 0)} dia(s).
+                </span>
+              </span>
+            </label>
+
             <div className="rounded-xl border border-[#e8dccb] bg-[#fcfcfd] px-4 py-3">
               <p className="text-xs font-black uppercase tracking-[0.08em] text-[#596579]">
                 Prévia do rateio
@@ -717,9 +811,9 @@ export default function DashboardContribuicoesExtrasPage() {
                   return (
                     <article
                       key={contribution.id}
-                      className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-start"
+                      className="grid gap-3 px-3 py-3 text-sm md:grid-cols-[1.2fr_150px_130px_150px_minmax(0,1.4fr)] md:items-start"
                     >
-                      <div className="md:col-span-3">
+                      <div>
                         <p className="font-black text-[#13233a]">
                           {contribution.title}
                         </p>
@@ -731,7 +825,7 @@ export default function DashboardContribuicoesExtrasPage() {
                         </p>
                       </div>
 
-                      <div className="md:col-span-2">
+                      <div>
                         <p className="font-bold text-[#13233a]">
                           {formatDate(contribution.due_date)}
                         </p>
@@ -739,15 +833,21 @@ export default function DashboardContribuicoesExtrasPage() {
                         <span className="mt-1 inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
                           {statusLabels[contribution.status] ?? contribution.status}
                         </span>
+
+                        {contribution.apply_late_charges && (
+                          <p className="mt-1 text-[10px] font-bold leading-4 text-red-700">
+                            Multa/juros após vencimento
+                          </p>
+                        )}
                       </div>
 
-                      <div className="font-bold text-[#596579] md:col-span-2 md:text-right">
+                      <div className="font-bold text-[#596579] md:text-right">
                         <p>{totals.totalItems} gerado(s)</p>
                         <p className="text-xs">{totals.pendingItems} pendente(s)</p>
                         <p className="text-xs">{totals.paidItems} pago(s)</p>
                       </div>
 
-                      <div className="font-bold text-[#596579] md:col-span-2 md:text-right">
+                      <div className="font-bold text-[#596579] md:text-right">
                         <p className="font-black text-[#13233a]">
                           {formatCurrency(totals.totalGenerated)}
                         </p>
@@ -761,7 +861,7 @@ export default function DashboardContribuicoesExtrasPage() {
                         </p>
                       </div>
 
-                      <div className="md:col-span-3">
+                      <div>
                         {contribution.description ? (
                           <p className="text-xs font-bold leading-5 text-[#596579]">
                             {contribution.description}

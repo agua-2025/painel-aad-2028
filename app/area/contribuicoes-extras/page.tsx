@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ProtectedArea } from "@/components/ProtectedArea";
 import { createClient } from "@/lib/supabase/client";
+import { calculateExtraContributionAmountDue } from "@/lib/extraContributionCharges";
 
 type Associate = {
   id: string;
@@ -27,6 +28,10 @@ type ExtraContributionItem = {
         description: string | null;
         reason: string | null;
         status: string;
+        apply_late_charges?: boolean | null;
+        late_fee_percent?: number | null;
+        daily_interest_percent?: number | null;
+        late_fee_grace_days?: number | null;
       }
     | {
         id: string;
@@ -34,6 +39,10 @@ type ExtraContributionItem = {
         description: string | null;
         reason: string | null;
         status: string;
+        apply_late_charges?: boolean | null;
+        late_fee_percent?: number | null;
+        daily_interest_percent?: number | null;
+        late_fee_grace_days?: number | null;
       }[]
     | null;
 };
@@ -98,10 +107,7 @@ export default function AreaContribuicoesExtrasPage() {
     const paidItems = items.filter((item) => item.status === "paga");
 
     const totalOpen = openItems.reduce((sum, item) => {
-      const balance = Math.max(
-        Number(item.amount ?? 0) - Number(item.paid_amount ?? 0),
-        0
-      );
+      const balance = calculateExtraContributionAmountDue(item).remaining;
 
       return sum + balance;
     }, 0);
@@ -161,7 +167,7 @@ export default function AreaContribuicoesExtrasPage() {
       const { data: itemsData, error: itemsError } = await supabase
         .from("extra_contribution_items")
         .select(
-          "id, contribution_id, associate_id, amount, paid_amount, due_date, status, notes, extra_contributions(id, title, description, reason, status)"
+          "id, contribution_id, associate_id, amount, paid_amount, due_date, status, notes, extra_contributions(id, title, description, reason, status, apply_late_charges, late_fee_percent, daily_interest_percent, late_fee_grace_days)"
         )
         .eq("associate_id", associateData.id)
         .order("due_date", { ascending: true });
@@ -275,10 +281,7 @@ export default function AreaContribuicoesExtrasPage() {
                   <div className="divide-y divide-[#eee7db]">
                     {summary.openItems.map((item) => {
                       const contribution = getContribution(item);
-                      const balance = Math.max(
-                        Number(item.amount ?? 0) - Number(item.paid_amount ?? 0),
-                        0
-                      );
+                      const balance = calculateExtraContributionAmountDue(item).remaining;
 
                       return (
                         <article
@@ -309,7 +312,7 @@ export default function AreaContribuicoesExtrasPage() {
 
                           <div className="font-bold text-[#596579] md:col-span-2 md:text-right">
                             <p className="font-black text-[#13233a]">
-                              {formatCurrency(item.amount)}
+                              {formatCurrency(calculateExtraContributionAmountDue(item).totalDue)}
                             </p>
 
                             <p className="text-xs">
@@ -373,10 +376,7 @@ export default function AreaContribuicoesExtrasPage() {
                   <div className="divide-y divide-[#eee7db]">
                     {items.map((item) => {
                       const contribution = getContribution(item);
-                      const balance = Math.max(
-                        Number(item.amount ?? 0) - Number(item.paid_amount ?? 0),
-                        0
-                      );
+                      const balance = calculateExtraContributionAmountDue(item).remaining;
 
                       return (
                         <article
@@ -400,7 +400,7 @@ export default function AreaContribuicoesExtrasPage() {
                           </div>
 
                           <div className="font-black text-[#13233a] md:col-span-2 md:text-right">
-                            {formatCurrency(item.amount)}
+                            {formatCurrency(calculateExtraContributionAmountDue(item).totalDue)}
                           </div>
 
                           <div className="font-bold text-[#596579] md:col-span-2 md:text-right">

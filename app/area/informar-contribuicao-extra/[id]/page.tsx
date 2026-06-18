@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ProtectedArea } from "@/components/ProtectedArea";
 import { createClient } from "@/lib/supabase/client";
+import { calculateExtraContributionAmountDue } from "@/lib/extraContributionCharges";
 
 type Associate = {
   id: string;
@@ -29,6 +30,10 @@ type ExtraContributionItem = {
         description: string | null;
         reason: string | null;
         status: string;
+        apply_late_charges?: boolean | null;
+        late_fee_percent?: number | null;
+        daily_interest_percent?: number | null;
+        late_fee_grace_days?: number | null;
       }
     | {
         id: string;
@@ -36,6 +41,10 @@ type ExtraContributionItem = {
         description: string | null;
         reason: string | null;
         status: string;
+        apply_late_charges?: boolean | null;
+        late_fee_percent?: number | null;
+        daily_interest_percent?: number | null;
+        late_fee_grace_days?: number | null;
       }[]
     | null;
 };
@@ -121,7 +130,7 @@ export default function InformarContribuicaoExtraPage() {
     notes: "",
   });
 
-  const balance = useMemo(() => {
+  const extraBalance = useMemo(() => {
     if (!item) return 0;
 
     return Math.max(
@@ -166,7 +175,7 @@ export default function InformarContribuicaoExtraPage() {
     const { data: itemData, error: itemError } = await supabase
       .from("extra_contribution_items")
       .select(
-        "id, contribution_id, associate_id, amount, paid_amount, due_date, status, notes, extra_contributions(id, title, description, reason, status)"
+        "id, contribution_id, associate_id, amount, paid_amount, due_date, status, notes, extra_contributions(id, title, description, reason, status, apply_late_charges, late_fee_percent, daily_interest_percent, late_fee_grace_days)"
       )
       .eq("id", itemId)
       .eq("associate_id", associateData.id)
@@ -279,8 +288,11 @@ export default function InformarContribuicaoExtraPage() {
   }
 
   const contribution = item ? getContribution(item) : null;
-
-  return (
+  const contributionAmountDue = item
+    ? calculateExtraContributionAmountDue(item)
+    : null;
+  const contributionBalance = contributionAmountDue?.remaining ?? 0;
+return (
     <ProtectedArea>
       <div className="space-y-4">
         <section className="rounded-2xl bg-[#13233a] p-5 text-white shadow-xl shadow-slate-900/10">
@@ -316,28 +328,28 @@ export default function InformarContribuicaoExtraPage() {
           </div>
         ) : item ? (
           <>
-            <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#c7a56b]">
-                Vencimento em {formatDate(item.due_date)}
+            <section className="rounded-xl border border-[#e8dccb] bg-white p-3 shadow-sm">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#c7a56b]">
+                Vencimento: {formatDate(item.due_date)}
               </p>
 
-              <h2 className="mt-2 text-lg font-black tracking-[-0.03em] text-[#13233a]">
+              <h2 className="mt-1 text-base font-black tracking-[-0.03em] text-[#13233a]">
                 {contribution?.title ?? "Contribuição extra"}
               </h2>
 
-              <p className="mt-2 text-sm font-bold text-[#596579]">
+              <p className="mt-1 text-xs font-bold text-[#596579]">
                 {associate?.full_name}
               </p>
 
               {contribution?.description && (
-                <p className="mt-3 text-sm leading-6 text-[#596579]">
+                <p className="mt-2 overflow-hidden text-xs font-bold leading-5 text-[#596579] [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]">
                   {contribution.description}
                 </p>
               )}
 
-              <div className="mt-4 grid gap-3 text-sm text-[#596579] md:grid-cols-3">
+              <div className="mt-3 grid gap-2 text-xs text-[#596579] md:grid-cols-3">
                 <p>
-                  <strong>Valor:</strong> {formatCurrency(item.amount)}
+                  <strong>Valor atualizado:</strong> {formatCurrency(contributionAmountDue?.totalDue ?? item.amount)}
                 </p>
 
                 <p>
@@ -346,12 +358,27 @@ export default function InformarContribuicaoExtraPage() {
                 </p>
 
                 <p>
-                  <strong>Saldo:</strong> {formatCurrency(balance)}
+                  <strong>Saldo atualizado:</strong> {formatCurrency(contributionBalance)}
                 </p>
               </div>
 
+              {contributionAmountDue?.applyLateCharges && contributionAmountDue.daysWithCharges > 0 && (
+                <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold leading-6 text-amber-900">
+                  Valor original: {formatCurrency(contributionAmountDue.baseAmount)} · Multa:{" "}
+                  {formatCurrency(contributionAmountDue.lateFeeAmount)} · Juros:{" "}
+                  {formatCurrency(contributionAmountDue.interestAmount)} · Dias com acréscimos:{" "}
+                  {contributionAmountDue.daysWithCharges}
+                </div>
+              )}
+
+              {contributionAmountDue?.applyLateCharges && contributionAmountDue.daysWithCharges === 0 && (
+                <div className="mt-2 rounded-lg border border-[#e8dccb] bg-[#f7f8fa] px-3 py-2 text-xs font-bold leading-5 text-[#596579]">
+                  Multa/juros configurados, ainda sem acréscimos.
+                </div>
+              )}
+
               {contribution?.reason && (
-                <p className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-3 text-sm leading-6 text-[#596579]">
+                <p className="mt-2 overflow-hidden rounded-lg bg-[#f7f8fa] px-3 py-2 text-xs font-bold leading-5 text-[#596579] [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]">
                   <strong>Motivo:</strong> {contribution.reason}
                 </p>
               )}
@@ -375,16 +402,18 @@ export default function InformarContribuicaoExtraPage() {
               </section>
             )}
 
-            <section className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
-              <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
-                Dados do pagamento
-              </h2>
+            <section className="rounded-xl border border-[#e8dccb] bg-white p-3 shadow-sm">
+              <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+                <h2 className="text-base font-black tracking-[-0.03em] text-[#13233a]">
+                  Dados do pagamento
+                </h2>
 
-              <p className="mt-1 text-xs font-bold leading-6 text-[#596579]">
-                Este envio não quita automaticamente a contribuição. A baixa depende de conferência da Tesouraria.
-              </p>
+                <p className="text-[11px] font-bold text-[#596579]">
+                  Sujeito à conferência da Tesouraria.
+                </p>
+              </div>
 
-              <form onSubmit={handleSubmit} className="mt-4 grid gap-3">
+              <form onSubmit={handleSubmit} className="mt-3 grid gap-3">
                 <div className="grid gap-3 md:grid-cols-3">
                   <label className="grid gap-2">
                     <span className="text-sm font-bold text-[#13233a]">
@@ -403,7 +432,7 @@ export default function InformarContribuicaoExtraPage() {
                           amount: event.target.value,
                         }))
                       }
-                      className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
+                      className="w-full rounded-lg border border-[#e8dccb] px-3 py-2 text-sm font-bold text-[#13233a] outline-none"
                     />
                   </label>
 
@@ -422,7 +451,7 @@ export default function InformarContribuicaoExtraPage() {
                           paid_at: event.target.value,
                         }))
                       }
-                      className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
+                      className="w-full rounded-lg border border-[#e8dccb] px-3 py-2 text-sm font-bold text-[#13233a] outline-none"
                     />
                   </label>
 
@@ -440,7 +469,7 @@ export default function InformarContribuicaoExtraPage() {
                           payment_method: event.target.value,
                         }))
                       }
-                      className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
+                      className="w-full rounded-lg border border-[#e8dccb] px-3 py-2 text-sm font-bold text-[#13233a] outline-none"
                     >
                       {paymentMethodLabels.map((method) => (
                         <option key={method.value} value={method.value}>
@@ -467,7 +496,7 @@ export default function InformarContribuicaoExtraPage() {
                       }))
                     }
                     placeholder="Ex.: ID do Pix, nome usado no Pix, número do comprovante..."
-                    className="w-full rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
+                    className="w-full rounded-lg border border-[#e8dccb] px-3 py-2 text-sm font-bold text-[#13233a] outline-none"
                   />
                 </label>
 
@@ -485,9 +514,9 @@ export default function InformarContribuicaoExtraPage() {
                         notes: event.target.value,
                       }))
                     }
-                    rows={4}
+                    rows={2}
                     placeholder="Ex.: pagamento feito por terceiro, valor complementar ou observação sobre o comprovante..."
-                    className="w-full resize-none rounded-xl border border-[#e8dccb] px-3 py-2.5 text-sm font-bold text-[#13233a] outline-none"
+                    className="w-full resize-none rounded-lg border border-[#e8dccb] px-3 py-2 text-sm font-bold text-[#13233a] outline-none"
                   />
                 </label>
 
@@ -498,16 +527,16 @@ export default function InformarContribuicaoExtraPage() {
                       !!pendingReport ||
                       saving ||
                       !isOpenItem(item.status) ||
-                      balance <= 0
+                      contributionBalance <= 0
                     }
-                    className="rounded-full bg-[#13233a] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-full bg-[#13233a] px-4 py-2 text-[10px] font-black uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {saving ? "Enviando..." : "Enviar informe"}
                   </button>
 
                   <Link
                     href="/area/contribuicoes-extras"
-                    className="rounded-full border border-[#e8dccb] bg-white px-6 py-3 text-center text-sm font-black uppercase tracking-[0.08em] text-[#13233a]"
+                    className="rounded-full border border-[#e8dccb] bg-white px-4 py-2 text-center text-[10px] font-black uppercase tracking-[0.08em] text-[#13233a]"
                   >
                     Voltar
                   </Link>
