@@ -117,6 +117,169 @@ function buildMeetingOptionLabel(meeting: Meeting, minute?: Minute | null) {
 }
 
 
+
+function formatMinuteForPrint(text: string) {
+  return text
+    .replace(/\r\n/g, "\n")
+    .replace(/\u00a0/g, " ")
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/[–—]/g, "-")
+    .replace(/•/g, "-")
+    .replace(
+      /_{8,}\s*([^\n]+?)\s+(Presidente|Secret[aá]rio(?:\s*\(Indicado\))?)/gi,
+      "____________________________________\n$1 - $2"
+    )
+    .replace(
+      /(RELAÇÃO DOS ASSOCIADOS PRESENTES)\s+(\d+\.)/gi,
+      "$1\n\n$2"
+    )
+    .replace(/\s+(\d+\.\s+[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ])/g, "\n$1")
+    .replace(
+      /(Observação:\s*as presenças acima foram registradas eletronicamente no sistema da Associação\.)/i,
+      "\n$1"
+    )
+    .trim();
+}
+
+
+function extractPresentNames(presenceText: string) {
+  const observationPattern =
+    /(Observação:\s*as presenças acima foram registradas eletronicamente no sistema da Associação\.)/i;
+
+  const withoutObservation = presenceText
+    .replace("RELAÇÃO DOS ASSOCIADOS PRESENTES", "")
+    .replace(observationPattern, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const matches = Array.from(
+    withoutObservation.matchAll(/(\d+)\.\s*([^\d]+?)(?=\s+\d+\.|$)/g)
+  );
+
+  return matches
+    .map((match) => {
+      const number = match[1];
+      const name = match[2].replace(/\s+/g, " ").trim();
+
+      return `${number}. ${name}`;
+    })
+    .filter(Boolean);
+}
+
+function extractPresenceObservation(presenceText: string) {
+  const match = presenceText.match(
+    /(Observação:\s*as presenças acima foram registradas eletronicamente no sistema da Associação\.)/i
+  );
+
+  return match?.[1] ?? "";
+}
+
+
+function renderPrintableMinute(text: string) {
+  const normalized = formatMinuteForPrint(text);
+
+  if (!normalized) {
+    return (
+      <p className="text-justify text-[12pt] leading-7">
+        Nenhum texto de ata disponível para impressão.
+      </p>
+    );
+  }
+
+  const presenceHeading = "RELAÇÃO DOS ASSOCIADOS PRESENTES";
+  const presenceIndex = normalized.indexOf(presenceHeading);
+
+  let mainText = normalized;
+  let presenceText = "";
+
+  if (presenceIndex >= 0) {
+    mainText = normalized.slice(0, presenceIndex).trim();
+    presenceText = normalized.slice(presenceIndex).trim();
+  }
+
+  const mainBlocks = mainText
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .filter(Boolean);
+
+  const renderedMain = mainBlocks.map((block, index) => {
+    const lines = block
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    const firstLine = lines[0] ?? "";
+    const isTitle =
+      firstLine.length <= 180 &&
+      firstLine === firstLine.toUpperCase() &&
+      !firstLine.includes(".");
+
+    const isSignature =
+      lines.some((line) => line.includes("________________________________"));
+
+    if (isTitle) {
+      return (
+        <h2
+          key={`main-${index}`}
+          className="mb-4 mt-3 text-center text-[12.5pt] font-bold leading-6"
+        >
+          {block}
+        </h2>
+      );
+    }
+
+    if (isSignature) {
+      return (
+        <div key={`main-${index}`} className="my-6 space-y-4 text-[12pt] leading-6">
+          {lines.map((line, lineIndex) => (
+            <p key={lineIndex} className="text-center">
+              {line}
+            </p>
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <p key={`main-${index}`} className="mb-2.5 text-justify text-[11.5pt] leading-6">
+        {block}
+      </p>
+    );
+  });
+
+  if (!presenceText) {
+    return renderedMain;
+  }
+
+  const observation = extractPresenceObservation(presenceText);
+  const presentNames = extractPresentNames(presenceText);
+
+  return [
+    ...renderedMain,
+    <section key="presentes" className="print-avoid-break mt-6">
+      <h2 className="mb-3 text-center text-[13pt] font-bold leading-6">
+        Relação dos associados presentes
+      </h2>
+
+      <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-[10.5pt] leading-5">
+        {presentNames.map((name, index) => (
+          <p key={index} className="break-inside-avoid">
+            {name}
+          </p>
+        ))}
+      </div>
+
+      {observation && (
+        <p className="mt-4 text-justify text-[10.5pt] leading-5">
+          {observation}
+        </p>
+      )}
+    </section>,
+  ];
+}
+
+
 export default function AtasReunioesPage() {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
@@ -468,6 +631,58 @@ export default function AtasReunioesPage() {
     setWorking(false);
   }
 
+  async function handleDownloadPdf() {
+    if (!selectedMeeting || !draftText.trim()) {
+      setMessage("Selecione uma reunião e gere ou carregue o texto da ata antes de baixar o PDF.");
+      return;
+    }
+
+    setWorking(true);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/reunioes/ata-pdf", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: `Ata de Reunião - ${selectedMeeting.title || "AAD Direito 2028"}`,
+          subtitle: "Associação dos Acadêmicos do Curso de Direito - AAD Direito 2028",
+          meetingDate: selectedMeeting.meeting_date,
+          minuteText: draftText,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.error || "Não foi possível gerar o PDF.");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = `ata-reuniao-${selectedMeeting.meeting_date || "aad-direito-2028"}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      setMessage("PDF da ata gerado com sucesso.");
+    } catch (error) {
+      console.error("Erro ao baixar PDF da ata:", error);
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível gerar o PDF da ata."
+      );
+    } finally {
+      setWorking(false);
+    }
+  }
+
   async function saveMinute(status: "minuta" | "final") {
     if (!selectedMeeting) {
       setErrorMessage("Selecione uma reunião.");
@@ -597,7 +812,92 @@ export default function AtasReunioesPage() {
 
   return (
     <ProtectedDashboard>
-      <div className="space-y-4">
+      <style>{`
+        @media print {
+          @page {
+            size: A4;
+            margin: 14mm 16mm;
+          }
+
+          html,
+          body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            height: auto !important;
+            overflow: visible !important;
+          }
+
+          #ata-screen-area {
+            display: none !important;
+          }
+
+          #ata-print-area {
+            display: block !important;
+            position: static !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+          }
+
+          #ata-print-area,
+          #ata-print-area * {
+            visibility: visible !important;
+          }
+
+          #ata-print-area p,
+          #ata-print-area h1,
+          #ata-print-area h2,
+          #ata-print-area div,
+          #ata-print-area section {
+            page-break-inside: auto;
+          }
+
+          .print-avoid-break {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+        }
+
+        @media screen {
+          #ata-print-area {
+            display: none;
+          }
+        }
+      `}</style>
+
+      <section id="ata-print-area">
+        <div className="font-serif text-black">
+          <header className="mb-6 border-b border-black pb-3">
+            <div className="flex items-center gap-4">
+              <img
+                src="/brand/aad-login-logo.png"
+                alt="AAD Direito 2028"
+                className="h-14 w-auto"
+              />
+
+              <div className="max-w-[620px] leading-tight">
+                <p className="text-justify text-[12px] font-bold tracking-[0.12em]">
+                  Associação dos Acadêmicos do Curso de Direito
+                </p>
+
+                <h1 className="mt-1 text-base font-black">
+                  AAD Direito 2028
+                </h1>
+
+                <p className="mt-1 text-justify text-[11px] leading-4">
+                  Sede administrativa e foro: Rua Casemiro de Abreu, nº 200, Sala 01, Centro, Araputanga/MT, CEP 78.260-000 | E-mail: contato@aaddireito2028.com.br | Site: www.aaddireito2028.com.br
+                </p>
+              </div>
+            </div>
+          </header>
+
+          <main>{renderPrintableMinute(draftText)}</main>
+        </div>
+      </section>
+
+      <div id="ata-screen-area" className="space-y-4">
         <section className="rounded-2xl bg-[#13233a] p-5 text-white shadow-xl shadow-slate-900/10">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
@@ -844,6 +1144,15 @@ export default function AtasReunioesPage() {
                     </div>
 
                     <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => window.print()}
+                        disabled={!selectedMeetingId || !draftText.trim()}
+                        className="rounded-full border border-[#c7a56b] bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.08em] text-[#13233a] hover:bg-[#fdfcf9] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Gerar PDF
+                      </button>
+
                       <button
                         type="button"
                         onClick={() => saveMinute("minuta")}
