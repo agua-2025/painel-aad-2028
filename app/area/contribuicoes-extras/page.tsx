@@ -12,6 +12,12 @@ type Associate = {
   status: string;
 };
 
+type PendingExtraReport = {
+  id: string;
+  extra_contribution_item_id: string | null;
+  status: string;
+};
+
 type ExtraContributionItem = {
   id: string;
   contribution_id: string;
@@ -91,6 +97,9 @@ function isOpenItem(item: ExtraContributionItem) {
 export default function AreaContribuicoesExtrasPage() {
   const [associate, setAssociate] = useState<Associate | null>(null);
   const [items, setItems] = useState<ExtraContributionItem[]>([]);
+  const [pendingReportItemIds, setPendingReportItemIds] = useState<Set<string>>(
+    () => new Set()
+  );
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
@@ -158,6 +167,7 @@ export default function AreaContribuicoesExtrasPage() {
       if (!associateData || associateData.status !== "ativo") {
         setAssociate(null);
         setItems([]);
+        setPendingReportItemIds(new Set());
         setLoading(false);
         return;
       }
@@ -179,7 +189,29 @@ export default function AreaContribuicoesExtrasPage() {
         return;
       }
 
+      const { data: pendingReportsData, error: pendingReportsError } =
+        await supabase
+          .from("payment_reports")
+          .select("id, extra_contribution_item_id, status")
+          .eq("associate_id", associateData.id)
+          .eq("status", "pendente")
+          .not("extra_contribution_item_id", "is", null);
+
+      if (pendingReportsError) {
+        console.error(
+          "Erro ao carregar informes pendentes de contribuições extras:",
+          pendingReportsError
+        );
+      }
+
+      const pendingIds = new Set(
+        ((pendingReportsData as PendingExtraReport[] | null) ?? [])
+          .map((report) => report.extra_contribution_item_id)
+          .filter((id): id is string => Boolean(id))
+      );
+
       setItems((itemsData as unknown as ExtraContributionItem[]) ?? []);
+      setPendingReportItemIds(pendingIds);
       setLoading(false);
     }
 
@@ -331,12 +363,18 @@ export default function AreaContribuicoesExtrasPage() {
                           </div>
 
                           <div className="md:col-span-1 md:text-right">
-                            <a
-                              href={`/area/informar-contribuicao-extra/${item.id}`}
-                              className="inline-flex rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
-                            >
-                              Informar
-                            </a>
+                            {pendingReportItemIds.has(item.id) ? (
+                              <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-amber-700">
+                                Em análise
+                              </span>
+                            ) : (
+                              <a
+                                href={`/area/informar-contribuicao-extra/${item.id}`}
+                                className="inline-flex rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
+                              >
+                                Informar
+                              </a>
+                            )}
                           </div>
                         </article>
                       );
