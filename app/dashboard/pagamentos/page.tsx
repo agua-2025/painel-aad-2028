@@ -784,22 +784,12 @@ await loadReports();
                   return (
                     <article
                       key={report.id}
-                      className="rounded-xl border border-[#e8dccb] bg-white p-3 text-sm shadow-sm xl:grid xl:grid-cols-[1.15fr_1.05fr_0.95fr_0.95fr_minmax(190px,1.2fr)_92px] xl:items-start xl:gap-4"
+                      className="rounded-xl border border-[#e8dccb] bg-white p-3 text-sm shadow-sm xl:grid xl:grid-cols-[1.1fr_1fr_0.85fr_0.85fr_minmax(240px,1.35fr)_92px] xl:items-start xl:gap-4"
                     >
                       <div className="min-w-0">
-                        <p className="font-black text-[#13233a]">
+                        <p className="font-black leading-5 text-[#13233a]">
                           {associate?.full_name ?? "Associado não localizado"}
                         </p>
-
-                        <p className="mt-0.5 break-words text-[11px] font-bold text-[#596579]">
-                          {associate?.email || "E-mail não informado"}
-                        </p>
-
-                        {associate?.phone && (
-                          <p className="mt-0.5 break-words text-[11px] font-bold text-[#596579]">
-                            {associate.phone}
-                          </p>
-                        )}
                       </div>
 
                       <div className="min-w-0">
@@ -864,14 +854,20 @@ await loadReports();
 
                       <div className="min-w-0 space-y-2">
                         {report.notes && (
-                          <p className="overflow-hidden rounded-lg bg-[#f7f8fa] px-3 py-2 text-[11px] font-bold leading-5 text-[#596579] [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]">
-                            Associado: {report.notes}
-                          </p>
+                          <div className="rounded-lg border border-[#edf0f4] bg-[#f7f8fa] px-3 py-2">
+                            <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#8a94a6]">
+                              Observação do associado
+                            </p>
+
+                            <p className="mt-1 overflow-hidden text-[11px] font-bold leading-5 text-[#596579] [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]">
+                              {report.notes}
+                            </p>
+                          </div>
                         )}
 
                         <label className="grid gap-1">
-                          <span className="text-xs font-black text-[#13233a]">
-                            Observação da Tesouraria
+                          <span className="text-[11px] font-black uppercase tracking-[0.06em] text-[#13233a]">
+                            Anotação da Tesouraria
                           </span>
 
                           <textarea
@@ -886,8 +882,8 @@ await loadReports();
                             onChange={(event) =>
                               updateReviewNotes(report.id, event.target.value)
                             }
-                            placeholder="Anotação ou motivo da rejeição."
-                            className="w-full resize-none rounded-lg border border-[#e8dccb] px-3 py-2 text-xs font-bold text-[#13233a] outline-none disabled:bg-slate-50"
+                            placeholder="Observação interna ou motivo da rejeição."
+                            className="w-full resize-none rounded-lg border border-[#e8dccb] bg-white px-3 py-2 text-xs font-bold leading-5 text-[#13233a] outline-none transition focus:border-[#c7a56b] focus:ring-2 focus:ring-[#c7a56b]/15 disabled:bg-slate-50"
                           />
                         </label>
                       </div>
