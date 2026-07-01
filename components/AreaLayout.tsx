@@ -87,7 +87,7 @@ export function AreaLayout({
         </div>
 
         {mobileMenuOpen && (
-          <div className="border-t border-[#e8dccb] bg-white px-5 py-4">
+          <div className="max-h-[calc(100dvh-78px)] overflow-y-auto overscroll-contain border-t border-[#e8dccb] bg-white px-5 py-4 pb-6 touch-pan-y [-webkit-overflow-scrolling:touch]">
             <nav className="grid gap-2">
               {menuItems.map((item) => (
                 <Link
