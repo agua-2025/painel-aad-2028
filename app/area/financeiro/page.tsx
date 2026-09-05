@@ -767,53 +767,54 @@ export default function AreaFinanceiroPage() {
                         : fee.total_amount;
 
                       return (
-                        <article
-                          key={fee.id}
-                          className="grid gap-2 px-3 py-2 text-sm md:grid-cols-12 md:items-center"
-                        >
-                          <div className="rounded-xl bg-[#f7f8fa] px-3 py-3 md:col-span-4 md:rounded-none md:bg-transparent md:px-0 md:py-0">
-                            <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d] md:hidden">
-                              Referência
-                            </p>
+                        <article key={fee.id} className="px-3 py-2 text-sm">
+                          <div className="grid grid-cols-[1fr_auto] gap-x-3 gap-y-1 md:hidden">
+                            <div>
+                              <p className="font-black text-[#13233a]">
+                                {getMonthLabel(fee)}
+                              </p>
 
-                            <p className="mt-1 font-black text-[#13233a] md:mt-0">
-                              {getMonthLabel(fee)}
+                              <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                                Vence: {formatDate(fee.due_date)}
+                              </p>
+                            </div>
+
+                            <div className="text-right">
+                              <p className="font-black text-[#13233a]">
+                                {formatCurrency(valueToShow)}
+                              </p>
+
+                              <span className="mt-1 inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                                {statusLabels[fee.status] ?? fee.status}
+                              </span>
+                            </div>
+
+                            <p className="col-span-2 text-xs font-bold text-[#596579]">
+                              Pago: {formatCurrency(fee.paid_amount)}
                             </p>
                           </div>
 
-                          <div className="grid gap-2 sm:grid-cols-2 md:contents">
-                            <div className="rounded-lg bg-[#f7f8fa] px-3 py-1.5 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0">
-                              <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d] md:hidden">
-                                Vencimento
-                              </p>
-
-                              <p className="mt-0.5 md:mt-0">{formatDate(fee.due_date)}</p>
-                            </div>
-
-                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
-                              <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d] md:hidden">
-                                Valor
-                              </p>
-
-                              <p className="mt-1 font-black text-[#13233a] md:mt-0">
-                                {formatCurrency(valueToShow)}
+                          <div className="hidden md:grid md:grid-cols-12 md:items-center">
+                            <div className="col-span-4">
+                              <p className="font-black text-[#13233a]">
+                                {getMonthLabel(fee)}
                               </p>
                             </div>
 
-                            <div className="rounded-lg bg-[#f7f8fa] px-3 py-1.5 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
-                              <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d] md:hidden">
-                                Pago
-                              </p>
-
-                              <p className="mt-0.5 md:mt-0">{formatCurrency(fee.paid_amount)}</p>
+                            <div className="col-span-2 font-bold text-[#596579]">
+                              {formatDate(fee.due_date)}
                             </div>
 
-                            <div className="rounded-lg bg-[#f7f8fa] px-3 py-1.5 sm:col-span-2 md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-center">
-                              <p className="mb-0.5 text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d] md:hidden">
-                                Status
-                              </p>
+                            <div className="col-span-2 text-right font-black text-[#13233a]">
+                              {formatCurrency(valueToShow)}
+                            </div>
 
-                              <span className="inline-flex rounded-full bg-white px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579] md:bg-[#f7f8fa]">
+                            <div className="col-span-2 text-right font-bold text-[#596579]">
+                              {formatCurrency(fee.paid_amount)}
+                            </div>
+
+                            <div className="col-span-2 text-center">
+                              <span className="inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
                                 {statusLabels[fee.status] ?? fee.status}
                               </span>
                             </div>
