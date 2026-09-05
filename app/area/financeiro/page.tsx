@@ -574,7 +574,7 @@ export default function AreaFinanceiroPage() {
                 </h2>
 
                 <p className="text-xs font-bold text-[#596579]">
-                  Valores calculados até hoje. Após o pagamento, informe a Tesouraria pelo botão correspondente.
+                  As mensalidades são exibidas por ordem de vencimento. Mensalidades futuras podem ser pagas antecipadamente, se desejar.
                   {summary.openFees.length > 0 &&
                     ` Mostrando ${Math.min(visibleOpenFeesCount, summary.openFees.length)} de ${summary.openFees.length}.`}
                 </p>
@@ -612,10 +612,10 @@ export default function AreaFinanceiroPage() {
                       return (
                         <article
                           key={fee.id}
-                          className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-center"
+                          className="grid gap-2 px-3 py-2 text-sm md:grid-cols-12 md:items-center"
                         >
-                          <div className="rounded-xl bg-[#f7f8fa] px-3 py-3 md:col-span-3 md:rounded-none md:bg-transparent md:px-0 md:py-0">
-                            <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                          <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 md:col-span-3 md:rounded-none md:bg-transparent md:px-0 md:py-0">
+                            <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d] md:hidden">
                               Referência
                             </p>
 
@@ -626,7 +626,7 @@ export default function AreaFinanceiroPage() {
 
                               {index === 0 && summary.openFees.length > 1 && (
                                 <span className="rounded-full bg-[#c7a56b] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a]">
-                                  Prioridade
+                                  {fee.due_date < today ? "Prioridade" : "Próxima"}
                                 </span>
                               )}
                             </div>
@@ -637,16 +637,16 @@ export default function AreaFinanceiroPage() {
                           </div>
 
                           <div className="grid gap-2 sm:grid-cols-2 md:contents">
-                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0">
-                              <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                            <div className="rounded-lg bg-[#f7f8fa] px-3 py-1.5 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0">
+                              <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d] md:hidden">
                                 Vencimento
                               </p>
 
-                              <p className="mt-1 md:mt-0">{formatDate(fee.due_date)}</p>
+                              <p className="mt-0.5 md:mt-0">{formatDate(fee.due_date)}</p>
                             </div>
 
-                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
-                              <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                            <div className="rounded-lg bg-[#f7f8fa] px-3 py-1.5 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
+                              <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d] md:hidden">
                                 Valor em aberto
                               </p>
 
@@ -659,12 +659,12 @@ export default function AreaFinanceiroPage() {
                               </p>
                             </div>
 
-                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
-                              <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                            <div className="rounded-lg bg-[#f7f8fa] px-3 py-1.5 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
+                              <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d] md:hidden">
                                 Encargos
                               </p>
 
-                              <p className="mt-1 md:mt-0">
+                              <p className="mt-0.5 md:mt-0">
                                 Multa: {formatCurrency(calculated.lateFeeAmount)}
                               </p>
 
@@ -674,8 +674,8 @@ export default function AreaFinanceiroPage() {
                               </p>
                             </div>
 
-                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 md:col-span-1 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-center">
-                              <p className="mb-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                            <div className="rounded-lg bg-[#f7f8fa] px-3 py-1.5 md:col-span-1 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-center">
+                              <p className="mb-0.5 text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d] md:hidden">
                                 Status
                               </p>
 
@@ -684,8 +684,8 @@ export default function AreaFinanceiroPage() {
                               </span>
                             </div>
 
-                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 sm:col-span-2 md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
-                              <p className="mb-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                            <div className="rounded-lg bg-[#f7f8fa] px-3 py-1.5 sm:col-span-2 md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
+                              <p className="mb-0.5 text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d] md:hidden">
                                 Ação
                               </p>
 
@@ -769,10 +769,10 @@ export default function AreaFinanceiroPage() {
                       return (
                         <article
                           key={fee.id}
-                          className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-center"
+                          className="grid gap-2 px-3 py-2 text-sm md:grid-cols-12 md:items-center"
                         >
                           <div className="rounded-xl bg-[#f7f8fa] px-3 py-3 md:col-span-4 md:rounded-none md:bg-transparent md:px-0 md:py-0">
-                            <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                            <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d] md:hidden">
                               Referência
                             </p>
 
@@ -782,16 +782,16 @@ export default function AreaFinanceiroPage() {
                           </div>
 
                           <div className="grid gap-2 sm:grid-cols-2 md:contents">
-                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0">
-                              <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                            <div className="rounded-lg bg-[#f7f8fa] px-3 py-1.5 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0">
+                              <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d] md:hidden">
                                 Vencimento
                               </p>
 
-                              <p className="mt-1 md:mt-0">{formatDate(fee.due_date)}</p>
+                              <p className="mt-0.5 md:mt-0">{formatDate(fee.due_date)}</p>
                             </div>
 
                             <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
-                              <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                              <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d] md:hidden">
                                 Valor
                               </p>
 
@@ -800,16 +800,16 @@ export default function AreaFinanceiroPage() {
                               </p>
                             </div>
 
-                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
-                              <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                            <div className="rounded-lg bg-[#f7f8fa] px-3 py-1.5 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
+                              <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d] md:hidden">
                                 Pago
                               </p>
 
-                              <p className="mt-1 md:mt-0">{formatCurrency(fee.paid_amount)}</p>
+                              <p className="mt-0.5 md:mt-0">{formatCurrency(fee.paid_amount)}</p>
                             </div>
 
-                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 sm:col-span-2 md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-center">
-                              <p className="mb-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
+                            <div className="rounded-lg bg-[#f7f8fa] px-3 py-1.5 sm:col-span-2 md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-center">
+                              <p className="mb-0.5 text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d] md:hidden">
                                 Status
                               </p>
 
