@@ -195,6 +195,13 @@ export default function AreaContribuicoesExtrasPage() {
 
       setPixPayment(data);
 
+      setTimeout(() => {
+        document.getElementById("pix-payment-section")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+
       if (data.pix_charge.pix_copia_e_cola) {
         const qrCode = await QRCode.toDataURL(data.pix_charge.pix_copia_e_cola, {
           margin: 2,
@@ -333,7 +340,7 @@ export default function AreaContribuicoesExtrasPage() {
 
 
         {pixPayment && pixPayment.pix_charge && (
-          <section className="rounded-2xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+          <section id="pix-payment-section" className="rounded-2xl border border-[#e8dccb] bg-white p-5 shadow-sm">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c7a56b]">
