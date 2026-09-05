@@ -42,3 +42,8 @@ next-env.d.ts
 
 # Backups locais do Supabase
 backups/
+
+# Certificados e chaves privadas
+*.key
+*.pfx
+*.cer
