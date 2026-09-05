@@ -309,3 +309,34 @@ export async function listReceivedPix(params: {
     token: params.token,
   });
 }
+
+export async function registerPixWebhook(input: {
+  token: string;
+  pixKey: string;
+  webhookUrl: string;
+}) {
+  const path = `/api/v2/webhook/${encodeURIComponent(input.pixKey)}`;
+
+  return sicrediRequest({
+    path,
+    method: "PUT",
+    token: input.token,
+    body: {
+      webhookUrl: input.webhookUrl,
+    },
+  });
+}
+
+export async function getPixWebhook(input: {
+  token: string;
+  pixKey: string;
+}) {
+  const path = `/api/v2/webhook/${encodeURIComponent(input.pixKey)}`;
+
+  return sicrediRequest({
+    path,
+    method: "GET",
+    token: input.token,
+  });
+}
+
