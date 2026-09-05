@@ -685,16 +685,16 @@ export default function AreaFinanceiroPage() {
                                   type="button"
                                   onClick={() => handleGeneratePix(fee.id)}
                                   disabled={generatingPixFeeId === fee.id}
-                                  className="inline-flex rounded-full bg-[#13233a] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-white hover:bg-[#1d3557] disabled:cursor-not-allowed disabled:opacity-60"
+                                  className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-[#13233a] px-4 py-2 text-[10px] font-black uppercase tracking-[0.06em] text-white hover:bg-[#1d3557] disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                   {generatingPixFeeId === fee.id ? "Gerando..." : "Pagar com Pix"}
                                 </button>
 
                                 <a
                                   href={`/area/informar-pagamento/${fee.id}`}
-                                  className="inline-flex rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
+                                  className="inline-flex items-center justify-center whitespace-nowrap rounded-full border border-[#e8dccb] bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
                                 >
-                                  Informar pagamento
+                                  Informar manualmente
                                 </a>
                               </div>
                             </div>
