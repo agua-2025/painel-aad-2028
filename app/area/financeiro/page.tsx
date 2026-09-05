@@ -399,17 +399,43 @@ export default function AreaFinanceiroPage() {
     <ProtectedArea>
       <div className="space-y-4">
         <section className="rounded-2xl bg-[#13233a] p-5 text-white shadow-xl shadow-slate-900/10">
-          <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
-            Minha área
-          </p>
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
+                Minha área
+              </p>
 
-          <h1 className="mt-2 text-2xl font-black tracking-[-0.04em]">
-            Financeiro
-          </h1>
+              <h1 className="mt-2 text-2xl font-black tracking-[-0.04em]">
+                Financeiro
+              </h1>
 
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
-            Acompanhe sua situação financeira, mensalidades em aberto e valores atualizados.
-          </p>
+              <p className="mt-2 text-sm font-bold text-white/75">
+                {summary.totalOpen > 0 ? "Com mensalidades em aberto" : "Em dia"}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 md:min-w-[360px]">
+              <div className="rounded-2xl bg-white/10 px-4 py-3 text-center">
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#c7a56b]">
+                  Em aberto
+                </p>
+
+                <p className="mt-1 text-xl font-black tracking-[-0.03em]">
+                  {formatCurrency(summary.totalOpen)}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-white/10 px-4 py-3 text-center">
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#c7a56b]">
+                  Pago
+                </p>
+
+                <p className="mt-1 text-xl font-black tracking-[-0.03em]">
+                  {formatCurrency(summary.totalPaid)}
+                </p>
+              </div>
+            </div>
+          </div>
         </section>
 
 
@@ -523,43 +549,6 @@ export default function AreaFinanceiroPage() {
           </div>
         ) : (
           <>
-            <section className="grid gap-3 md:grid-cols-3">
-              <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
-                <p className="text-sm font-bold text-[#596579]">Situação</p>
-                <p className="mt-2 text-base font-black tracking-[-0.03em] text-[#13233a]">
-                  {summary.totalOpen > 0 ? "Com pendência" : "Em dia"}
-                </p>
-                <p className="mt-2 text-sm font-bold text-[#596579]">
-                  {associate.full_name}
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
-                <p className="text-sm font-bold text-[#596579]">Total em aberto</p>
-                <p className="mt-2 text-lg font-black tracking-[-0.03em] text-[#13233a]">
-                  {formatCurrency(summary.totalOpen)}
-                </p>
-                <p className="mt-2 text-sm font-bold text-[#596579]">
-                  Atualizado até hoje
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
-                <p className="text-sm font-bold text-[#596579]">Total pago</p>
-                <p className="mt-2 text-lg font-black tracking-[-0.03em] text-[#13233a]">
-                  {formatCurrency(summary.totalPaid)}
-                </p>
-                <p className="mt-2 text-sm font-bold text-[#596579]">
-                  Pagamentos já baixados
-                </p>
-              </div>
-            </section>
-
-            {summary.openFees.length > 1 && (
-              <p className="rounded-xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
-                Orientação: havendo mais de uma mensalidade em aberto, recomenda-se quitar primeiro a mais antiga e informar corretamente a referência do pagamento.
-              </p>
-            )}
 
             {summary.overdueFees.length > 0 && (
               <p className="rounded-xl border border-[#e8dccb] bg-white px-4 py-3 text-sm font-bold text-[#596579]">
@@ -574,9 +563,8 @@ export default function AreaFinanceiroPage() {
                 </h2>
 
                 <p className="text-xs font-bold text-[#596579]">
-                  As mensalidades são exibidas por ordem de vencimento. Mensalidades futuras podem ser pagas antecipadamente, se desejar.
                   {summary.openFees.length > 0 &&
-                    ` Mostrando ${Math.min(visibleOpenFeesCount, summary.openFees.length)} de ${summary.openFees.length}.`}
+                    `Mostrando ${Math.min(visibleOpenFeesCount, summary.openFees.length)} de ${summary.openFees.length}.`}
                 </p>
               </div>
 
