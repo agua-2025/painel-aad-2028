@@ -12,6 +12,19 @@ type SicrediWebhookPix = {
   horario?: string;
 };
 
+type PixWebhookResult = {
+  ok: boolean;
+  message: string;
+  txid?: string;
+  endToEndId?: string | null;
+  already_settled?: boolean;
+  pix_charge_id?: string;
+  monthly_fee_id?: string | null;
+  extra_contribution_item_id?: string | null;
+  error?: string;
+  pix?: SicrediWebhookPix;
+};
+
 function normalizePixPayload(payload: unknown): SicrediWebhookPix[] {
   if (!payload || typeof payload !== "object") {
     return [];
@@ -83,7 +96,7 @@ export async function POST(request: NextRequest) {
 
   const supabase = createServiceClient();
 
-  const results = [];
+  const results: PixWebhookResult[] = [];
 
   for (const pix of pixList) {
     if (!pix.txid) {

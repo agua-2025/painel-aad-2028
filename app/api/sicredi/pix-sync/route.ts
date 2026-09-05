@@ -23,6 +23,23 @@ type SicrediReceivedPix = {
   horario?: string;
 };
 
+type SicrediPixListResponse = {
+  pix?: SicrediReceivedPix[];
+};
+
+type PixSyncResult = {
+  ok: boolean;
+  message: string;
+  txid?: string;
+  endToEndId?: string | null;
+  already_settled?: boolean;
+  pix_charge_id?: string;
+  monthly_fee_id?: string | null;
+  extra_contribution_item_id?: string | null;
+  error?: string;
+  pix?: SicrediReceivedPix;
+};
+
 export async function POST(request: NextRequest) {
   const configuredSecret = process.env.PIX_SYNC_SECRET;
 
@@ -63,20 +80,20 @@ export async function POST(request: NextRequest) {
 
   const token = await getSicrediAccessToken();
 
-  const sicrediResponse = await listReceivedPix({
+  const sicrediResponse = (await listReceivedPix({
     token: token.access_token,
     inicio,
     fim,
     txIdPresente: true,
-  });
+  })) as SicrediPixListResponse;
 
   const pixList = Array.isArray(sicrediResponse.pix)
-    ? (sicrediResponse.pix as SicrediReceivedPix[])
+    ? sicrediResponse.pix
     : [];
 
   const supabase = createServiceClient();
 
-  const results = [];
+  const results: PixSyncResult[] = [];
 
   for (const pix of pixList) {
     if (!pix.txid) {
