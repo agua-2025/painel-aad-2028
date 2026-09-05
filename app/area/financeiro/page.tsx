@@ -667,9 +667,11 @@ export default function AreaFinanceiroPage() {
                                 Status
                               </p>
 
-                              <span className="inline-flex rounded-full bg-white px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579] md:bg-[#f7f8fa]">
-                                {statusLabels[fee.status] ?? fee.status}
-                              </span>
+                              <div className="flex justify-center md:block">
+                                <span className="inline-flex min-w-[110px] items-center justify-center rounded-full bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579] md:min-w-0 md:bg-[#f7f8fa]">
+                                  {statusLabels[fee.status] ?? fee.status}
+                                </span>
+                              </div>
                             </div>
 
                             <div className="rounded-lg bg-[#f7f8fa] px-3 py-1.5 sm:col-span-2 md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
@@ -677,13 +679,17 @@ export default function AreaFinanceiroPage() {
                                 Ação
                               </p>
 
-                              <div className="flex flex-wrap justify-end gap-2">
+                              <div
+                                className={`grid gap-2 ${
+                                  pixPaymentsEnabled ? "grid-cols-2" : "grid-cols-1"
+                                } md:flex md:flex-wrap md:justify-end`}
+                              >
                                 {pixPaymentsEnabled && (
                                   <button
                                     type="button"
                                     onClick={() => handleGeneratePix(fee.id)}
                                     disabled={generatingPixFeeId === fee.id}
-                                    className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-[#13233a] px-4 py-2 text-[10px] font-black uppercase tracking-[0.06em] text-white hover:bg-[#1d3557] disabled:cursor-not-allowed disabled:opacity-60"
+                                    className="inline-flex min-h-[42px] w-full items-center justify-center rounded-full bg-[#13233a] px-3 py-2 text-[10px] font-black uppercase tracking-[0.06em] text-white transition hover:bg-[#1d3557] disabled:cursor-not-allowed disabled:opacity-60 md:w-auto md:min-w-[160px]"
                                   >
                                     {generatingPixFeeId === fee.id ? "Gerando..." : "Pagar com Pix"}
                                   </button>
@@ -691,9 +697,10 @@ export default function AreaFinanceiroPage() {
 
                                 <a
                                   href={`/area/informar-pagamento/${fee.id}`}
-                                  className="inline-flex items-center justify-center whitespace-nowrap rounded-full border border-[#e8dccb] bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
+                                  className="inline-flex min-h-[42px] w-full items-center justify-center rounded-full border border-[#e8dccb] bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] transition hover:bg-[#f7f8fa] md:w-auto md:min-w-[160px]"
                                 >
-                                  Informar manualmente
+                                  <span className="sm:hidden">Informar</span>
+                                  <span className="hidden sm:inline">Informar manualmente</span>
                                 </a>
                               </div>
                             </div>
