@@ -190,6 +190,8 @@ function isOpenFee(fee: MonthlyFee) {
   return ["pendente", "parcialmente_paga", "atrasada"].includes(fee.status);
 }
 
+const pixPaymentsEnabled = process.env.NEXT_PUBLIC_PIX_PAYMENTS_ENABLED === "true";
+
 export default function AreaFinanceiroPage() {
   const [associate, setAssociate] = useState<Associate | null>(null);
   const [fees, setFees] = useState<MonthlyFee[]>([]);
@@ -681,14 +683,16 @@ export default function AreaFinanceiroPage() {
                               </p>
 
                               <div className="flex flex-wrap justify-end gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() => handleGeneratePix(fee.id)}
-                                  disabled={generatingPixFeeId === fee.id}
-                                  className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-[#13233a] px-4 py-2 text-[10px] font-black uppercase tracking-[0.06em] text-white hover:bg-[#1d3557] disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                  {generatingPixFeeId === fee.id ? "Gerando..." : "Pagar com Pix"}
-                                </button>
+                                {pixPaymentsEnabled && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleGeneratePix(fee.id)}
+                                    disabled={generatingPixFeeId === fee.id}
+                                    className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-[#13233a] px-4 py-2 text-[10px] font-black uppercase tracking-[0.06em] text-white hover:bg-[#1d3557] disabled:cursor-not-allowed disabled:opacity-60"
+                                  >
+                                    {generatingPixFeeId === fee.id ? "Gerando..." : "Pagar com Pix"}
+                                  </button>
+                                )}
 
                                 <a
                                   href={`/area/informar-pagamento/${fee.id}`}

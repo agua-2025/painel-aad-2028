@@ -128,6 +128,8 @@ function isOpenItem(item: ExtraContributionItem) {
   return ["pendente", "parcialmente_paga", "atrasada"].includes(item.status);
 }
 
+const pixPaymentsEnabled = process.env.NEXT_PUBLIC_PIX_PAYMENTS_ENABLED === "true";
+
 export default function AreaContribuicoesExtrasPage() {
   const [associate, setAssociate] = useState<Associate | null>(null);
   const [items, setItems] = useState<ExtraContributionItem[]>([]);
@@ -552,14 +554,16 @@ export default function AreaContribuicoesExtrasPage() {
                               </span>
                             ) : (
                               <div className="flex flex-wrap justify-end gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() => handleGeneratePix(item.id)}
-                                  disabled={generatingPixItemId === item.id}
-                                  className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-[#13233a] px-4 py-2 text-[10px] font-black uppercase tracking-[0.06em] text-white hover:bg-[#1d3557] disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                  {generatingPixItemId === item.id ? "Gerando..." : "Pagar com Pix"}
-                                </button>
+                                {pixPaymentsEnabled && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleGeneratePix(item.id)}
+                                    disabled={generatingPixItemId === item.id}
+                                    className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-[#13233a] px-4 py-2 text-[10px] font-black uppercase tracking-[0.06em] text-white hover:bg-[#1d3557] disabled:cursor-not-allowed disabled:opacity-60"
+                                  >
+                                    {generatingPixItemId === item.id ? "Gerando..." : "Pagar com Pix"}
+                                  </button>
+                                )}
 
                                 <a
                                   href={`/area/informar-contribuicao-extra/${item.id}`}
