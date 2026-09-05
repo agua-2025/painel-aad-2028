@@ -485,12 +485,12 @@ export default function AreaContribuicoesExtrasPage() {
               ) : (
                 <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
                   <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#596579] md:grid">
-                    <div className="col-span-4">Contribuição</div>
+                    <div className="col-span-3">Contribuição</div>
                     <div className="col-span-2">Vencimento</div>
                     <div className="col-span-2 text-right">Valor/Pago</div>
                     <div className="col-span-2 text-right">Saldo</div>
                     <div className="col-span-1 text-center">Status</div>
-                    <div className="col-span-1 text-right">Ação</div>
+                    <div className="col-span-2 text-right">Ação</div>
                   </div>
 
                   <div className="divide-y divide-[#eee7db]">
@@ -503,7 +503,7 @@ export default function AreaContribuicoesExtrasPage() {
                           key={item.id}
                           className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-center"
                         >
-                          <div className="md:col-span-4">
+                          <div className="md:col-span-3">
                             <p className="font-black text-[#13233a]">
                               {contribution?.title ?? "Contribuição extra"}
                             </p>
@@ -545,7 +545,7 @@ export default function AreaContribuicoesExtrasPage() {
                             </span>
                           </div>
 
-                          <div className="md:col-span-1 md:text-right">
+                          <div className="md:col-span-2 md:text-right">
                             {pendingReportItemIds.has(item.id) ? (
                               <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-amber-700">
                                 Em análise
@@ -556,14 +556,14 @@ export default function AreaContribuicoesExtrasPage() {
                                   type="button"
                                   onClick={() => handleGeneratePix(item.id)}
                                   disabled={generatingPixItemId === item.id}
-                                  className="inline-flex rounded-full bg-[#13233a] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-white hover:bg-[#1d3557] disabled:cursor-not-allowed disabled:opacity-60"
+                                  className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-[#13233a] px-4 py-2 text-[10px] font-black uppercase tracking-[0.06em] text-white hover:bg-[#1d3557] disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                   {generatingPixItemId === item.id ? "Gerando..." : "Pagar com Pix"}
                                 </button>
 
                                 <a
                                   href={`/area/informar-contribuicao-extra/${item.id}`}
-                                  className="inline-flex rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
+                                  className="inline-flex items-center justify-center whitespace-nowrap rounded-full border border-[#e8dccb] bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
                                 >
                                   Informar
                                 </a>
@@ -598,7 +598,7 @@ export default function AreaContribuicoesExtrasPage() {
               ) : (
                 <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
                   <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#596579] md:grid">
-                    <div className="col-span-4">Contribuição</div>
+                    <div className="col-span-3">Contribuição</div>
                     <div className="col-span-2">Vencimento</div>
                     <div className="col-span-2 text-right">Valor</div>
                     <div className="col-span-2 text-right">Pago/Saldo</div>
