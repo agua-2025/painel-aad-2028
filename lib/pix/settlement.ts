@@ -86,23 +86,42 @@ export async function settlePixPayment(
     };
   }
 
-  const { error: paymentError } = await supabase.from("payments").insert({
-    associate_id: charge.associate_id,
-    monthly_fee_id: charge.monthly_fee_id,
-    extra_contribution_item_id: charge.extra_contribution_item_id,
-    amount: paidAmount,
-    paid_at: paidAt,
-    payment_method: "pix",
-    reference: endToEndId ?? charge.txid,
-    notes: `Baixa automática Pix Sicredi. TXID: ${charge.txid}`,
-  });
+  const paymentReference = endToEndId ?? charge.txid;
 
-  if (paymentError) {
+  const { data: existingPayment, error: existingPaymentError } = await supabase
+    .from("payments")
+    .select("id")
+    .eq("payment_method", "pix")
+    .eq("reference", paymentReference)
+    .maybeSingle();
+
+  if (existingPaymentError) {
     return {
       ok: false,
-      message: "Erro ao registrar pagamento.",
-      error: paymentError.message,
+      message: "Erro ao verificar pagamento Pix existente.",
+      error: existingPaymentError.message,
     };
+  }
+
+  if (!existingPayment) {
+    const { error: paymentError } = await supabase.from("payments").insert({
+      associate_id: charge.associate_id,
+      monthly_fee_id: charge.monthly_fee_id,
+      extra_contribution_item_id: charge.extra_contribution_item_id,
+      amount: paidAmount,
+      paid_at: paidAt,
+      payment_method: "pix",
+      reference: paymentReference,
+      notes: `Baixa automática Pix Sicredi. TXID: ${charge.txid}`,
+    });
+
+    if (paymentError) {
+      return {
+        ok: false,
+        message: "Erro ao registrar pagamento.",
+        error: paymentError.message,
+      };
+    }
   }
 
   if (charge.monthly_fee_id) {
