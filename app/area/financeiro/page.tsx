@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import QRCode from "qrcode";
 import { ProtectedArea } from "@/components/ProtectedArea";
 import { createClient } from "@/lib/supabase/client";
 
@@ -10,6 +11,37 @@ type Associate = {
   email: string | null;
   status: string;
   financial_status: string | null;
+};
+
+type PixPaymentData = {
+  id: string;
+  txid: string;
+  status: string;
+  original_amount: number;
+  updated_amount: number;
+  expires_at: string | null;
+  pix_copia_e_cola: string | null;
+  location: string | null;
+  loc_id: string | null;
+  created_at: string;
+};
+
+type PixPaymentResponse = {
+  ok: boolean;
+  reused?: boolean;
+  message: string;
+  pix_charge?: PixPaymentData;
+  calculation?: {
+    base_amount: number;
+    paid_amount: number;
+    days_with_charges: number;
+    late_fee_amount: number;
+    interest_amount: number;
+    total_due: number;
+    remaining: number;
+    pix_amount: number;
+  };
+  error?: string;
 };
 
 type MonthlyFee = {
@@ -72,7 +104,26 @@ function formatCurrency(value: number | null | undefined) {
 function formatDate(value?: string | null) {
   if (!value) return "Não informado";
 
-  return new Date(value + "T00:00:00").toLocaleDateString("pt-BR");
+  const dateOnly = value.includes("T") ? value : value + "T00:00:00";
+  const date = new Date(dateOnly);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Data não informada";
+  }
+
+  return date.toLocaleDateString("pt-BR");
+}
+
+function formatDateTime(value?: string | null) {
+  if (!value) return "Não informado";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Data não informada";
+  }
+
+  return date.toLocaleString("pt-BR");
 }
 
 function getMonthLabel(fee: MonthlyFee) {
@@ -145,6 +196,10 @@ export default function AreaFinanceiroPage() {
   const [visibleOpenFeesCount, setVisibleOpenFeesCount] = useState(5);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [generatingPixFeeId, setGeneratingPixFeeId] = useState<string | null>(null);
+  const [pixPayment, setPixPayment] = useState<PixPaymentResponse | null>(null);
+  const [pixQrCode, setPixQrCode] = useState("");
+  const [pixMessage, setPixMessage] = useState("");
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -192,6 +247,62 @@ export default function AreaFinanceiroPage() {
 
   const visibleOpenFees = summary.openFees.slice(0, visibleOpenFeesCount);
   const hasMoreOpenFees = visibleOpenFeesCount < summary.openFees.length;
+
+
+  async function handleGeneratePix(feeId: string) {
+    setGeneratingPixFeeId(feeId);
+    setPixPayment(null);
+    setPixQrCode("");
+    setPixMessage("");
+
+    try {
+      const response = await fetch(`/api/pix/monthly-fee/${feeId}`, {
+        method: "POST",
+      });
+
+      const data = (await response.json()) as PixPaymentResponse;
+
+      if (!response.ok || !data.ok || !data.pix_charge) {
+        setPixMessage(data.message || data.error || "Não foi possível gerar o Pix.");
+        return;
+      }
+
+      setPixPayment(data);
+
+      if (data.pix_charge.pix_copia_e_cola) {
+        const qrCode = await QRCode.toDataURL(data.pix_charge.pix_copia_e_cola, {
+          margin: 2,
+          width: 240,
+        });
+
+        setPixQrCode(qrCode);
+      }
+    } catch (error) {
+      console.error("Erro ao gerar Pix:", error);
+      setPixMessage("Não foi possível gerar o Pix. Tente novamente.");
+    } finally {
+      setGeneratingPixFeeId(null);
+    }
+  }
+
+  async function copyPixCode() {
+    const pixCode = pixPayment?.pix_charge?.pix_copia_e_cola;
+
+    if (!pixCode) return;
+
+    try {
+      await navigator.clipboard.writeText(pixCode);
+      setPixMessage("Código Pix copiado.");
+    } catch {
+      setPixMessage("Não foi possível copiar automaticamente. Selecione e copie o código manualmente.");
+    }
+  }
+
+  function closePixPayment() {
+    setPixPayment(null);
+    setPixQrCode("");
+    setPixMessage("");
+  }
 
   useEffect(() => {
     async function loadFinancialData() {
@@ -291,6 +402,97 @@ export default function AreaFinanceiroPage() {
             Acompanhe sua situação financeira, mensalidades em aberto e valores atualizados.
           </p>
         </section>
+
+
+        {pixPayment && pixPayment.pix_charge && (
+          <section className="rounded-2xl border border-[#e8dccb] bg-white p-5 shadow-sm">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-[#c7a56b]">
+                  Pagamento Pix
+                </p>
+
+                <h2 className="mt-2 text-xl font-black tracking-[-0.03em] text-[#13233a]">
+                  QR Code gerado com sucesso
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-[#596579]">
+                  Valor do Pix:{" "}
+                  <span className="font-black text-[#13233a]">
+                    {formatCurrency(pixPayment.pix_charge.updated_amount)}
+                  </span>
+                  {pixPayment.reused ? " · cobrança ativa reaproveitada" : " · nova cobrança gerada"}
+                </p>
+
+                <p className="mt-1 text-xs font-bold text-[#596579]">
+                  Válido até: {formatDateTime(pixPayment.pix_charge.expires_at)}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={closePixPayment}
+                className="rounded-full border border-[#e8dccb] bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-[#13233a] hover:bg-[#f7f8fa]"
+              >
+                Fechar
+              </button>
+            </div>
+
+            <div className="mt-4 grid gap-4 lg:grid-cols-[280px_1fr]">
+              <div className="rounded-2xl border border-[#eee7db] bg-[#f7f8fa] p-4 text-center">
+                {pixQrCode ? (
+                  <img
+                    src={pixQrCode}
+                    alt="QR Code Pix"
+                    className="mx-auto h-60 w-60 rounded-xl bg-white p-2"
+                  />
+                ) : (
+                  <div className="flex h-60 items-center justify-center rounded-xl bg-white text-sm font-bold text-[#596579]">
+                    QR Code indisponível
+                  </div>
+                )}
+
+                <p className="mt-3 text-xs font-bold text-[#596579]">
+                  Escaneie o QR Code no aplicativo do banco.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-[#eee7db] bg-[#f7f8fa] p-4">
+                <p className="text-sm font-black text-[#13233a]">
+                  Pix copia e cola
+                </p>
+
+                <textarea
+                  readOnly
+                  value={pixPayment.pix_charge.pix_copia_e_cola ?? ""}
+                  className="mt-3 h-32 w-full resize-none rounded-xl border border-[#e8dccb] bg-white p-3 text-xs font-bold text-[#13233a] outline-none"
+                />
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={copyPixCode}
+                    className="rounded-full bg-[#13233a] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white hover:bg-[#1d3557]"
+                  >
+                    Copiar código Pix
+                  </button>
+                </div>
+
+                {pixMessage && (
+                  <p className="mt-3 text-sm font-bold text-[#596579]">
+                    {pixMessage}
+                  </p>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {pixMessage && !pixPayment && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
+            <p className="font-bold text-red-700">{pixMessage}</p>
+          </div>
+        )}
 
         {loading ? (
           <div className="rounded-xl border border-[#e8dccb] bg-white p-4 shadow-sm">
@@ -478,12 +680,23 @@ export default function AreaFinanceiroPage() {
                                 Ação
                               </p>
 
-                              <a
-                                href={`/area/informar-pagamento/${fee.id}`}
-                                className="inline-flex rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
-                              >
-                                Informar pagamento
-                              </a>
+                              <div className="flex flex-wrap justify-end gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleGeneratePix(fee.id)}
+                                  disabled={generatingPixFeeId === fee.id}
+                                  className="inline-flex rounded-full bg-[#13233a] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-white hover:bg-[#1d3557] disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                  {generatingPixFeeId === fee.id ? "Gerando..." : "Pagar com Pix"}
+                                </button>
+
+                                <a
+                                  href={`/area/informar-pagamento/${fee.id}`}
+                                  className="inline-flex rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
+                                >
+                                  Informar pagamento
+                                </a>
+                              </div>
                             </div>
                           </div>
                         </article>
