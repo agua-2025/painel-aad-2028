@@ -697,7 +697,7 @@ export default function AreaContribuicoesExtrasPage() {
                 </h2>
 
                 <p className="text-xs font-bold text-[#596579]">
-                  Rateios e cobranças pontuais lançados em seu nome.
+                  {items.length > 0 && `Mostrando ${items.length} de ${items.length}.`}
                 </p>
               </div>
 
@@ -710,7 +710,7 @@ export default function AreaContribuicoesExtrasPage() {
               ) : (
                 <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
                   <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#596579] md:grid">
-                    <div className="col-span-3">Contribuição</div>
+                    <div className="col-span-4">Contribuição</div>
                     <div className="col-span-2">Vencimento</div>
                     <div className="col-span-2 text-right">Valor</div>
                     <div className="col-span-2 text-right">Pago/Saldo</div>
@@ -725,37 +725,105 @@ export default function AreaContribuicoesExtrasPage() {
                       return (
                         <article
                           key={item.id}
-                          className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-center"
+                          className="px-3 py-2 text-sm md:grid md:grid-cols-12 md:items-center md:gap-3"
                         >
-                          <div className="md:col-span-4">
-                            <p className="font-black text-[#13233a]">
-                              {contribution?.title ?? "Contribuição extra"}
-                            </p>
+                          <div className="md:hidden">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="font-black text-[#13233a]">
+                                  {contribution?.title ?? "Contribuição extra"}
+                                </p>
 
-                            {contribution?.description && (
-                              <p className="mt-0.5 text-xs font-bold leading-5 text-[#596579]">
-                                {contribution.description}
-                              </p>
+                                <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                                  Vence: {formatDate(item.due_date)}
+                                </p>
+                              </div>
+
+                              <div className="text-right">
+                                <p className="whitespace-nowrap font-black text-[#13233a]">
+                                  {formatCurrency(item.amount)}
+                                </p>
+
+                                <span className="mt-1 inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                                  {statusLabels[item.status] ?? item.status}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="mt-2 grid grid-cols-2 gap-2 text-xs font-bold text-[#596579]">
+                              <div className="rounded-lg bg-[#f7f8fa] px-3 py-2">
+                                <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d]">
+                                  Pago
+                                </p>
+                                <p className="font-black text-[#13233a]">
+                                  {formatCurrency(item.paid_amount)}
+                                </p>
+                              </div>
+
+                              <div className="rounded-lg bg-[#f7f8fa] px-3 py-2">
+                                <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d]">
+                                  Saldo
+                                </p>
+                                <p className="font-black text-[#13233a]">
+                                  {formatCurrency(balance)}
+                                </p>
+                              </div>
+                            </div>
+
+                            {(contribution?.description || contribution?.reason || item.notes) && (
+                              <details className="mt-2 text-xs font-bold text-[#596579]">
+                                <summary className="cursor-pointer text-[#a7834d]">
+                                  Detalhes
+                                </summary>
+
+                                <div className="mt-1 rounded-lg bg-[#f7f8fa] px-3 py-2 leading-5">
+                                  {contribution?.description && <p>{contribution.description}</p>}
+                                  {contribution?.reason && <p>Motivo: {contribution.reason}</p>}
+                                  {item.notes && <p>Obs.: {item.notes}</p>}
+                                </div>
+                              </details>
                             )}
                           </div>
 
-                          <div className="font-bold text-[#596579] md:col-span-2">
-                            {formatDate(item.due_date)}
-                          </div>
+                          <div className="hidden md:contents">
+                            <div className="col-span-4">
+                              <p className="font-black text-[#13233a]">
+                                {contribution?.title ?? "Contribuição extra"}
+                              </p>
 
-                          <div className="font-black text-[#13233a] md:col-span-2 md:text-right">
-                            {formatCurrency(calculateExtraContributionAmountDue(item).totalDue)}
-                          </div>
+                              {(contribution?.description || contribution?.reason || item.notes) && (
+                                <details className="mt-1 text-xs font-bold text-[#596579]">
+                                  <summary className="cursor-pointer text-[#a7834d]">
+                                    Detalhes
+                                  </summary>
 
-                          <div className="font-bold text-[#596579] md:col-span-2 md:text-right">
-                            <p>Pago: {formatCurrency(item.paid_amount)}</p>
-                            <p className="text-xs">Saldo: {formatCurrency(balance)}</p>
-                          </div>
+                                  <div className="mt-1 rounded-lg bg-[#f7f8fa] px-3 py-2 leading-5">
+                                    {contribution?.description && <p>{contribution.description}</p>}
+                                    {contribution?.reason && <p>Motivo: {contribution.reason}</p>}
+                                    {item.notes && <p>Obs.: {item.notes}</p>}
+                                  </div>
+                                </details>
+                              )}
+                            </div>
 
-                          <div className="md:col-span-2 md:text-center">
-                            <span className="inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
-                              {statusLabels[item.status] ?? item.status}
-                            </span>
+                            <div className="col-span-2 font-bold text-[#596579]">
+                              {formatDate(item.due_date)}
+                            </div>
+
+                            <div className="col-span-2 text-right font-black text-[#13233a]">
+                              {formatCurrency(item.amount)}
+                            </div>
+
+                            <div className="col-span-2 text-right font-bold text-[#596579]">
+                              <p>Pago: {formatCurrency(item.paid_amount)}</p>
+                              <p className="text-xs">Saldo: {formatCurrency(balance)}</p>
+                            </div>
+
+                            <div className="col-span-2 text-center">
+                              <span className="inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                                {statusLabels[item.status] ?? item.status}
+                              </span>
+                            </div>
                           </div>
                         </article>
                       );
