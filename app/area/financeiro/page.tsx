@@ -397,7 +397,7 @@ export default function AreaFinanceiroPage() {
 
   return (
     <ProtectedArea>
-      <div className="space-y-4">
+      <div className="min-h-screen space-y-4 pb-10">
         <section className="rounded-2xl bg-[#13233a] p-5 text-white shadow-xl shadow-slate-900/10">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
