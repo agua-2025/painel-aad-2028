@@ -314,8 +314,8 @@ export default function AreaPagamentosPage() {
             Pagamentos
           </h1>
 
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
-            Consulte o histórico de pagamentos baixados pela Tesouraria da AAD Direito 2028.
+          <p className="mt-2 text-sm font-bold text-white/75">
+            Total pago: {formatCurrency(summary.totalPaid)}
           </p>
         </section>
 
@@ -339,35 +339,7 @@ export default function AreaPagamentosPage() {
           </div>
         ) : (
           <>
-            <section className="grid gap-3 md:grid-cols-4">
-              <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm md:col-span-2">
-                <p className="text-sm font-bold text-[#596579]">Associado</p>
-                <p className="mt-2 text-base font-black tracking-[-0.03em] text-[#13233a]">
-                  {associate.full_name}
-                </p>
-                <p className="mt-2 text-sm font-bold text-[#596579]">
-                  {associate.email}
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
-                <p className="text-sm font-bold text-[#596579]">Mensalidades</p>
-                <p className="mt-2 text-base font-black tracking-[-0.03em] text-[#13233a]">
-                  {formatCurrency(summary.monthlyTotal)}
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
-                <p className="text-sm font-bold text-[#596579]">
-                  Contribuições extras
-                </p>
-                <p className="mt-2 text-base font-black tracking-[-0.03em] text-[#13233a]">
-                  {formatCurrency(summary.extraTotal)}
-                </p>
-              </div>
-            </section>
-
-            <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+<section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
               <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
                 <div>
                   <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
@@ -375,22 +347,11 @@ export default function AreaPagamentosPage() {
                   </h2>
 
                   <p className="text-xs font-bold text-[#596579]">
-                    Pagamentos lançados pela Tesouraria em seu nome.
                     {payments.length > 0 &&
-                      ` Mostrando ${Math.min(visiblePaymentsCount, payments.length)} de ${payments.length}.`}
+                      `Mostrando ${Math.min(visiblePaymentsCount, payments.length)} de ${payments.length}.`}
                   </p>
                 </div>
-
-                <div className="rounded-xl bg-[#f7f8fa] px-4 py-2.5">
-                  <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[#596579]">
-                    Total pago
-                  </p>
-
-                  <p className="text-lg font-black text-[#13233a]">
-                    {formatCurrency(summary.totalPaid)}
-                  </p>
-                </div>
-              </div>
+</div>
 
               {payments.length === 0 ? (
                 <div className="mt-4 rounded-xl bg-[#f7f8fa] px-4 py-4">
@@ -423,73 +384,96 @@ export default function AreaPagamentosPage() {
                       return (
                         <article
                           key={payment.id}
-                          className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-start"
+                          className="px-3 py-2 text-sm md:grid md:grid-cols-12 md:items-center md:gap-3"
                         >
-                          <div className="rounded-xl bg-[#f7f8fa] px-3 py-3 md:col-span-3 md:rounded-none md:bg-transparent md:px-0 md:py-0">
-                            <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
-                              Referência
-                            </p>
+                          <div className="md:hidden">
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <p className="font-black text-[#13233a]">
+                                  {getReferenceLabel(payment)}
+                                </p>
 
-                            <p className="mt-1 font-black text-[#13233a] md:mt-0">
-                              {getReferenceLabel(payment)}
-                            </p>
+                                <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                                  {getOriginBadge(payment)} ·{" "}
+                                  {paymentMethodLabels[payment.payment_method] ??
+                                    payment.payment_method}
+                                </p>
+                              </div>
 
-                            <div className="mt-2 flex flex-wrap gap-1.5 md:mt-1">
-                              <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579] md:bg-[#f7f8fa]">
-                                {getOriginBadge(payment)}
-                              </span>
+                              <p className="whitespace-nowrap text-right font-black text-[#13233a]">
+                                {formatCurrency(payment.amount)}
+                              </p>
+                            </div>
 
-                              {originType === "extra" && (
-                                <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579] md:bg-[#f7f8fa]">
-                                  Rateio
+                            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-bold text-[#596579]">
+                              <span>Pago em {formatDate(payment.paid_at)}</span>
+
+                              {chargeStatus && (
+                                <span className="rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em]">
+                                  {statusLabels[chargeStatus] ?? chargeStatus}
                                 </span>
                               )}
                             </div>
+
+                            {(payment.reference || payment.notes) && (
+                              <details className="mt-1 text-xs font-bold text-[#596579]">
+                                <summary className="cursor-pointer text-[#a7834d]">
+                                  Detalhes
+                                </summary>
+
+                                <div className="mt-1 rounded-lg bg-[#f7f8fa] px-3 py-2 leading-5">
+                                  <p>Vencimento: {formatDate(dueDate)}</p>
+                                  <p>Cobrança: {formatCurrency(chargeAmount)}</p>
+
+                                  {payment.reference && (
+                                    <p>Ref.: {payment.reference}</p>
+                                  )}
+
+                                  {payment.notes && <p>{payment.notes}</p>}
+                                </div>
+                              </details>
+                            )}
                           </div>
 
-                          <div className="grid gap-2 sm:grid-cols-2 md:contents">
-                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0">
-                              <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
-                                Pagamento
+                          <div className="hidden md:contents">
+                            <div className="col-span-3">
+                              <p className="font-black text-[#13233a]">
+                                {getReferenceLabel(payment)}
                               </p>
 
-                              <p className="mt-1 md:mt-0">{formatDate(payment.paid_at)}</p>
+                              <div className="mt-1 flex flex-wrap gap-1.5">
+                                <span className="rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                                  {getOriginBadge(payment)}
+                                </span>
 
+                                {originType === "extra" && (
+                                  <span className="rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                                    Rateio
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="col-span-2 font-bold text-[#596579]">
+                              <p>{formatDate(payment.paid_at)}</p>
                               <p className="text-xs">
                                 {paymentMethodLabels[payment.payment_method] ??
                                   payment.payment_method}
                               </p>
                             </div>
 
-                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
-                              <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
-                                Valor pago
-                              </p>
-
-                              <p className="mt-1 font-black text-[#13233a] md:mt-0">
-                                {formatCurrency(payment.amount)}
-                              </p>
+                            <div className="col-span-2 text-right font-black text-[#13233a]">
+                              {formatCurrency(payment.amount)}
                             </div>
 
-                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 font-bold text-[#596579] md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-right">
-                              <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
-                                Cobrança
-                              </p>
-
-                              <p className="mt-1 md:mt-0">{formatCurrency(chargeAmount)}</p>
-
-                              <p className="text-xs">
-                                Venc.: {formatDate(dueDate)}
-                              </p>
+                            <div className="col-span-2 text-right font-bold text-[#596579]">
+                              <p>{formatCurrency(chargeAmount)}</p>
+                              <p className="text-xs">Venc.: {formatDate(dueDate)}</p>
                             </div>
 
-                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 md:col-span-1 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:text-center">
-                              <p className="mb-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
-                                Status
-                              </p>
-
+                            <div className="col-span-1 text-center">
                               {chargeStatus ? (
-                                <span className="inline-flex rounded-full bg-white px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579] md:bg-[#f7f8fa]">
+                                <span className="inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
                                   {statusLabels[chargeStatus] ?? chargeStatus}
                                 </span>
                               ) : (
@@ -499,17 +483,11 @@ export default function AreaPagamentosPage() {
                               )}
                             </div>
 
-                            <div className="rounded-xl bg-[#f7f8fa] px-3 py-2 text-xs font-bold leading-5 text-[#596579] sm:col-span-2 md:col-span-2 md:rounded-none md:bg-transparent md:px-0 md:py-0">
-                              <p className="mb-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#a7834d] md:hidden">
-                                Referência/observação
-                              </p>
-
-                              <p>
-                                Ref.: {payment.reference || "Não informada"}
-                              </p>
+                            <div className="col-span-2 text-xs font-bold leading-5 text-[#596579]">
+                              <p>Ref.: {payment.reference || "Não informada"}</p>
 
                               {payment.notes && (
-                                <p className="mt-1 rounded-lg bg-white px-3 py-2 md:bg-[#f7f8fa]">
+                                <p className="mt-1 rounded-lg bg-[#f7f8fa] px-3 py-2">
                                   {payment.notes}
                                 </p>
                               )}
