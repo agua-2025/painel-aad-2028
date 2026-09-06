@@ -470,28 +470,64 @@ export default function AreaFinanceiroPage() {
               </h1>
 
               <p className="mt-2 text-sm font-bold text-white/75">
-                {summary.totalOpen > 0 ? "Com valores em aberto" : "Em dia"}
+                Resumo financeiro geral
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 md:min-w-[360px]">
-              <div className="rounded-2xl bg-white/10 px-4 py-3 text-center">
-                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#c7a56b]">
+            <div className="grid grid-cols-2 gap-2 md:min-w-[460px] md:grid-cols-4">
+              <div className="rounded-2xl bg-white/10 px-3 py-3 text-center">
+                <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#c7a56b]">
+                  Mensalidades
+                </p>
+
+                <p className="mt-0.5 text-[10px] font-bold uppercase text-white/60">
                   Em aberto
                 </p>
 
-                <p className="mt-1 text-xl font-black tracking-[-0.03em]">
-                  {formatCurrency(summary.totalOpen)}
+                <p className="mt-1 text-lg font-black tracking-[-0.03em]">
+                  {formatCurrency(summary.monthlyOpenTotal)}
                 </p>
               </div>
 
-              <div className="rounded-2xl bg-white/10 px-4 py-3 text-center">
-                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#c7a56b]">
-                  Pago
+              <div className="rounded-2xl bg-white/10 px-3 py-3 text-center">
+                <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#c7a56b]">
+                  Mensalidades
                 </p>
 
-                <p className="mt-1 text-xl font-black tracking-[-0.03em]">
-                  {formatCurrency(summary.totalPaid)}
+                <p className="mt-0.5 text-[10px] font-bold uppercase text-white/60">
+                  Pagas
+                </p>
+
+                <p className="mt-1 text-lg font-black tracking-[-0.03em]">
+                  {formatCurrency(summary.monthlyPaidTotal)}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-white/10 px-3 py-3 text-center">
+                <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#c7a56b]">
+                  Extras
+                </p>
+
+                <p className="mt-0.5 text-[10px] font-bold uppercase text-white/60">
+                  Em aberto
+                </p>
+
+                <p className="mt-1 text-lg font-black tracking-[-0.03em]">
+                  {formatCurrency(summary.extraOpenTotal)}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-white/10 px-3 py-3 text-center">
+                <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#c7a56b]">
+                  Extras
+                </p>
+
+                <p className="mt-0.5 text-[10px] font-bold uppercase text-white/60">
+                  Pagas
+                </p>
+
+                <p className="mt-1 text-lg font-black tracking-[-0.03em]">
+                  {formatCurrency(summary.extraPaidTotal)}
                 </p>
               </div>
             </div>
