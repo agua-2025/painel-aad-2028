@@ -484,19 +484,23 @@ export default function AreaPagamentosPage() {
                             </div>
 
                             <div className="col-span-2 text-xs font-bold leading-5 text-[#596579]">
-                              <p>Ref.: {payment.reference || "Não informada"}</p>
+                              <details>
+                                <summary className="cursor-pointer rounded-full bg-[#f7f8fa] px-3 py-1.5 text-center text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a]">
+                                  Detalhes
+                                </summary>
 
-                              {payment.notes && (
-                                <p className="mt-1 rounded-lg bg-[#f7f8fa] px-3 py-2">
-                                  {payment.notes}
-                                </p>
-                              )}
+                                <div className="mt-2 rounded-lg bg-[#f7f8fa] px-3 py-2">
+                                  <p>Ref.: {payment.reference || "Não informada"}</p>
 
-                              {originType === "extra" && !payment.notes && (
-                                <p className="mt-1">
-                                  Pagamento vinculado a contribuição extra.
-                                </p>
-                              )}
+                                  {payment.notes && <p className="mt-1">{payment.notes}</p>}
+
+                                  {originType === "extra" && !payment.notes && (
+                                    <p className="mt-1">
+                                      Pagamento vinculado a contribuição extra.
+                                    </p>
+                                  )}
+                                </div>
+                              </details>
                             </div>
                           </div>
                         </article>
