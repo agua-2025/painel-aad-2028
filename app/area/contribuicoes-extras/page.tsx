@@ -325,17 +325,43 @@ export default function AreaContribuicoesExtrasPage() {
     <ProtectedArea>
       <div className="space-y-4">
         <section className="rounded-2xl bg-[#13233a] p-5 text-white shadow-xl shadow-slate-900/10">
-          <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
-            Minha área
-          </p>
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.25em] text-[#c7a56b]">
+                Minha área
+              </p>
 
-          <h1 className="mt-2 text-2xl font-black tracking-[-0.04em]">
-            Contribuições Extras
-          </h1>
+              <h1 className="mt-2 text-2xl font-black tracking-[-0.04em]">
+                Contribuições Extras
+              </h1>
 
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">
-            Consulte rateios e cobranças pontuais lançados pela Associação.
-          </p>
+              <p className="mt-2 text-sm font-bold text-white/75">
+                {summary.totalOpen > 0 ? "Com contribuições em aberto" : "Sem contribuições em aberto"}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 md:min-w-[360px]">
+              <div className="rounded-2xl bg-white/10 px-4 py-3 text-center">
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#c7a56b]">
+                  Em aberto
+                </p>
+
+                <p className="mt-1 text-xl font-black tracking-[-0.03em]">
+                  {formatCurrency(summary.totalOpen)}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-white/10 px-4 py-3 text-center">
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#c7a56b]">
+                  Pago
+                </p>
+
+                <p className="mt-1 text-xl font-black tracking-[-0.03em]">
+                  {formatCurrency(summary.totalPaid)}
+                </p>
+              </div>
+            </div>
+          </div>
         </section>
 
 
@@ -449,35 +475,15 @@ export default function AreaContribuicoesExtrasPage() {
           </div>
         ) : (
           <>
-            <section className="grid gap-3 md:grid-cols-3">
-              <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm md:col-span-2">
-                <p className="text-sm font-bold text-[#596579]">Associado</p>
-                <p className="mt-2 text-base font-black tracking-[-0.03em] text-[#13233a]">
-                  {associate.full_name}
-                </p>
-                <p className="mt-2 text-sm font-bold text-[#596579]">
-                  {associate.email}
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
-                <p className="text-sm font-bold text-[#596579]">
-                  Total em aberto
-                </p>
-                <p className="mt-2 text-lg font-black tracking-[-0.03em] text-[#13233a]">
-                  {formatCurrency(summary.totalOpen)}
-                </p>
-              </div>
-            </section>
-
-            <section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
+<section className="rounded-2xl border border-[#e8dccb] bg-white p-4 shadow-sm">
               <div>
                 <h2 className="text-lg font-black tracking-[-0.03em] text-[#13233a]">
                   Contribuições extras em aberto
                 </h2>
 
                 <p className="text-xs font-bold text-[#596579]">
-                  Cobranças pontuais ou rateios lançados pela Associação, diferentes da mensalidade ordinária.
+                  {summary.openItems.length > 0 &&
+                    `Mostrando ${summary.openItems.length} de ${summary.openItems.length}.`}
                 </p>
               </div>
 
@@ -494,10 +500,10 @@ export default function AreaContribuicoesExtrasPage() {
               ) : (
                 <div className="mt-4 overflow-hidden rounded-xl border border-[#e8dccb]">
                   <div className="hidden grid-cols-12 border-b border-[#eee7db] bg-[#fafafa] px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#596579] md:grid">
-                    <div className="col-span-3">Contribuição</div>
+                    <div className="col-span-4">Contribuição</div>
                     <div className="col-span-2">Vencimento</div>
-                    <div className="col-span-2 text-right">Valor/Pago</div>
-                    <div className="col-span-2 text-right">Saldo</div>
+                    <div className="col-span-2 text-right">Valor</div>
+                    <div className="col-span-1 text-right">Saldo</div>
                     <div className="col-span-1 text-center">Status</div>
                     <div className="col-span-2 text-right">Ação</div>
                   </div>
@@ -510,76 +516,171 @@ export default function AreaContribuicoesExtrasPage() {
                       return (
                         <article
                           key={item.id}
-                          className="grid gap-3 px-3 py-3 text-sm md:grid-cols-12 md:items-center"
+                          className="px-3 py-2 text-sm md:grid md:grid-cols-12 md:items-center md:gap-3"
                         >
-                          <div className="md:col-span-3">
-                            <p className="font-black text-[#13233a]">
-                              {contribution?.title ?? "Contribuição extra"}
-                            </p>
+                          <div className="md:hidden">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="font-black text-[#13233a]">
+                                  {contribution?.title ?? "Contribuição extra"}
+                                </p>
 
-                            {contribution?.description && (
-                              <p className="mt-0.5 text-xs font-bold leading-5 text-[#596579]">
-                                {contribution.description}
-                              </p>
-                            )}
-
-                            {contribution?.reason && (
-                              <p className="mt-1 text-xs font-bold leading-5 text-[#596579]">
-                                Motivo: {contribution.reason}
-                              </p>
-                            )}
-                          </div>
-
-                          <div className="font-bold text-[#596579] md:col-span-2">
-                            {formatDate(item.due_date)}
-                          </div>
-
-                          <div className="font-bold text-[#596579] md:col-span-2 md:text-right">
-                            <p className="font-black text-[#13233a]">
-                              {formatCurrency(calculateExtraContributionAmountDue(item).totalDue)}
-                            </p>
-
-                            <p className="text-xs">
-                              Pago: {formatCurrency(item.paid_amount)}
-                            </p>
-                          </div>
-
-                          <div className="font-black text-[#13233a] md:col-span-2 md:text-right">
-                            {formatCurrency(balance)}
-                          </div>
-
-                          <div className="md:col-span-1 md:text-center">
-                            <span className="inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
-                              {statusLabels[item.status] ?? item.status}
-                            </span>
-                          </div>
-
-                          <div className="md:col-span-2 md:text-right">
-                            {pendingReportItemIds.has(item.id) ? (
-                              <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-amber-700">
-                                Em análise
-                              </span>
-                            ) : (
-                              <div className="flex flex-wrap justify-end gap-2">
-                                {pixPaymentsEnabled && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleGeneratePix(item.id)}
-                                    disabled={generatingPixItemId === item.id}
-                                    className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-[#13233a] px-4 py-2 text-[10px] font-black uppercase tracking-[0.06em] text-white hover:bg-[#1d3557] disabled:cursor-not-allowed disabled:opacity-60"
-                                  >
-                                    {generatingPixItemId === item.id ? "Gerando..." : "Pagar com Pix"}
-                                  </button>
-                                )}
-
-                                <a
-                                  href={`/area/informar-contribuicao-extra/${item.id}`}
-                                  className="inline-flex items-center justify-center whitespace-nowrap rounded-full border border-[#e8dccb] bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] hover:bg-[#f7f8fa]"
-                                >
-                                  Informar
-                                </a>
+                                <p className="mt-0.5 text-xs font-bold text-[#596579]">
+                                  Vence: {formatDate(item.due_date)}
+                                </p>
                               </div>
+
+                              <div className="text-right">
+                                <p className="whitespace-nowrap font-black text-[#13233a]">
+                                  {formatCurrency(balance)}
+                                </p>
+
+                                <span className="mt-1 inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                                  {statusLabels[item.status] ?? item.status}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="mt-2 grid grid-cols-2 gap-2 text-xs font-bold text-[#596579]">
+                              <div className="rounded-lg bg-[#f7f8fa] px-3 py-2">
+                                <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d]">
+                                  Valor
+                                </p>
+                                <p className="font-black text-[#13233a]">
+                                  {formatCurrency(calculateExtraContributionAmountDue(item).totalDue)}
+                                </p>
+                              </div>
+
+                              <div className="rounded-lg bg-[#f7f8fa] px-3 py-2">
+                                <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#a7834d]">
+                                  Pago
+                                </p>
+                                <p className="font-black text-[#13233a]">
+                                  {formatCurrency(item.paid_amount)}
+                                </p>
+                              </div>
+                            </div>
+
+                            {(contribution?.description || contribution?.reason || item.notes) && (
+                              <details className="mt-2 text-xs font-bold text-[#596579]">
+                                <summary className="cursor-pointer text-[#a7834d]">
+                                  Detalhes
+                                </summary>
+
+                                <div className="mt-1 rounded-lg bg-[#f7f8fa] px-3 py-2 leading-5">
+                                  {contribution?.description && <p>{contribution.description}</p>}
+                                  {contribution?.reason && <p>Motivo: {contribution.reason}</p>}
+                                  {item.notes && <p>Obs.: {item.notes}</p>}
+                                </div>
+                              </details>
                             )}
+
+                            <div
+                              className={`mt-2 grid gap-2 ${
+                                pixPaymentsEnabled ? "grid-cols-2" : "grid-cols-1"
+                              }`}
+                            >
+                              {pendingReportItemIds.has(item.id) ? (
+                                <span className="inline-flex min-h-[36px] items-center justify-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-amber-700">
+                                  Em análise
+                                </span>
+                              ) : (
+                                <>
+                                  {pixPaymentsEnabled && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleGeneratePix(item.id)}
+                                      disabled={generatingPixItemId === item.id}
+                                      className="inline-flex min-h-[36px] items-center justify-center rounded-full bg-[#13233a] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-white transition hover:bg-[#1d3557] disabled:cursor-not-allowed disabled:opacity-60"
+                                    >
+                                      {generatingPixItemId === item.id ? "..." : "Pix"}
+                                    </button>
+                                  )}
+
+                                  <a
+                                    href={`/area/informar-contribuicao-extra/${item.id}`}
+                                    className="inline-flex min-h-[36px] items-center justify-center rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] transition hover:bg-[#f7f8fa]"
+                                  >
+                                    Informar
+                                  </a>
+                                </>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="hidden md:contents">
+                            <div className="col-span-4">
+                              <p className="font-black text-[#13233a]">
+                                {contribution?.title ?? "Contribuição extra"}
+                              </p>
+
+                              {(contribution?.description || contribution?.reason || item.notes) && (
+                                <details className="mt-1 text-xs font-bold text-[#596579]">
+                                  <summary className="cursor-pointer text-[#a7834d]">
+                                    Detalhes
+                                  </summary>
+
+                                  <div className="mt-1 rounded-lg bg-[#f7f8fa] px-3 py-2 leading-5">
+                                    {contribution?.description && <p>{contribution.description}</p>}
+                                    {contribution?.reason && <p>Motivo: {contribution.reason}</p>}
+                                    {item.notes && <p>Obs.: {item.notes}</p>}
+                                  </div>
+                                </details>
+                              )}
+                            </div>
+
+                            <div className="col-span-2 font-bold text-[#596579]">
+                              {formatDate(item.due_date)}
+                            </div>
+
+                            <div className="col-span-2 text-right font-bold text-[#596579]">
+                              <p className="font-black text-[#13233a]">
+                                {formatCurrency(calculateExtraContributionAmountDue(item).totalDue)}
+                              </p>
+                              <p className="text-xs">Pago: {formatCurrency(item.paid_amount)}</p>
+                            </div>
+
+                            <div className="col-span-1 text-right font-black text-[#13233a]">
+                              {formatCurrency(balance)}
+                            </div>
+
+                            <div className="col-span-1 text-center">
+                              <span className="inline-flex rounded-full bg-[#f7f8fa] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579]">
+                                {statusLabels[item.status] ?? item.status}
+                              </span>
+                            </div>
+
+                            <div className="col-span-2 text-right">
+                              {pendingReportItemIds.has(item.id) ? (
+                                <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-amber-700">
+                                  Em análise
+                                </span>
+                              ) : (
+                                <div
+                                  className={`grid gap-1.5 ${
+                                    pixPaymentsEnabled ? "grid-cols-2" : "grid-cols-1"
+                                  } md:inline-grid`}
+                                >
+                                  {pixPaymentsEnabled && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleGeneratePix(item.id)}
+                                      disabled={generatingPixItemId === item.id}
+                                      className="inline-flex min-h-[32px] items-center justify-center rounded-full bg-[#13233a] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-white transition hover:bg-[#1d3557] disabled:cursor-not-allowed disabled:opacity-60"
+                                    >
+                                      {generatingPixItemId === item.id ? "..." : "Pix"}
+                                    </button>
+                                  )}
+
+                                  <a
+                                    href={`/area/informar-contribuicao-extra/${item.id}`}
+                                    className="inline-flex min-h-[32px] items-center justify-center rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] transition hover:bg-[#f7f8fa]"
+                                  >
+                                    Informar
+                                  </a>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </article>
                       );
