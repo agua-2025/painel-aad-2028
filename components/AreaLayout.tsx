@@ -65,7 +65,7 @@ export function AreaLayout({
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f8fa] text-[#13233a]">
+    <main className="min-h-[100dvh] bg-[#f7f8fa] text-[#13233a]">
       <header className="sticky top-0 z-40 border-b border-[#e8dccb] bg-white/95 backdrop-blur-xl lg:hidden">
         <div className="flex items-center justify-between gap-4 px-5 py-4">
           <Link href="/area" className="flex items-center">
@@ -135,7 +135,7 @@ export function AreaLayout({
         )}
       </header>
 
-      <div className="mx-auto grid min-h-screen max-w-[1600px] lg:grid-cols-[260px_1fr]">
+      <div className="mx-auto grid min-h-[100dvh] max-w-[1600px] bg-[#f7f8fa] lg:grid-cols-[260px_1fr]">
         <aside className="sticky top-0 hidden h-screen flex-col border-r border-[#e8dccb] bg-white px-4 py-4 lg:flex">
           <Link
             href="/area"
@@ -200,7 +200,7 @@ export function AreaLayout({
           </div>
         </aside>
 
-        <section className="relative min-w-0 px-5 py-6 md:px-8 lg:px-9 lg:py-7">
+        <section className="relative min-h-[100dvh] min-w-0 bg-[#f7f8fa] px-5 py-6 pb-16 md:px-8 lg:px-9 lg:py-7 lg:pb-16">
           {children}
 
           {!assistantBubbleHidden && (
