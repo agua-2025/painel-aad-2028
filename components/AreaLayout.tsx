@@ -136,7 +136,7 @@ export function AreaLayout({
       </header>
 
       <div className="mx-auto grid min-h-[100dvh] max-w-[1600px] bg-[#f7f8fa] lg:grid-cols-[260px_1fr]">
-        <aside className="sticky top-0 hidden h-screen flex-col border-r border-[#e8dccb] bg-white px-4 py-4 lg:flex">
+        <aside className="sticky top-0 hidden h-screen flex-col overflow-y-auto border-r border-[#e8dccb] bg-white px-4 py-4 lg:flex">
           <Link
             href="/area"
             className="flex items-center justify-center rounded-3xl bg-[#f7f8fa] px-4 py-3"
@@ -148,7 +148,7 @@ export function AreaLayout({
             />
           </Link>
 
-          <nav className="mt-5 flex flex-col gap-1">
+          <nav className="mt-5 flex flex-col gap-1 pb-4">
             {menuItems.map((item) => (
               <Link
                 key={item.href}
@@ -175,17 +175,19 @@ export function AreaLayout({
             )}
           </nav>
 
-          <div className="mt-auto rounded-3xl border border-[#e8dccb] bg-[#f7f8fa] p-3">
-            <p className="text-sm font-black text-[#13233a]">
-              {userName || "Usuário"}
-            </p>
+          <div className="mt-4 rounded-2xl border border-[#e8dccb] bg-[#f7f8fa] p-3">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-black text-[#13233a]">
+                  {userName || "Usuário"}
+                </p>
 
-            <p className="mt-1 truncate text-[11px] font-bold text-[#596579]">
-              {userEmail || ""}
-            </p>
+                <p className="mt-0.5 truncate text-[11px] font-bold text-[#596579]">
+                  {userEmail || ""}
+                </p>
+              </div>
 
-            <div className="mt-2">
-              <span className="inline-flex rounded-full bg-white px-2.5 py-1 text-[9px] font-black uppercase text-[#13233a]">
+              <span className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[8px] font-black uppercase text-[#13233a]">
                 {isAssociate ? "Associado" : formatStatus(requestStatus)}
               </span>
             </div>
@@ -193,7 +195,7 @@ export function AreaLayout({
             <button
               type="button"
               onClick={handleLogout}
-              className="mt-3 w-full rounded-full bg-[#13233a] px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-white"
+              className="mt-3 w-full rounded-full bg-[#13233a] px-4 py-2 text-[11px] font-black uppercase tracking-[0.08em] text-white"
             >
               Sair
             </button>
