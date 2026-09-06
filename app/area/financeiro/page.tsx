@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import QRCode from "qrcode";
 import { ProtectedArea } from "@/components/ProtectedArea";
 import { createClient } from "@/lib/supabase/client";
+import { calculateExtraContributionAmountDue } from "@/lib/extraContributionCharges";
 
 type Associate = {
   id: string;
@@ -42,6 +43,28 @@ type PixPaymentResponse = {
     pix_amount: number;
   };
   error?: string;
+};
+
+type ExtraContributionItem = {
+  id: string;
+  amount: number;
+  paid_amount: number;
+  due_date: string;
+  status: string;
+  extra_contributions:
+    | {
+        apply_late_charges?: boolean | null;
+        late_fee_percent?: number | null;
+        daily_interest_percent?: number | null;
+        late_fee_grace_days?: number | null;
+      }
+    | {
+        apply_late_charges?: boolean | null;
+        late_fee_percent?: number | null;
+        daily_interest_percent?: number | null;
+        late_fee_grace_days?: number | null;
+      }[]
+    | null;
 };
 
 type MonthlyFee = {
@@ -190,11 +213,16 @@ function isOpenFee(fee: MonthlyFee) {
   return ["pendente", "parcialmente_paga", "atrasada"].includes(fee.status);
 }
 
+function isOpenExtraItem(item: ExtraContributionItem) {
+  return ["pendente", "parcialmente_paga", "atrasada"].includes(item.status);
+}
+
 const pixPaymentsEnabled = process.env.NEXT_PUBLIC_PIX_PAYMENTS_ENABLED === "true";
 
 export default function AreaFinanceiroPage() {
   const [associate, setAssociate] = useState<Associate | null>(null);
   const [fees, setFees] = useState<MonthlyFee[]>([]);
+  const [extraItems, setExtraItems] = useState<ExtraContributionItem[]>([]);
   const [visibleOpenFeesCount, setVisibleOpenFeesCount] = useState(5);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -217,8 +245,9 @@ export default function AreaFinanceiroPage() {
       });
 
     const paidFees = fees.filter((fee) => fee.status === "paga");
+    const openExtraItems = extraItems.filter(isOpenExtraItem);
 
-    const totalOpen = openFees.reduce((sum, fee) => {
+    const monthlyOpenTotal = openFees.reduce((sum, fee) => {
       const calculated = calculateAmountDueAtDate(fee, today);
       const remaining = Math.max(
         calculated.totalDue - Number(fee.paid_amount ?? 0),
@@ -228,8 +257,19 @@ export default function AreaFinanceiroPage() {
       return sum + remaining;
     }, 0);
 
-    const totalPaid = fees.reduce(
+    const extraOpenTotal = openExtraItems.reduce((sum, item) => {
+      const balance = calculateExtraContributionAmountDue(item, today).remaining;
+
+      return sum + balance;
+    }, 0);
+
+    const monthlyPaidTotal = fees.reduce(
       (sum, fee) => sum + Number(fee.paid_amount ?? 0),
+      0
+    );
+
+    const extraPaidTotal = extraItems.reduce(
+      (sum, item) => sum + Number(item.paid_amount ?? 0),
       0
     );
 
@@ -242,10 +282,14 @@ export default function AreaFinanceiroPage() {
       openFees,
       paidFees,
       overdueFees,
-      totalOpen,
-      totalPaid,
+      totalOpen: monthlyOpenTotal + extraOpenTotal,
+      totalPaid: monthlyPaidTotal + extraPaidTotal,
+      monthlyOpenTotal,
+      extraOpenTotal,
+      monthlyPaidTotal,
+      extraPaidTotal,
     };
-  }, [fees, today]);
+  }, [fees, extraItems, today]);
 
   const visibleOpenFees = summary.openFees.slice(0, visibleOpenFeesCount);
   const hasMoreOpenFees = visibleOpenFeesCount < summary.openFees.length;
@@ -365,6 +409,7 @@ export default function AreaFinanceiroPage() {
     if (!associateData || associateData.status !== "ativo") {
       setAssociate(null);
       setFees([]);
+      setExtraItems([]);
       setLoading(false);
       return;
     }
@@ -387,7 +432,22 @@ export default function AreaFinanceiroPage() {
         return;
       }
 
+      const { data: extraItemsData, error: extraItemsError } = await supabase
+        .from("extra_contribution_items")
+        .select(
+          "id, amount, paid_amount, due_date, status, extra_contributions(apply_late_charges, late_fee_percent, daily_interest_percent, late_fee_grace_days)"
+        )
+        .eq("associate_id", associateData.id);
+
+      if (extraItemsError) {
+        console.error("Erro ao carregar contribuições extras:", extraItemsError);
+        setMessage("Não foi possível carregar suas contribuições extras.");
+        setLoading(false);
+        return;
+      }
+
       setFees((feesData as unknown as MonthlyFee[]) ?? []);
+      setExtraItems((extraItemsData as unknown as ExtraContributionItem[]) ?? []);
       setVisibleOpenFeesCount(5);
       setLoading(false);
     }
@@ -410,7 +470,7 @@ export default function AreaFinanceiroPage() {
               </h1>
 
               <p className="mt-2 text-sm font-bold text-white/75">
-                {summary.totalOpen > 0 ? "Com mensalidades em aberto" : "Em dia"}
+                {summary.totalOpen > 0 ? "Com valores em aberto" : "Em dia"}
               </p>
             </div>
 
