@@ -667,8 +667,8 @@ export default function AreaFinanceiroPage() {
                                 Status
                               </p>
 
-                              <div className="flex justify-center md:block">
-                                <span className="inline-flex min-w-[110px] items-center justify-center rounded-full bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579] md:min-w-0 md:bg-[#f7f8fa]">
+                              <div className="flex justify-start md:justify-center">
+                                <span className="inline-flex items-center justify-center rounded-full bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.06em] text-[#596579] md:bg-[#f7f8fa]">
                                   {statusLabels[fee.status] ?? fee.status}
                                 </span>
                               </div>
