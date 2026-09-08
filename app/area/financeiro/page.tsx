@@ -777,7 +777,7 @@ export default function AreaFinanceiroPage() {
 
                               <div
                                 className={`grid gap-2 ${
-                                  pixPaymentsEnabled ? "grid-cols-2" : "grid-cols-1"
+                                  "grid-cols-1"
                                 } md:flex md:flex-nowrap md:items-center md:justify-end md:gap-1.5`}
                               >
                                 {pixPaymentsEnabled && (
@@ -790,13 +790,6 @@ export default function AreaFinanceiroPage() {
                                     {generatingPixFeeId === fee.id ? "..." : "Pix"}
                                   </button>
                                 )}
-
-                                <a
-                                  href={`/area/informar-pagamento/${fee.id}`}
-                                  className="inline-flex min-h-[32px] w-full items-center justify-center rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] transition hover:bg-[#f7f8fa] md:w-auto md:min-w-[82px]"
-                                >
-                                  Informar
-                                </a>
                               </div>
                             </div>
                           </div>

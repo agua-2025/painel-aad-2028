@@ -577,7 +577,7 @@ export default function AreaContribuicoesExtrasPage() {
 
                             <div
                               className={`mt-2 grid gap-2 ${
-                                pixPaymentsEnabled ? "grid-cols-2" : "grid-cols-1"
+                                "grid-cols-1"
                               }`}
                             >
                               {pendingReportItemIds.has(item.id) ? (
@@ -596,13 +596,6 @@ export default function AreaContribuicoesExtrasPage() {
                                       {generatingPixItemId === item.id ? "..." : "Pix"}
                                     </button>
                                   )}
-
-                                  <a
-                                    href={`/area/informar-contribuicao-extra/${item.id}`}
-                                    className="inline-flex min-h-[36px] items-center justify-center rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] transition hover:bg-[#f7f8fa]"
-                                  >
-                                    Informar
-                                  </a>
                                 </>
                               )}
                             </div>
@@ -658,7 +651,7 @@ export default function AreaContribuicoesExtrasPage() {
                               ) : (
                                 <div
                                   className={`grid gap-1.5 ${
-                                    pixPaymentsEnabled ? "grid-cols-2" : "grid-cols-1"
+                                    "grid-cols-1"
                                   } md:inline-grid`}
                                 >
                                   {pixPaymentsEnabled && (
@@ -671,13 +664,6 @@ export default function AreaContribuicoesExtrasPage() {
                                       {generatingPixItemId === item.id ? "..." : "Pix"}
                                     </button>
                                   )}
-
-                                  <a
-                                    href={`/area/informar-contribuicao-extra/${item.id}`}
-                                    className="inline-flex min-h-[32px] items-center justify-center rounded-full border border-[#e8dccb] bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#13233a] transition hover:bg-[#f7f8fa]"
-                                  >
-                                    Informar
-                                  </a>
                                 </div>
                               )}
                             </div>
