@@ -593,7 +593,7 @@ export default function AreaContribuicoesExtrasPage() {
                                       disabled={generatingPixItemId === item.id}
                                       className="inline-flex min-h-[36px] items-center justify-center rounded-full bg-[#13233a] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-white transition hover:bg-[#1d3557] disabled:cursor-not-allowed disabled:opacity-60"
                                     >
-                                      {generatingPixItemId === item.id ? "..." : "Pix"}
+                                      {generatingPixItemId === item.id ? "..." : "Pagar com Pix"}
                                     </button>
                                   )}
                                 </>
@@ -661,7 +661,7 @@ export default function AreaContribuicoesExtrasPage() {
                                       disabled={generatingPixItemId === item.id}
                                       className="inline-flex min-h-[32px] items-center justify-center rounded-full bg-[#13233a] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-white transition hover:bg-[#1d3557] disabled:cursor-not-allowed disabled:opacity-60"
                                     >
-                                      {generatingPixItemId === item.id ? "..." : "Pix"}
+                                      {generatingPixItemId === item.id ? "..." : "Pagar com Pix"}
                                     </button>
                                   )}
                                 </div>

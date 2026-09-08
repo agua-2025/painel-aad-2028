@@ -787,7 +787,7 @@ export default function AreaFinanceiroPage() {
                                     disabled={generatingPixFeeId === fee.id}
                                     className="inline-flex min-h-[32px] w-full items-center justify-center rounded-full bg-[#13233a] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-white transition hover:bg-[#1d3557] disabled:cursor-not-allowed disabled:opacity-60 md:w-auto md:min-w-[72px]"
                                   >
-                                    {generatingPixFeeId === fee.id ? "..." : "Pix"}
+                                    {generatingPixFeeId === fee.id ? "..." : "Pagar com Pix"}
                                   </button>
                                 )}
                               </div>
