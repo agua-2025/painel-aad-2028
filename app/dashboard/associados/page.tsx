@@ -652,7 +652,7 @@ export default function AssociadosPage() {
                   </span>
                   <select
                     value={editForm.status}
-                    disabled={saving}
+                    disabled={saving || editingAssociate?.status === "desligado"}
                     onChange={(event) => updateEditField("status", event.target.value)}
                     className="w-full rounded-lg border border-[#e8dccb] px-3 py-2 text-sm font-medium text-[#13233a] outline-none focus:border-[#c7a56b]"
                   >
