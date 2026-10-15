@@ -5,6 +5,7 @@ import { ProtectedDashboard } from "@/components/ProtectedDashboard";
 import { createClient } from "@/lib/supabase/client";
 import { useDashboardPermissions } from "@/lib/useDashboardPermissions";
 import { registerAuditLog } from "@/lib/audit";
+import { RegistrarDesligamento } from "@/components/associados/RegistrarDesligamento";
 
 type Associate = {
   id: string;
@@ -30,7 +31,7 @@ const associateStatusOptions = [
   { value: "ativo", label: "Ativo" },
   { value: "pendente", label: "Pendente" },
   { value: "inativo", label: "Inativo" },
-  { value: "desligado", label: "Desligado" },
+  // Desligamento será realizado por procedimento específico.
 ];
 
 const financialStatusOptions = [
@@ -84,6 +85,7 @@ export default function AssociadosPage() {
   const [successMessage, setSuccessMessage] = useState("");
 
   const [editingAssociate, setEditingAssociate] = useState<Associate | null>(null);
+  const [disengagingAssociate, setDisengagingAssociate] = useState<Associate | null>(null);
   const [editJustification, setEditJustification] = useState("");
 
   const [editForm, setEditForm] = useState({
@@ -255,6 +257,22 @@ export default function AssociadosPage() {
       return;
     }
 
+    if (
+      editForm.status === "desligado" &&
+      editingAssociate.status !== "desligado"
+    ) {
+      setErrorMessage("O desligamento deve ser realizado pelo procedimento específico.");
+      return;
+    }
+
+    if (
+      editingAssociate.status === "desligado" &&
+      editForm.status !== "desligado"
+    ) {
+      setErrorMessage("Não é permitido reativar um associado desligado pela edição comum.");
+      return;
+    }
+
     if (editJustification.trim().length < 10) {
       setErrorMessage("Informe uma justificativa mais detalhada para a alteração.");
       return;
@@ -347,6 +365,18 @@ export default function AssociadosPage() {
   return (
     <ProtectedDashboard>
       <div className="space-y-4">
+        {disengagingAssociate && permissions.canUpdate && (
+          <RegistrarDesligamento
+            associateId={disengagingAssociate.id}
+            associateName={disengagingAssociate.full_name}
+            onCancel={() => setDisengagingAssociate(null)}
+            onSuccess={async () => {
+              setDisengagingAssociate(null);
+              await loadAssociates();
+              setSuccessMessage("Desligamento registrado com sucesso.");
+            }}
+          />
+        )}
         <section className="rounded-2xl bg-[#13233a] p-5 text-white shadow-xl shadow-slate-900/10">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
@@ -626,6 +656,9 @@ export default function AssociadosPage() {
                     onChange={(event) => updateEditField("status", event.target.value)}
                     className="w-full rounded-lg border border-[#e8dccb] px-3 py-2 text-sm font-medium text-[#13233a] outline-none focus:border-[#c7a56b]"
                   >
+                    {editForm.status === "desligado" && (
+                      <option value="desligado">Desligado</option>
+                    )}
                     {associateStatusOptions.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
@@ -832,7 +865,20 @@ export default function AssociadosPage() {
                       {formatDate(associate.joined_at || associate.created_at)}
                     </div>
 
-                    <div className="lg:col-span-1 lg:text-right">
+                    <div className="lg:col-span-1 flex flex-wrap justify-end gap-2">
+                      {associate.status === "ativo" && permissions.canUpdate && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            closeEditAssociate();
+                            setDisengagingAssociate(associate);
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                          }}
+                          className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-[10px] font-black uppercase text-amber-900"
+                        >
+                          Desligar
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => openEditAssociate(associate)}
