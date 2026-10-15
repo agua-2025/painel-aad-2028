@@ -319,10 +319,18 @@ export default function SolicitacoesPage() {
 
     const { data: existingAssociate } = await supabase
       .from("associates")
-      .select("id")
+      .select("id, status")
       .or(`email.eq.${request.email}${request.cpf ? `,cpf.eq.${request.cpf}` : ""}`)
       .limit(1)
       .maybeSingle();
+
+    if (existingAssociate?.status === "desligado") {
+      setErrorMessage(
+        "A solicitação corresponde a um associado desligado. A reativação exige procedimento específico."
+      );
+      setProcessingId(null);
+      return;
+    }
 
     if (existingAssociate?.id) {
       const { error: updateAssociateError } = await supabase
